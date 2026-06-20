@@ -57,6 +57,65 @@ namespace AudioSampler.Android.Services
 
         public override StartCommandResult OnStartCommand(Intent? intent, StartCommandFlags flags, int startId)
         {
+            if (intent?.Action == "ACTION_START_CAPTURE")
+            {
+                int resultCode = intent.GetIntExtra("RESULT_CODE", 0);
+                var data = (Intent?)intent.GetParcelableExtra("DATA", Java.Lang.Class.FromType(typeof(Intent)));
+
+                if (data != null)
+                {
+                    // 1. СТРОГО СНАЧАЛА включаем Foreground режим службы с уведомлением
+                    StartMyForegroundNotification();
+
+                    // 2. ТЕПЕРЬ Android видит, что мы в Foreground, и разрешает создать проекцию без вылетов!
+                    _projectionManager = (MediaProjectionManager?)GetSystemService(Context.MediaProjectionService);
+                    if (_projectionManager != null)
+                    {
+                        _mediaProjection = _projectionManager.GetMediaProjection(resultCode, data);
+
+                        if (_mediaProjection != null)
+                        {
+                            // Регистрируем наш системный колбэк остановки
+                            _mediaProjection.RegisterCallback(new AudioProjectionCallback(), new Handler(Looper.MainLooper));
+
+                            // 3. И вот теперь, когда всё успешно завелось, запускаем плавающую панель!
+                            Intent panelIntent = new Intent(this, typeof(FloatingButtonService));
+                            StartService(panelIntent);
+                        }
+                    }
+                }
+            }
+            //if (intent != null)
+            //{
+            //    string? action = intent.Action;
+
+            //    if (action == "ACTION_START_CAPTURE")
+            //    {
+            //        int resultCode = intent.GetIntExtra("RESULT_CODE", 0);
+            //        var data = (Intent?)intent.GetParcelableExtra("DATA");
+
+            //        if (data != null)
+            //        {
+            //            _projectionManager = (MediaProjectionManager?)GetSystemService(Context.MediaProjectionService);
+            //            _mediaProjection = _projectionManager!.GetMediaProjection(resultCode, data);
+
+            //            //_isRecording = true;
+            //            //Task.Run(() => CaptureAudio());
+            //        }
+            //    }
+            //    else if (action == "ACTION_STOP_CAPTURE")
+            //    {
+            //        //_isRecording = false;
+            //        StopSelf();
+            //    }
+            //}
+
+            return StartCommandResult.Sticky;
+        }
+
+
+        private void StartMyForegroundNotification()
+        {
             var notification = new Notification.Builder(this, "capture_channel")
                 .SetContentTitle("Audio Capture")
                 .SetContentText("Audio Capture")
@@ -65,32 +124,24 @@ namespace AudioSampler.Android.Services
 
             StartForeground(1, notification);
 
-            if (intent != null)
-            {
-                string? action = intent.Action;
+            //string channelId = "audio_capture_channel";
+            //if (Build.VERSION.SdkInt >= BuildVersionCodes.O)
+            //{
+            //    var channel = new NotificationChannel(channelId, "Audio Capture", NotificationImportance.Low);
+            //    var manager = (NotificationManager?)GetSystemService(Context.NotificationService);
+            //    manager?.CreateNotificationChannel(channel);
+            //}
 
-                if (action == "ACTION_START_CAPTURE" /*&& !_isRecording*/)
-                {
-                    int resultCode = intent.GetIntExtra("RESULT_CODE", 0);
-                    var data = (Intent?)intent.GetParcelableExtra("DATA");
+            //var notification = new Notification.Builder(this, channelId)
+            //    .SetContentTitle("Audio Sampler")
+            //    .SetContentText("Захват системного аудио активен")
+            //    .SetSmallIcon(global::Android.Resource.Drawable.IcMediaPlay)
+            //    .Build();
 
-                    if (data != null)
-                    {
-                        _projectionManager = (MediaProjectionManager?)GetSystemService(Context.MediaProjectionService);
-                        _mediaProjection = _projectionManager!.GetMediaProjection(resultCode, data);
-
-                        //_isRecording = true;
-                        //Task.Run(() => CaptureAudio());
-                    }
-                }
-                else if (action == "ACTION_STOP_CAPTURE")
-                {
-                    //_isRecording = false;
-                    StopSelf();
-                }
-            }
-
-            return StartCommandResult.Sticky;
+            //if (Build.VERSION.SdkInt >= BuildVersionCodes.Q)
+            //    StartForeground(101, notification, global::Android.Content.PM.ForegroundService.TypeMediaProjection);
+            //else
+            //    StartForeground(101, notification);
         }
 
 
@@ -148,10 +199,13 @@ namespace AudioSampler.Android.Services
         {
             _isRecording = false;
 
-            _recorder.Stop();
-            _recorder.Release();
+            if(_recorder != null)
+            {
+                _recorder.Stop();
+                _recorder.Release();
 
-            RenderAudio();
+                RenderAudio();
+            }
         }
 
         public byte[] GetSoundData(List<byte[]> chunks)
@@ -207,73 +261,6 @@ namespace AudioSampler.Android.Services
                 writer.Write(pcmData);
             }
 
-        }
-
-        private void RecordLoop()
-        {
-            var config = new AudioPlaybackCaptureConfiguration.Builder(_mediaProjection!)
-                .AddMatchingUsage(AudioUsageKind.Media)
-                .Build();
-
-            var sampleRate = 16000;
-            short channels = 1;
-            short bitsPerSample = 16;
-
-            var audioFormat = new AudioFormat.Builder()
-                .SetEncoding(Encoding.Pcm16bit)
-                .SetSampleRate(sampleRate)
-                .SetChannelMask(ChannelOut.Mono)
-                .Build();
-
-            var bufferSize = AudioRecord.GetMinBufferSize(sampleRate, ChannelIn.Mono, Encoding.Pcm16bit);
-            _recorder = new AudioRecord.Builder()
-                .SetAudioFormat(audioFormat)
-                .SetBufferSizeInBytes(bufferSize * 4)
-                .SetAudioPlaybackCaptureConfig(config)
-                .Build();
-
-            _recorder.StartRecording();
-
-            var path = Path.Combine(global::Android.OS.Environment.GetExternalStoragePublicDirectory(global::Android.OS.Environment.DirectoryDownloads)!.AbsolutePath, "capture_live.wav");
-            var buffer = new byte[4096];
-
-            using (var fs = File.Create(path))
-            {
-                fs.Position = 44;
-                long totalBytes = 0;
-
-                while (_isRecording)
-                {
-                    int read = _recorder.Read(buffer, 0, buffer.Length);
-                    if (read > 0)
-                    {
-                        fs.Write(buffer, 0, read);
-                        totalBytes += read;
-                    }
-                }
-
-                _recorder.Stop();
-                _recorder.Release();
-
-                fs.Position = 0;
-                using var bw = new BinaryWriter(fs);
-                bw.Write(System.Text.Encoding.ASCII.GetBytes("RIFF"));
-                bw.Write((int)(36 + totalBytes));
-                bw.Write(System.Text.Encoding.ASCII.GetBytes("WAVE"));
-                bw.Write(System.Text.Encoding.ASCII.GetBytes("fmt "));
-                bw.Write(16);
-                bw.Write((short)1);
-                bw.Write(channels);
-                bw.Write(sampleRate);
-                bw.Write(sampleRate * channels * bitsPerSample / 8);
-                bw.Write((short)(channels * bitsPerSample / 8));
-                bw.Write(bitsPerSample);
-                bw.Write(System.Text.Encoding.ASCII.GetBytes("data"));
-                bw.Write((int)totalBytes);
-                bw.Flush();
-            }
-
-            StopSelf();
         }
     }
 }

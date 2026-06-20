@@ -14,7 +14,7 @@ namespace AudioSampler.Android.Services
 {
     public class AndroidScreenCaptureService : IScreenCaptureService
     {
-        private readonly Activity _activity;
+        private readonly MainActivity _activity;
         private const int CaptureRequestCode = 1001;
 
         public AndroidScreenCaptureService()
@@ -42,12 +42,7 @@ namespace AudioSampler.Android.Services
 
         public void ChooseApplicationGivePermission()
         {
-            var projectionManager = (MediaProjectionManager?)_activity.GetSystemService(Context.MediaProjectionService);
-            if (projectionManager != null)
-            {
-                var intent = projectionManager.CreateScreenCaptureIntent();
-                _activity.StartActivityForResult(intent, CaptureRequestCode);
-            }
+            _activity.ChooseApplicationGivePermission();
         }
 
         //public void EnterMiniMode()
@@ -63,25 +58,6 @@ namespace AudioSampler.Android.Services
         //        _activity.EnterPictureInPictureMode(pipParams);
         //    }
         //}
-
-
-        public void HandleActivityResult(int requestCode, int resultCode, Intent? data)
-        {
-            if (requestCode == CaptureRequestCode && resultCode == (int)Result.Ok && data != null)
-            {
-                var serviceIntent = new Intent(_activity, typeof(CaptureService));
-                serviceIntent.SetAction("ACTION_START_CAPTURE");
-                serviceIntent.PutExtra("RESULT_CODE", resultCode);
-                serviceIntent.PutExtra("DATA", data);
-
-                _activity.StartForegroundService(serviceIntent);
-            }
-        }
-
-
-
-
-
 
     }
 }

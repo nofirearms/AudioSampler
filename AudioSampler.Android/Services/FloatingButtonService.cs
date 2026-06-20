@@ -2,6 +2,7 @@
 using Android.Content;
 using Android.Graphics;
 using Android.Graphics.Drawables;
+using Android.Media.Projection;
 using Android.OS;
 using Android.Runtime;
 using Android.Views;
@@ -153,5 +154,7 @@ namespace AudioSampler.Android.Services
             // Применяем созданный фон к кнопке
             _floatingButton.Background = _buttonBackground;
         }
+
+
     }
 }

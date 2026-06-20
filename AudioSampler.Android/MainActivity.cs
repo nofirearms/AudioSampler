@@ -1,6 +1,7 @@
 ﻿using Android.App;
 using Android.Content;
 using Android.Content.PM;
+using Android.Media.Projection;
 using Android.Net;
 using Android.OS;
 using Android.Provider;
@@ -21,6 +22,7 @@ namespace AudioSampler.Android
         ConfigurationChanges = ConfigChanges.Orientation | ConfigChanges.ScreenSize | ConfigChanges.UiMode)]
     public class MainActivity : AvaloniaMainActivity
     {
+        private const int CaptureRequestCode = 1001;
         public static MainActivity Instance { get; private set; }
 
         private AndroidScreenCaptureService? _androidService;
@@ -46,8 +48,15 @@ namespace AudioSampler.Android
         {
             base.OnActivityResult(requestCode, resultCode, data);
 
-            // Напрямую отдаем результат нашему локальному сервису
-            _androidService?.HandleActivityResult(requestCode, (int)resultCode, data);
+            if (requestCode == CaptureRequestCode && resultCode == Result.Ok && data != null)
+            {
+                var serviceIntent = new Intent(this, typeof(CaptureService));
+                serviceIntent.SetAction("ACTION_START_CAPTURE");
+                serviceIntent.PutExtra("RESULT_CODE", (int)resultCode);
+                serviceIntent.PutExtra("DATA", data);
+
+                StartForegroundService(serviceIntent);
+            }
         }
 
         // Метод срабатывает, когда пользователь нажимает кнопку Home или сворачивает приложение
@@ -62,6 +71,29 @@ namespace AudioSampler.Android
         //        StartService(intent);
         //    }
         //}
+
+        //public void HardStopSharing()
+        //{
+        //    if (_mediaProjection != null)
+        //    {
+        //        // Этот вызов вырубит трансляцию (значок в шторке пропадет) 
+        //        // и автоматически стриггерит AudioProjectionCallback.OnStop()
+        //        _mediaProjection.Stop();
+        //        _mediaProjection = null;
+        //    }
+        //}
+
+        public void ChooseApplicationGivePermission()
+        {
+            var projectionManager = (MediaProjectionManager?)GetSystemService(Context.MediaProjectionService);
+            if (projectionManager != null)
+            {
+                var intent = projectionManager.CreateScreenCaptureIntent();
+                StartActivityForResult(intent, CaptureRequestCode);
+
+            }
+        }
+
 
         public void CheckOverlayPermission()
         {
