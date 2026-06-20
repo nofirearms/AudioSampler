@@ -42,7 +42,16 @@ namespace AudioSampler.Android.Services
                     StopCaptureAudio();
                 }
             });
+
+
+            // Регистрируем слушателя команды от крестика плавающей панели
+            WeakReferenceMessenger.Default.Register<HardStopSharingMessage>(this, (r, m) =>
+            {
+                StopCaptureSession();
+            });
         }
+
+
 
         public override IBinder? OnBind(Intent? intent) => null;
 
@@ -85,30 +94,6 @@ namespace AudioSampler.Android.Services
                     }
                 }
             }
-            //if (intent != null)
-            //{
-            //    string? action = intent.Action;
-
-            //    if (action == "ACTION_START_CAPTURE")
-            //    {
-            //        int resultCode = intent.GetIntExtra("RESULT_CODE", 0);
-            //        var data = (Intent?)intent.GetParcelableExtra("DATA");
-
-            //        if (data != null)
-            //        {
-            //            _projectionManager = (MediaProjectionManager?)GetSystemService(Context.MediaProjectionService);
-            //            _mediaProjection = _projectionManager!.GetMediaProjection(resultCode, data);
-
-            //            //_isRecording = true;
-            //            //Task.Run(() => CaptureAudio());
-            //        }
-            //    }
-            //    else if (action == "ACTION_STOP_CAPTURE")
-            //    {
-            //        //_isRecording = false;
-            //        StopSelf();
-            //    }
-            //}
 
             return StartCommandResult.Sticky;
         }
@@ -123,25 +108,6 @@ namespace AudioSampler.Android.Services
                 .Build();
 
             StartForeground(1, notification);
-
-            //string channelId = "audio_capture_channel";
-            //if (Build.VERSION.SdkInt >= BuildVersionCodes.O)
-            //{
-            //    var channel = new NotificationChannel(channelId, "Audio Capture", NotificationImportance.Low);
-            //    var manager = (NotificationManager?)GetSystemService(Context.NotificationService);
-            //    manager?.CreateNotificationChannel(channel);
-            //}
-
-            //var notification = new Notification.Builder(this, channelId)
-            //    .SetContentTitle("Audio Sampler")
-            //    .SetContentText("Захват системного аудио активен")
-            //    .SetSmallIcon(global::Android.Resource.Drawable.IcMediaPlay)
-            //    .Build();
-
-            //if (Build.VERSION.SdkInt >= BuildVersionCodes.Q)
-            //    StartForeground(101, notification, global::Android.Content.PM.ForegroundService.TypeMediaProjection);
-            //else
-            //    StartForeground(101, notification);
         }
 
 
@@ -173,30 +139,28 @@ namespace AudioSampler.Android.Services
 
             _recorder.StartRecording();
 
-
             var buffer = new byte[4096];
 
-            using (var memoryStream = new MemoryStream())
-            {
-                long totalBytes = 0;
+            long totalBytes = 0;
 
-                while (_isRecording)
+            _audioChunks.Clear();
+
+            while (_isRecording)
+            {
+                int read = _recorder.Read(buffer, 0, buffer.Length);
+                if (read > 0)
                 {
-                    int read = _recorder.Read(buffer, 0, buffer.Length);
-                    if (read > 0)
-                    {
-                        var chunk = new byte[read];
-                        System.Array.Copy(buffer, 0, chunk, 0, read);
-                        _audioChunks.Add(chunk);
-                        //memoryStream.Write(buffer, 0, read);
-                        //totalBytes += read;
-                    }
+                    var chunk = new byte[read];
+                    System.Array.Copy(buffer, 0, chunk, 0, read);
+                    _audioChunks.Add(chunk);
+
                 }
             }
         }
 
         public void StopCaptureAudio()
         {
+
             _isRecording = false;
 
             if(_recorder != null)
@@ -204,7 +168,7 @@ namespace AudioSampler.Android.Services
                 _recorder.Stop();
                 _recorder.Release();
 
-                RenderAudio();
+                Task.Run(() => RenderAudio());
             }
         }
 
@@ -226,7 +190,7 @@ namespace AudioSampler.Android.Services
         private void RenderAudio(int sampleRate = 44100, short channels = 2, short bitsPerSample = 16)
         {
             var now = DateTime.Now;
-            var name = $"Recording_{now:ddMMyyyy}.wav";
+            var name = $"Recording{now:ddMMyyyy_hhmmss}.wav";
             var path = Path.Combine(global::Android.OS.Environment.GetExternalStoragePublicDirectory(global::Android.OS.Environment.DirectoryDownloads)!.AbsolutePath, name);
 
             var pcmData = GetSoundData(_audioChunks);
@@ -261,6 +225,43 @@ namespace AudioSampler.Android.Services
                 writer.Write(pcmData);
             }
 
+        }
+
+
+        private void StopCaptureSession()
+        {
+            // 1. Принудительно выключаем цикл записи, если пользователь забыл нажать Стоп
+            if (_isRecording)
+            {
+                _isRecording = false;
+                // Тут твой код склейки списка чанков и вызова AudioSaver.SavePcmToWav(...)
+            }
+
+            // 2. Глушим нативный Android-рекордер и освобождаем ресурсы звука
+            if (_recorder != null)
+            {
+                try
+                {
+                    _recorder.Stop();
+                    _recorder.Release();
+                }
+                catch (Exception ex) { }
+                _recorder = null;
+            }
+
+            // 3. САМОЕ ГЛАВНОЕ: глушим системный шеринг (убирает значок из шторки)
+            if (_mediaProjection != null)
+            {
+                _mediaProjection.Stop();
+                _mediaProjection = null;
+            }
+
+            _audioChunks.Clear();
+
+            // 4. Выключаем режим Foreground и полностью выгружаем сервис из памяти
+            StopForeground(StopForegroundFlags.Remove);
+
+            StopSelf();
         }
     }
 }

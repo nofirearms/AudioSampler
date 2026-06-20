@@ -1,42 +1,74 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
-<LinearLayout
-    xmlns:android="http://android.com"
+﻿<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/panel_root"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:background="#2C2C2E"
-    android:padding="6dp"
+    android:background="@drawable/panel_background"
+    android:padding="3dp"
     android:gravity="center_vertical">
 
-	<!-- Кнопка перемотки назад на 10 секунд -->
 	<Button
-        android:id="@+id/btn_rewind"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:text="⏪"
-        android:textSize="18sp"
-        android:background="?android:attr/selectableItemBackground"
-        android:textColor="#FFFFFF"/>
+		android:id="@+id/btn_rewind"
+		android:clickable="false"
+		android:focusable="false"
+		android:focusableInTouchMode="false"
+		android:layout_width="48dp"
+		android:layout_height="48dp"
+		android:text="&#xF11F9;"
+		android:textSize="36sp"
+		android:textColor="#FFFFFF"
+		android:padding="0dp"
+		android:background="@android:color/transparent"
+		android:fontFamily="@font/materialdesignicons" />
 
-	<!-- Наша круглая красная кнопка Записи / Квадратный Стоп -->
-	<!-- Ей мы задаем небольшой отступ по бокам -->
-	<Button
-        android:id="@+id/btn_record_toggle"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
-        android:background="@android:color/transparent" />
+	<FrameLayout
+		android:layout_width="48dp"
+		android:layout_height="48dp">
+		<Button
+			android:id="@+id/btn_record"
+			android:clickable="false"
+			android:focusable="false"
+			android:focusableInTouchMode="false"
+			android:layout_width="48dp"
+			android:layout_height="48dp"
+			android:text="&#xF044A;"
+			android:textSize="36sp"
+			android:textColor="#FF0000"
+			android:padding="0dp"
+			android:background="@android:color/transparent"
+			android:fontFamily="@font/materialdesignicons"
+			android:visibility="visible"/>
 
-	<!-- Кнопка полного закрытия (Крестик) -->
+		<Button
+			android:id="@+id/btn_stop_record"
+			android:clickable="false"
+			android:focusable="false"
+			android:focusableInTouchMode="false"
+			android:layout_width="48dp"
+			android:layout_height="48dp"
+			android:text="&#xF04DB;"
+			android:textSize="36sp"
+			android:textColor="#FFFFFF"
+			android:padding="0dp"
+			android:background="@android:color/transparent"
+			android:fontFamily="@font/materialdesignicons"
+			android:visibility="gone"/>
+	</FrameLayout>
+
+
 	<Button
-        android:id="@+id/btn_close_panel"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:text="❌"
-        android:textSize="16sp"
-        android:background="?android:attr/selectableItemBackground"
-        android:textColor="#FFFFFF"/>
+		android:id="@+id/btn_close_panel"
+		android:clickable="false"
+		android:focusable="false"
+		android:focusableInTouchMode="false"
+		android:layout_width="48dp"
+		android:layout_height="48dp"
+		android:text="&#xF0156;"
+		android:textSize="36sp"
+		android:textColor="#FFFFFF"
+		android:padding="0dp"
+		android:background="@android:color/transparent"
+		android:fontFamily="@font/materialdesignicons" />
 
 </LinearLayout>

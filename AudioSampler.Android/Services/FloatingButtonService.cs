@@ -1,10 +1,12 @@
-﻿using Android.App;
+﻿using Android;
+using Android.App;
 using Android.Content;
 using Android.Graphics;
 using Android.Graphics.Drawables;
 using Android.Media.Projection;
 using Android.OS;
 using Android.Runtime;
+using Android.Util;
 using Android.Views;
 using Android.Widget;
 using AudioSampler.Messages;
@@ -17,17 +19,27 @@ namespace AudioSampler.Android.Services
     public class FloatingButtonService : Service, View.IOnTouchListener
     {
         private IWindowManager _windowManager;
-        private Button _floatingButton;
         private WindowManagerLayoutParams _params;
+
         private float _initialX;
         private float _initialY;
         private float _initialTouchX;
         private float _initialTouchY;
 
+        private View? _panelView;
+        private Button? _btnRecord;
+        private Button? _btnStopRecord;
+        private Button? _btnRewind;
+        private Button? _btnClosePanel;
+
 
         private bool _isRecording = false; // Флаг текущего состояния
-        private GradientDrawable _buttonBackground; // Объект для управления формой и цветом
 
+
+        private bool _isDestroyed = false;
+        private bool _isDragging = false;
+        
+        private const float  DRAG_THRESHOLD = 5;
         public override IBinder OnBind(Intent intent) => null;
 
         public override void OnCreate()
@@ -36,26 +48,40 @@ namespace AudioSampler.Android.Services
 
             _windowManager = GetSystemService(Context.WindowService).JavaCast<IWindowManager>();
 
-            // Переводим 60 dp в реальные пиксели экрана устройства
-            int buttonSize = (int)(60 * Resources.DisplayMetrics.Density);
+            // 1. Загружаем наш XML лейаут
+            var inflater = LayoutInflater.From(this);
+            _panelView = inflater.Inflate(Resource.Layout.floating_panel, null);
 
-            _floatingButton = new Button(this);
-            _floatingButton.SetOnTouchListener(this);
+            // 2. Находим кнопки по их ID из XML
+            _btnRecord = _panelView.FindViewById<Button>(Resource.Id.btn_record);
+            _btnStopRecord = _panelView.FindViewById<Button>(Resource.Id.btn_stop_record);
+            _btnRewind = _panelView.FindViewById<Button>(Resource.Id.btn_rewind);
+            _btnClosePanel = _panelView.FindViewById<Button>(Resource.Id.btn_close_panel);
 
-            // Устанавливаем начальный круглый вид
+
+            // 3. Вешаем перетаскивание (Drag & Drop) на ВСЮ панель целиком
+            _panelView.SetOnTouchListener(this); // Не забудь добавить View.IOnTouchListener к классу CaptureService
+
+            // 4. Настраиваем клики
+            //_btnRecordToggle.Click += (s, e) => OnRecordToggleClick();
+            //_btnRewind.Click += (s, e) => OnRewindClick();
+            //_btnClosePanel.Click += (s, e) => OnClosePanelClick();
+
+            // 5. Задаем начальный визуальный стиль кнопке записи (круг/квадрат)
             _isRecording = false;
-            UpdateButtonVisuals();
 
+            UpdateButtonsVisibility(false);
+
+            // Настройки окна WindowManager (теперь WrapContent, панель сама примет нужный размер)
             var layoutType = Build.VERSION.SdkInt >= BuildVersionCodes.O
                 ? WindowManagerTypes.ApplicationOverlay
                 : WindowManagerTypes.Phone;
 
-            // Вместо WrapContent задаем жесткие размеры buttonSize
             _params = new WindowManagerLayoutParams(
-                buttonSize,
-                buttonSize,
+                WindowManagerLayoutParams.WrapContent,
+                WindowManagerLayoutParams.WrapContent,
                 layoutType,
-                WindowManagerFlags.NotFocusable,
+                WindowManagerFlags.NotFocusable | WindowManagerFlags.AllowLockWhileScreenOn,
                 Format.Translucent
             );
 
@@ -63,44 +89,98 @@ namespace AudioSampler.Android.Services
             _params.X = 100;
             _params.Y = 100;
 
-            _windowManager.AddView(_floatingButton, _params);
+            // Добавляем готовую красивую панель на экран поверх всех приложений
+            _windowManager.AddView(_panelView, _params);
         }
 
+        // И обрабатываем все в OnTouch
         public bool OnTouch(View v, MotionEvent e)
         {
+            if (_panelView == null || _isDestroyed)
+                return false;
+
             switch (e.Action)
             {
                 case MotionEventActions.Down:
-                    _initialX = _params.X;
-                    _initialY = _params.Y;
+                    _initialX = _params.X - e.RawX;
+                    _initialY = _params.Y - e.RawY;
                     _initialTouchX = e.RawX;
                     _initialTouchY = e.RawY;
+                    _isDragging = false;
                     return true;
 
                 case MotionEventActions.Move:
-                    _params.X = (int)(_initialX + (e.RawX - _initialTouchX));
-                    _params.Y = (int)(_initialY + (e.RawY - _initialTouchY));
-                    _windowManager.UpdateViewLayout(_floatingButton, _params);
+                    float deltaX = e.RawX - _initialTouchX;
+                    float deltaY = e.RawY - _initialTouchY;
+
+                    if (Math.Abs(deltaX) > DRAG_THRESHOLD || Math.Abs(deltaY) > DRAG_THRESHOLD)
+                    {
+                        _isDragging = true;
+                    }
+
+                    if (_isDragging)
+                    {
+                        _params.X = (int)(e.RawX + _initialX);
+                        _params.Y = (int)(e.RawY + _initialY);
+                        _windowManager.UpdateViewLayout(_panelView, _params);
+                    }
                     return true;
 
                 case MotionEventActions.Up:
-                    if (Math.Abs(e.RawX - _initialTouchX) < 10 && Math.Abs(e.RawY - _initialTouchY) < 10)
+                    if (!_isDragging)
                     {
-                        OnButtonClick();
+                        // Определяем, по какой кнопке кликнули
+                        int[] panelLocation = new int[2];
+                        _panelView.GetLocationOnScreen(panelLocation);
+                        float x = e.RawX - panelLocation[0];
+                        float y = e.RawY - panelLocation[1];
+
+                        // Проверяем только видимые кнопки!
+                        if (_btnRecord.Visibility == ViewStates.Visible && IsInsideView(_btnRecord, x, y))
+                        {
+                            OnRecordToggleClick(true);
+                        }
+                        else if (_btnStopRecord.Visibility == ViewStates.Visible && IsInsideView(_btnStopRecord, x, y))
+                        {
+                            OnRecordToggleClick(false);
+                        }
+                        else if (_btnRewind.Visibility == ViewStates.Visible && IsInsideView(_btnRewind, x, y))
+                        {
+                            // OnRewindClick();
+                        }
+                        else if (_btnClosePanel.Visibility == ViewStates.Visible && IsInsideView(_btnClosePanel, x, y))
+                        {
+                            HardStopAndCloseEverything();
+                        }
                     }
                     return true;
             }
             return false;
         }
 
-        private void OnButtonClick()
+        private bool IsInsideView(View view, float x, float y)
+        {
+            if (view == null) return false;
+
+            int[] viewLocation = new int[2];
+            view.GetLocationOnScreen(viewLocation);
+
+            int[] panelLocation = new int[2];
+            _panelView.GetLocationOnScreen(panelLocation);
+
+            float viewX = viewLocation[0] - panelLocation[0];
+            float viewY = viewLocation[1] - panelLocation[1];
+
+            return x >= viewX && x <= viewX + view.Width &&
+                   y >= viewY && y <= viewY + view.Height;
+        }
+
+        private void OnRecordToggleClick(bool isRecording)
         {
 
-            // Переключаем состояние (если был круг — станет квадрат, и наоборот)
-            _isRecording = !_isRecording;
+            _isRecording = isRecording;
 
-            // Мгновенно перерисовываем кнопку на экране
-            UpdateButtonVisuals();
+            UpdateButtonsVisibility(_isRecording);
 
             WeakReferenceMessenger.Default.Send(new ToggleRecordMessage(_isRecording));
 
@@ -117,42 +197,47 @@ namespace AudioSampler.Android.Services
         public override void OnDestroy()
         {
             base.OnDestroy();
-            if (_floatingButton != null)
-            {
-                _windowManager.RemoveView(_floatingButton);
-            }
+            if (_panelView != null) _windowManager.RemoveView(_panelView);
         }
 
 
-        private void UpdateButtonVisuals()
+        private void HardStopAndCloseEverything()
         {
-            if (_floatingButton == null) return;
-
-            _buttonBackground = new GradientDrawable();
-
-            if (!_isRecording)
+            // 1. Если в этот момент шла запись — принудительно выключаем цикл
+            if (_isRecording)
             {
-                // СОСТОЯНИЕ 1: Круглая красная кнопка (Старт)
-                _buttonBackground.SetShape(ShapeType.Rectangle);
-                // Делаем радиус закругления огромным (половина от размера кнопки), чтобы получился идеальный круг
-                _buttonBackground.SetCornerRadius(1000);
-                _buttonBackground.SetColor(Color.ParseColor("#FF3B30")); // Яркий Apple-Red цвет
-                _floatingButton.Text = ""; // Текст убираем, круг говорит сам за себя
+                _isRecording = false;
+            }
+
+
+            // Отправляем команду на жесткую остановку шеринга в CaptureService
+            WeakReferenceMessenger.Default.Send(new HardStopSharingMessage());
+
+            // И сразу удаляем саму плавающую панель с экрана, раз пользователь её закрыл
+            if (_windowManager != null && _panelView != null)
+            {
+                _windowManager.RemoveView(_panelView);
+                _panelView = null;
+            }
+
+            // 5. Полностью выключаем сам Foreground-сервис и убираем уведомление из шторки
+            StopForeground(StopForegroundFlags.Remove);
+            StopSelf();
+        }
+
+
+        private void UpdateButtonsVisibility(bool isRecording)
+        {
+            if (isRecording)
+            {
+                _btnRecord.Visibility = ViewStates.Gone;
+                _btnStopRecord.Visibility = ViewStates.Visible;
             }
             else
             {
-                // СОСТОЯНИЕ 2: Квадратная кнопка (Стоп)
-                _buttonBackground.SetShape(ShapeType.Rectangle);
-                // Маленький радиус для легкого сглаживания углов квадрата
-                _buttonBackground.SetCornerRadius(15);
-                _buttonBackground.SetColor(Color.ParseColor("#1C1C1E")); // Темный стильный цвет фона
-                _floatingButton.Text = "■"; // Символ квадрата "Стоп"
-                _floatingButton.SetTextColor(Color.ParseColor("#FF3B30")); // Сам квадрат делаем красным
-                _floatingButton.TextSize = 24; // Увеличиваем размер иконки стопа
+                _btnRecord.Visibility = ViewStates.Visible;
+                _btnStopRecord.Visibility = ViewStates.Gone;
             }
-
-            // Применяем созданный фон к кнопке
-            _floatingButton.Background = _buttonBackground;
         }
 
 
