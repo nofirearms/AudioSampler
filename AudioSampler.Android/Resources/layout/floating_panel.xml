@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<LinearLayout
+    xmlns:android="http://android.com"
+    android:id="@+id/panel_root"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:background="#2C2C2E"
+    android:padding="6dp"
+    android:gravity="center_vertical">
+
+	<!-- Кнопка перемотки назад на 10 секунд -->
+	<Button
+        android:id="@+id/btn_rewind"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:text="⏪"
+        android:textSize="18sp"
+        android:background="?android:attr/selectableItemBackground"
+        android:textColor="#FFFFFF"/>
+
+	<!-- Наша круглая красная кнопка Записи / Квадратный Стоп -->
+	<!-- Ей мы задаем небольшой отступ по бокам -->
+	<Button
+        android:id="@+id/btn_record_toggle"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:background="@android:color/transparent" />
+
+	<!-- Кнопка полного закрытия (Крестик) -->
+	<Button
+        android:id="@+id/btn_close_panel"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:text="❌"
+        android:textSize="16sp"
+        android:background="?android:attr/selectableItemBackground"
+        android:textColor="#FFFFFF"/>
+
+</LinearLayout>

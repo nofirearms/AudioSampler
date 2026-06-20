@@ -1,0 +1,20 @@
+<ContentPage xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:AudioSampler.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="600"
+             xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             x:Class="AudioSampler.Views.MainView"
+             x:DataType="vm:MainViewModel">
+    <Design.DataContext>
+        <vm:MainViewModel />
+    </Design.DataContext>
+
+    <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
+        <!-- <Button Content="{materialIcons:MaterialIconExt Kind=RecordCircle}" Command="{Binding StartCaptureCommand}" Foreground="Red" />
+        <Button Content="{materialIcons:MaterialIconExt Kind=StopCircle}" Command="{Binding StopCaptureCommand}"  /> --> 
+        <Button Width="70" Height="70" Margin="5" Content="{materialIcons:MaterialIconExt Kind=Application}" Command="{Binding ChooseCaptureApplitcationCommand}"/>
+        <Button Width="70" Height="70" Margin="5" Content="{materialIcons:MaterialIconExt Kind=Minimize}" Command="{Binding  OpenMiniModeCommand}"  />
+    </StackPanel>
+</ContentPage>

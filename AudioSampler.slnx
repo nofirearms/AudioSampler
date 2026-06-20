@@ -1,0 +1,11 @@
+<Solution>
+  <Project Path="AudioSampler.Android/AudioSampler.Android.csproj">
+    <Deploy />
+  </Project>
+  <Project Path="AudioSampler.Browser/AudioSampler.Browser.csproj" />
+  <Project Path="AudioSampler.Desktop/AudioSampler.Desktop.csproj" />
+  <Project Path="AudioSampler.iOS/AudioSampler.iOS.csproj">
+    <Deploy />
+  </Project>
+  <Project Path="AudioSampler/AudioSampler.csproj" />
+</Solution>
