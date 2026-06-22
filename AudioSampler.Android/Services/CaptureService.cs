@@ -13,6 +13,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using static Android.Resource;
+using AudioSampler.Model;
 
 namespace AudioSampler.Android.Services
 {
@@ -33,13 +34,25 @@ namespace AudioSampler.Android.Services
             WeakReferenceMessenger.Default.Register<ToggleRecordMessage>(this, (r, m) =>
             {
                 // m.Value содержит true (если надо писать) или false (если стоп)
-                if (m.Value)
+                if (m.Value == RecordingAction.Start)
                 {
-                    Task.Run(() => CaptureAudio());
+                    Task.Run(() => StartRecording());
                 }
-                else
+                else if (m.Value == RecordingAction.Stop) 
                 {
-                    StopCaptureAudio();
+                    Task.Run(async() => await StopRecordingAsync());
+                }
+                else if(m.Value == RecordingAction.Pause)
+                {
+                    PauseRecording();
+                }
+                else if(m.Value == RecordingAction.Cancel)
+                {
+                    CancelRecording();
+                }
+                else if(m.Value == RecordingAction.Resume)
+                {
+                    Task.Run(() => StartRecording());
                 }
             });
 
@@ -111,7 +124,7 @@ namespace AudioSampler.Android.Services
         }
 
 
-        private void CaptureAudio()
+        private void StartRecording()
         {
             _isRecording = true;
 
@@ -143,8 +156,6 @@ namespace AudioSampler.Android.Services
 
             long totalBytes = 0;
 
-            _audioChunks.Clear();
-
             while (_isRecording)
             {
                 int read = _recorder.Read(buffer, 0, buffer.Length);
@@ -158,7 +169,7 @@ namespace AudioSampler.Android.Services
             }
         }
 
-        public void StopCaptureAudio()
+        public async Task StopRecordingAsync()
         {
 
             _isRecording = false;
@@ -168,8 +179,40 @@ namespace AudioSampler.Android.Services
                 _recorder.Stop();
                 _recorder.Release();
 
-                Task.Run(() => RenderAudio());
+                _recorder = null;
+
+                await Task.Run(() => RenderAudio());
             }
+            _audioChunks.Clear();
+        }
+
+        public void PauseRecording()
+        {
+            _isRecording = false;
+
+            if(_recorder != null)
+            {
+                _recorder.Stop();
+                _recorder.Release();
+
+                _recorder = null;
+            }
+        }
+
+        public void CancelRecording()
+        {
+            _isRecording = false;
+
+            if (_recorder != null)
+            {
+                _recorder.Stop();
+                _recorder.Release();
+
+                _recorder = null;
+
+            }
+
+            _audioChunks.Clear();
         }
 
         public byte[] GetSoundData(List<byte[]> chunks)
@@ -230,24 +273,7 @@ namespace AudioSampler.Android.Services
 
         private void StopCaptureSession()
         {
-            // 1. Принудительно выключаем цикл записи, если пользователь забыл нажать Стоп
-            if (_isRecording)
-            {
-                _isRecording = false;
-                // Тут твой код склейки списка чанков и вызова AudioSaver.SavePcmToWav(...)
-            }
-
-            // 2. Глушим нативный Android-рекордер и освобождаем ресурсы звука
-            if (_recorder != null)
-            {
-                try
-                {
-                    _recorder.Stop();
-                    _recorder.Release();
-                }
-                catch (Exception ex) { }
-                _recorder = null;
-            }
+            CancelRecording();
 
             // 3. САМОЕ ГЛАВНОЕ: глушим системный шеринг (убирает значок из шторки)
             if (_mediaProjection != null)
@@ -255,8 +281,6 @@ namespace AudioSampler.Android.Services
                 _mediaProjection.Stop();
                 _mediaProjection = null;
             }
-
-            _audioChunks.Clear();
 
             // 4. Выключаем режим Foreground и полностью выгружаем сервис из памяти
             StopForeground(StopForegroundFlags.Remove);

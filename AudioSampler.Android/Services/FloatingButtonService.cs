@@ -3,15 +3,21 @@ using Android.App;
 using Android.Content;
 using Android.Graphics;
 using Android.Graphics.Drawables;
+using Android.Media;
 using Android.Media.Projection;
 using Android.OS;
 using Android.Runtime;
+using Android.Transitions;
 using Android.Util;
 using Android.Views;
 using Android.Widget;
 using AudioSampler.Messages;
+using AudioSampler.Model;
 using CommunityToolkit.Mvvm.Messaging;
+using Java.Lang;
 using System;
+using System.Timers;
+
 
 namespace AudioSampler.Android.Services
 {
@@ -27,19 +33,35 @@ namespace AudioSampler.Android.Services
         private float _initialTouchY;
 
         private View? _panelView;
+        private LinearLayout? _panelRoot;
         private Button? _btnRecord;
         private Button? _btnStopRecord;
+        private Button? _btnPauseRecord;
+        private Button? _btnResumeRecord;
+        private Button? _btnCancelRecord;
         private Button? _btnRewind;
         private Button? _btnClosePanel;
+        private TextView? _tvTimer;
+        private TextView? _tvStatus;
+        private LinearLayout? _recordingControlsGroup;
+
+        private RecordingState _recordingState = RecordingState.Initial; 
+        public RecordingState RecordingState
+        {
+            get => _recordingState;
+            set
+            {
+                OnRecordingStateChanged(_recordingState, value);;
+                _recordingState = value;               
+            }
+        }
 
 
-        private bool _isRecording = false; // Флаг текущего состояния
+        private Handler _timerHandler;
+        private Runnable _timerRunnable;
+        private TimeSpan _recordingTime = TimeSpan.Zero;
 
 
-        private bool _isDestroyed = false;
-        private bool _isDragging = false;
-        
-        private const float  DRAG_THRESHOLD = 5;
         public override IBinder OnBind(Intent intent) => null;
 
         public override void OnCreate()
@@ -52,25 +74,40 @@ namespace AudioSampler.Android.Services
             var inflater = LayoutInflater.From(this);
             _panelView = inflater.Inflate(Resource.Layout.floating_panel, null);
 
-            // 2. Находим кнопки по их ID из XML
+            _panelRoot = _panelView.FindViewById<LinearLayout>(Resource.Id.panel_root);
             _btnRecord = _panelView.FindViewById<Button>(Resource.Id.btn_record);
+            _tvStatus = _panelView.FindViewById<TextView>(Resource.Id.tv_status);
             _btnStopRecord = _panelView.FindViewById<Button>(Resource.Id.btn_stop_record);
+            _btnPauseRecord = _panelView.FindViewById<Button>(Resource.Id.btn_pause_record);
+            _btnResumeRecord = _panelView.FindViewById<Button>(Resource.Id.btn_resume_record);
+            _btnCancelRecord = _panelView.FindViewById<Button>(Resource.Id.btn_cancel_record);
             _btnRewind = _panelView.FindViewById<Button>(Resource.Id.btn_rewind);
             _btnClosePanel = _panelView.FindViewById<Button>(Resource.Id.btn_close_panel);
+            _tvTimer = _panelView.FindViewById<TextView>(Resource.Id.tv_timer);
+            _recordingControlsGroup = _panelView.FindViewById<LinearLayout>(Resource.Id.recording_controls_group);
 
 
             // 3. Вешаем перетаскивание (Drag & Drop) на ВСЮ панель целиком
             _panelView.SetOnTouchListener(this); // Не забудь добавить View.IOnTouchListener к классу CaptureService
+            _btnRewind.SetOnTouchListener(this);
+            _btnRecord.SetOnTouchListener(this);
+            _btnPauseRecord.SetOnTouchListener(this);
+            _btnStopRecord.SetOnTouchListener(this);
+            _btnCancelRecord.SetOnTouchListener(this);
+            _btnClosePanel.SetOnTouchListener(this);
+            _btnResumeRecord.SetOnTouchListener(this);
+
 
             // 4. Настраиваем клики
-            //_btnRecordToggle.Click += (s, e) => OnRecordToggleClick();
-            //_btnRewind.Click += (s, e) => OnRewindClick();
-            //_btnClosePanel.Click += (s, e) => OnClosePanelClick();
+            _btnRecord.Click += (s, e) => OnRecordButtonClick();
+            _btnStopRecord.Click += (s, e) => OnStopButtonClick();
+            _btnPauseRecord.Click += (s, e) => OnPauseButtonClick();
+            _btnCancelRecord.Click += (s, e) => OnCancelButtonClick();
+            _btnResumeRecord.Click += (s, e) => OnResumeButtonClick();
+            _btnRewind.Click += (s, e) => OnRewindButtonClick();
+            _btnClosePanel.Click += (s, e) => OnClosePanelButtonClick();
+            
 
-            // 5. Задаем начальный визуальный стиль кнопке записи (круг/квадрат)
-            _isRecording = false;
-
-            UpdateButtonsVisibility(false);
 
             // Настройки окна WindowManager (теперь WrapContent, панель сама примет нужный размер)
             var layoutType = Build.VERSION.SdkInt >= BuildVersionCodes.O
@@ -83,74 +120,53 @@ namespace AudioSampler.Android.Services
                 layoutType,
                 WindowManagerFlags.NotFocusable | WindowManagerFlags.AllowLockWhileScreenOn,
                 Format.Translucent
-            );
-
-            _params.Gravity = GravityFlags.Top | GravityFlags.Left;
-            _params.X = 100;
-            _params.Y = 100;
+            )
+            {
+                Gravity = GravityFlags.Top | GravityFlags.Left,
+                X = 100,
+                Y = 100
+            };
 
             // Добавляем готовую красивую панель на экран поверх всех приложений
             _windowManager.AddView(_panelView, _params);
+
+            _timerHandler = new Handler(Looper.MainLooper);
+            _timerRunnable = new Runnable(OnTimerTick);
+
         }
 
-        // И обрабатываем все в OnTouch
+
+
         public bool OnTouch(View v, MotionEvent e)
         {
-            if (_panelView == null || _isDestroyed)
-                return false;
-
             switch (e.Action)
             {
                 case MotionEventActions.Down:
-                    _initialX = _params.X - e.RawX;
-                    _initialY = _params.Y - e.RawY;
+                    _initialX = _params.X;
+                    _initialY = _params.Y;
                     _initialTouchX = e.RawX;
                     _initialTouchY = e.RawY;
-                    _isDragging = false;
                     return true;
 
                 case MotionEventActions.Move:
-                    float deltaX = e.RawX - _initialTouchX;
-                    float deltaY = e.RawY - _initialTouchY;
-
-                    if (Math.Abs(deltaX) > DRAG_THRESHOLD || Math.Abs(deltaY) > DRAG_THRESHOLD)
-                    {
-                        _isDragging = true;
-                    }
-
-                    if (_isDragging)
-                    {
-                        _params.X = (int)(e.RawX + _initialX);
-                        _params.Y = (int)(e.RawY + _initialY);
-                        _windowManager.UpdateViewLayout(_panelView, _params);
-                    }
+                    // Двигаем всю панель, за какой бы элемент её ни зацепили
+                    _params.X = (int)(_initialX + (e.RawX - _initialTouchX));
+                    _params.Y = (int)(_initialY + (e.RawY - _initialTouchY));
+                    _windowManager.UpdateViewLayout(_panelView, _params);
                     return true;
 
                 case MotionEventActions.Up:
-                    if (!_isDragging)
-                    {
-                        // Определяем, по какой кнопке кликнули
-                        int[] panelLocation = new int[2];
-                        _panelView.GetLocationOnScreen(panelLocation);
-                        float x = e.RawX - panelLocation[0];
-                        float y = e.RawY - panelLocation[1];
+                    // ВЫЧИСЛЯЕМ: это был просто клик или перетаскивание?
+                    float deltaX = System.Math.Abs(e.RawX - _initialTouchX);
+                    float deltaY = System.Math.Abs(e.RawY - _initialTouchY);
 
-                        // Проверяем только видимые кнопки!
-                        if (_btnRecord.Visibility == ViewStates.Visible && IsInsideView(_btnRecord, x, y))
+                    if (deltaX < 10 && deltaY < 10)
+                    {
+                        // Пользователь просто кликнул (палец почти не сместился).
+                        // Если событие пришло от конкретной кнопки, принудительно вызываем её нативный клик!
+                        if (v is Button)
                         {
-                            OnRecordToggleClick(true);
-                        }
-                        else if (_btnStopRecord.Visibility == ViewStates.Visible && IsInsideView(_btnStopRecord, x, y))
-                        {
-                            OnRecordToggleClick(false);
-                        }
-                        else if (_btnRewind.Visibility == ViewStates.Visible && IsInsideView(_btnRewind, x, y))
-                        {
-                            // OnRewindClick();
-                        }
-                        else if (_btnClosePanel.Visibility == ViewStates.Visible && IsInsideView(_btnClosePanel, x, y))
-                        {
-                            HardStopAndCloseEverything();
+                            v.PerformClick();
                         }
                     }
                     return true;
@@ -158,41 +174,130 @@ namespace AudioSampler.Android.Services
             return false;
         }
 
-        private bool IsInsideView(View view, float x, float y)
+        private void OnTimerTick()
         {
-            if (view == null) return false;
+            _recordingTime = _recordingTime.Add(TimeSpan.FromMilliseconds(1000));
+            _tvTimer.Text = _recordingTime.ToString(@"mm\:ss");
 
-            int[] viewLocation = new int[2];
-            view.GetLocationOnScreen(viewLocation);
-
-            int[] panelLocation = new int[2];
-            _panelView.GetLocationOnScreen(panelLocation);
-
-            float viewX = viewLocation[0] - panelLocation[0];
-            float viewY = viewLocation[1] - panelLocation[1];
-
-            return x >= viewX && x <= viewX + view.Width &&
-                   y >= viewY && y <= viewY + view.Height;
+            _timerHandler.PostDelayed(_timerRunnable, 1000);
         }
 
-        private void OnRecordToggleClick(bool isRecording)
+
+        private void OnRecordingStateChanged(RecordingState oldValue, RecordingState newValue)
         {
 
-            _isRecording = isRecording;
+            TransitionManager.BeginDelayedTransition(_panelRoot, new AutoTransition().SetDuration(300));
 
-            UpdateButtonsVisibility(_isRecording);
+            if (newValue == RecordingState.Initial)
+            {
 
-            WeakReferenceMessenger.Default.Send(new ToggleRecordMessage(_isRecording));
+            }
+            else if(newValue == RecordingState.Record)
+            {
+                _btnRecord.Visibility = ViewStates.Gone;
 
-            // НЕОБЯЗАТЕЛЬНО: Если нужно, чтобы при нажатии на "Стоп" приложение открывалось обратно:
-            //if (!_isRecording)
-            //{
-            //    Intent dialogIntent = new Intent(this, typeof(MainActivity));
-            //    dialogIntent.AddFlags(ActivityFlags.NewTask);
-            //    StartActivity(dialogIntent);
-            //    StopSelf(); // Закрываем плавающую кнопку
-            //}
+                _btnResumeRecord.Visibility = ViewStates.Gone;
+                _btnPauseRecord.Visibility = ViewStates.Visible;
+
+                _recordingControlsGroup.Visibility = ViewStates.Visible;
+                
+
+                _params.Width = WindowManagerLayoutParams.WrapContent;
+
+                StartTimer();
+            }
+            else if(newValue == RecordingState.Stop)
+            {
+                _btnRecord.Visibility = ViewStates.Visible;
+
+                _btnResumeRecord.Visibility = ViewStates.Gone;
+                _btnPauseRecord.Visibility = ViewStates.Visible;
+
+                _recordingControlsGroup.Visibility = ViewStates.Gone;
+
+                StopTimer(true); 
+            }
+            else if(newValue == RecordingState.Pause)
+            {
+                _btnRecord.Visibility = ViewStates.Gone;
+
+                _btnResumeRecord.Visibility = ViewStates.Visible;
+                _btnPauseRecord.Visibility = ViewStates.Gone;
+
+                _recordingControlsGroup.Visibility = ViewStates.Visible;
+
+                StopTimer(false);
+            }
+
+            _windowManager.UpdateViewLayout(_panelView, _params);
         }
+
+
+        private void OnClosePanelButtonClick()
+        {
+
+        }
+
+        private void OnRewindButtonClick()
+        {
+
+        }
+
+        private void OnRecordButtonClick()
+        {
+            RecordingState = RecordingState.Record;
+
+            WeakReferenceMessenger.Default.Send(new ToggleRecordMessage(RecordingAction.Start));
+        }
+
+        private void OnPauseButtonClick()
+        {
+            RecordingState = RecordingState.Pause;
+
+            WeakReferenceMessenger.Default.Send(new ToggleRecordMessage(RecordingAction.Pause));
+        }
+
+        private void OnStopButtonClick()
+        {
+            RecordingState = RecordingState.Stop;
+
+            WeakReferenceMessenger.Default.Send(new ToggleRecordMessage(RecordingAction.Stop));
+        }
+
+        private void OnCancelButtonClick()
+        {
+            RecordingState = RecordingState.Stop;
+
+            WeakReferenceMessenger.Default.Send(new ToggleRecordMessage(RecordingAction.Cancel));
+        }
+
+        private void OnResumeButtonClick()
+        {
+            RecordingState = RecordingState.Record;
+
+            WeakReferenceMessenger.Default.Send(new ToggleRecordMessage(RecordingAction.Resume));
+        }
+
+
+        private void StartTimer()
+        {
+
+            _timerHandler.PostDelayed(_timerRunnable, 1000);
+        }
+
+        private void StopTimer(bool reset = true)
+        {
+            if (reset)
+            {
+                _tvTimer.Text = "00:00";
+                _recordingTime = TimeSpan.Zero;
+            }
+
+            _timerHandler.RemoveCallbacks(_timerRunnable);
+        }
+
+
+
 
         public override void OnDestroy()
         {
@@ -204,10 +309,7 @@ namespace AudioSampler.Android.Services
         private void HardStopAndCloseEverything()
         {
             // 1. Если в этот момент шла запись — принудительно выключаем цикл
-            if (_isRecording)
-            {
-                _isRecording = false;
-            }
+            _recordingState = RecordingState.Stop;
 
 
             // Отправляем команду на жесткую остановку шеринга в CaptureService
@@ -226,19 +328,19 @@ namespace AudioSampler.Android.Services
         }
 
 
-        private void UpdateButtonsVisibility(bool isRecording)
-        {
-            if (isRecording)
-            {
-                _btnRecord.Visibility = ViewStates.Gone;
-                _btnStopRecord.Visibility = ViewStates.Visible;
-            }
-            else
-            {
-                _btnRecord.Visibility = ViewStates.Visible;
-                _btnStopRecord.Visibility = ViewStates.Gone;
-            }
-        }
+        //private void UpdateButtonsVisibility(bool isRecording)
+        //{
+        //    if (isRecording)
+        //    {
+        //        _btnRecord.Visibility = ViewStates.Gone;
+        //        _btnStopRecord.Visibility = ViewStates.Visible;
+        //    }
+        //    else
+        //    {
+        //        _btnRecord.Visibility = ViewStates.Visible;
+        //        _btnStopRecord.Visibility = ViewStates.Gone;
+        //    }
+        //}
 
 
     }
