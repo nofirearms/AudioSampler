@@ -4,8 +4,8 @@
 
 
 	<!-- Тёмный цвет с альфа-каналом CC (примерно 80% прозрачности) -->
-	<solid android:color="#551C1C1E" />
+	<solid android:color="#441C1C1E" />
 
 	<!-- Скругляем углы панели -->
-	<corners android:radius="16dp" />
+	<corners android:radius="12dp" />
 </shape>

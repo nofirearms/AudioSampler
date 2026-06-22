@@ -5,6 +5,8 @@ using Android.Media.Projection;
 using Android.Net;
 using Android.OS;
 using Android.Provider;
+using Android.Widget;
+using AndroidX.Core.App;
 using AudioSampler.Android.Services;
 using Avalonia;
 using Avalonia.Android;
@@ -42,6 +44,7 @@ namespace AudioSampler.Android
             App.OnFloatingWidgetServiceReady?.Invoke(_floatingService);
 
             CheckOverlayPermission();
+            CheckNotificationPermission();
         }
 
         protected override void OnActivityResult(int requestCode, Result resultCode, Intent? data)
@@ -94,6 +97,21 @@ namespace AudioSampler.Android
             }
         }
 
+        public void CheckNotificationPermission()
+        {
+            var enabledListeners = NotificationManagerCompat.GetEnabledListenerPackages(this);
+
+            // Проверяем, есть ли имя пакета нашего приложения в этом списке
+            if (!enabledListeners.Contains(PackageName))
+            {
+                var intent = new Intent(Settings.ActionNotificationListenerSettings);
+                intent.AddFlags(ActivityFlags.NewTask);
+                StartActivity(intent);
+
+                // Тут можно вывести Toast-сообщение: "Пожалуйста, включите доступ для AudioSampler"
+                Toast.MakeText(this, "Включите доступ к уведомлениям для перемотки", ToastLength.Long)?.Show();
+            }
+        }
 
         public void CheckOverlayPermission()
         {

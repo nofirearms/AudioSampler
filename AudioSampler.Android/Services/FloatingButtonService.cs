@@ -5,6 +5,7 @@ using Android.Graphics;
 using Android.Graphics.Drawables;
 using Android.Media;
 using Android.Media.Projection;
+using Android.Media.Session;
 using Android.OS;
 using Android.Runtime;
 using Android.Transitions;
@@ -17,6 +18,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using Java.Lang;
 using System;
 using System.Timers;
+using MediaController = Android.Media.Session.MediaController;
 
 
 namespace AudioSampler.Android.Services
@@ -240,7 +242,7 @@ namespace AudioSampler.Android.Services
 
         private void OnRewindButtonClick()
         {
-
+            SendSystemRewindCommand();
         }
 
         private void OnRecordButtonClick()
@@ -297,12 +299,43 @@ namespace AudioSampler.Android.Services
         }
 
 
-
-
         public override void OnDestroy()
         {
             base.OnDestroy();
             if (_panelView != null) _windowManager.RemoveView(_panelView);
+        }
+
+
+        private void SendSystemRewindCommand()
+        {
+            var manager = (MediaSessionManager?)GetSystemService(Context.MediaSessionService);
+            if (manager == null) return;
+
+            // Передаем компонент нашего сервиса, у которого есть права слушателя уведомлений
+            var component = new ComponentName(this, Java.Lang.Class.FromType(typeof(CaptureService)));
+
+            try
+            {
+                var controllers = manager.GetActiveSessions(component);
+                if (controllers != null && controllers.Count > 0)
+                {
+                    // Берем самый первый активный плеер (например, запущенный YouTube)
+                    MediaController activeController = controllers[0];
+
+                    // Получаем текущую позицию ползунка в миллисекундах
+                    long currentPosition = activeController.PlaybackState.Position;
+
+                    // Высчитываем новую позицию (минус 10000 миллисекунд = 10 секунд)
+                    long targetPosition = System.Math.Max(0, currentPosition - 5000);
+
+                    // Принудительно двигаем ползунок чужого плеера на нужную секунду!
+                    activeController.GetTransportControls().SeekTo(targetPosition);
+                }
+            }
+            catch (System.Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка перемотки сессии: {ex.Message}");
+            }
         }
 
 
@@ -327,20 +360,6 @@ namespace AudioSampler.Android.Services
             StopSelf();
         }
 
-
-        //private void UpdateButtonsVisibility(bool isRecording)
-        //{
-        //    if (isRecording)
-        //    {
-        //        _btnRecord.Visibility = ViewStates.Gone;
-        //        _btnStopRecord.Visibility = ViewStates.Visible;
-        //    }
-        //    else
-        //    {
-        //        _btnRecord.Visibility = ViewStates.Visible;
-        //        _btnStopRecord.Visibility = ViewStates.Gone;
-        //    }
-        //}
 
 
     }
