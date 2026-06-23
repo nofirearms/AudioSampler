@@ -4,8 +4,12 @@ using Android.Content;
 using Android.Media;
 using Android.Media.Projection;
 using Android.OS;
+using Android.Provider;
 using AudioSampler.Messages;
+using AudioSampler.Model;
+using Avalonia.Markup.Xaml.Templates;
 using CommunityToolkit.Mvvm.Messaging;
+using Java.Nio.FileNio.Attributes;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,7 +17,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using static Android.Resource;
-using AudioSampler.Model;
 
 namespace AudioSampler.Android.Services
 {
@@ -24,9 +27,7 @@ namespace AudioSampler.Android.Services
         private MediaProjection? _mediaProjection;
         private AudioRecord? _recorder;
         private bool _isRecording = false;
-
-        private List<byte[]> _audioChunks = new List<byte[]>();
-
+        private TaskCompletionSource<bool> _recordingResultSource;
 
         public CaptureService()
         {
@@ -36,7 +37,7 @@ namespace AudioSampler.Android.Services
                 // m.Value содержит true (если надо писать) или false (если стоп)
                 if (m.Value == RecordingAction.Start)
                 {
-                    Task.Run(() => StartRecording());
+                    StartRecordingAsync();
                 }
                 else if (m.Value == RecordingAction.Stop) 
                 {
@@ -52,7 +53,7 @@ namespace AudioSampler.Android.Services
                 }
                 else if(m.Value == RecordingAction.Resume)
                 {
-                    Task.Run(() => StartRecording());
+                    StartRecordingAsync();
                 }
             });
 
@@ -124,9 +125,10 @@ namespace AudioSampler.Android.Services
         }
 
 
-        private void StartRecording()
+        private async Task StartRecordingAsync()
         {
             _isRecording = true;
+            _recordingResultSource = new TaskCompletionSource<bool>();
 
             var config = new AudioPlaybackCaptureConfiguration.Builder(_mediaProjection!)
                 .AddMatchingUsage(AudioUsageKind.Media)
@@ -143,109 +145,95 @@ namespace AudioSampler.Android.Services
                 .Build();
 
             var bufferSize = AudioRecord.GetMinBufferSize(sampleRate, ChannelIn.Stereo, Encoding.Pcm16bit);
+            var bufferSizeInBytes = bufferSize * 4;
 
             _recorder = new AudioRecord.Builder()
                 .SetAudioFormat(audioFormat)
-                .SetBufferSizeInBytes(bufferSize * 4)
+                .SetBufferSizeInBytes(bufferSizeInBytes)
                 .SetAudioPlaybackCaptureConfig(config)
                 .Build();
 
             _recorder.StartRecording();
 
-            var buffer = new byte[4096];
+            var folder = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments);
+            Directory.CreateDirectory(folder);
+            var file = Path.Combine(folder, $"Recording{DateTime.Now:yyyyMMdd_HHmmss}.wav");
 
-            long totalBytes = 0;
-
-            while (_isRecording)
+            var writeTask = Task.Run(() =>
             {
-                int read = _recorder.Read(buffer, 0, buffer.Length);
-                if (read > 0)
+                using (var stream = new FileStream(file, FileMode.Create, FileAccess.Write))
+                using (var writer = new BinaryWriter(stream))
                 {
-                    var chunk = new byte[read];
-                    System.Array.Copy(buffer, 0, chunk, 0, read);
-                    _audioChunks.Add(chunk);
+                    // Выделяем 44 байта ПУСТОГО места в самом начале файла под будущий WAV-заголовок
+                    byte[] emptyHeader = new byte[44];
+                    writer.Write(emptyHeader);
 
+                    byte[] buffer = new byte[bufferSizeInBytes];
+
+                    while (_isRecording)
+                    {
+                        int read = _recorder.Read(buffer, 0, buffer.Length);
+                        if (read > 0)
+                        {
+                            // Пишем байты на диск мгновенно порциями, память приложения чиста!
+                            writer.Write(buffer, 0, read);
+                        }
+                    }
                 }
-            }
-        }
+            });
 
-        public async Task StopRecordingAsync()
-        {
 
-            _isRecording = false;
+            bool recordResult = await _recordingResultSource.Task;
 
-            if(_recorder != null)
-            {
-                _recorder.Stop();
-                _recorder.Release();
-
-                _recorder = null;
-
-                await Task.Run(() => RenderAudio());
-            }
-            _audioChunks.Clear();
-        }
-
-        public void PauseRecording()
-        {
-            _isRecording = false;
-
-            if(_recorder != null)
-            {
-                _recorder.Stop();
-                _recorder.Release();
-
-                _recorder = null;
-            }
-        }
-
-        public void CancelRecording()
-        {
-            _isRecording = false;
+            // Гарантируем, что поток записи успел закрыть файл
+            await writeTask;
 
             if (_recorder != null)
             {
-                _recorder.Stop();
-                _recorder.Release();
+                try
+                {
+                    _recorder.Stop();
+                    _recorder.Release();
 
-                _recorder = null;
-
+                    _recorder = null;
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Ошибка остановки: {ex.Message}");
+                }
             }
 
-            _audioChunks.Clear();
-        }
 
-        public byte[] GetSoundData(List<byte[]> chunks)
-        {
-            // Объединяем все чанки в один массив
-            int totalSize = chunks.Sum(chunk => chunk.Length);
-            byte[] result = new byte[totalSize];
-
-            int offset = 0;
-            foreach (byte[] chunk in chunks)
+            if (recordResult)
             {
-                Buffer.BlockCopy(chunk, 0, result, offset, chunk.Length);
-                offset += chunk.Length;
+                // Пользователь нажал Стоп — запечатываем WAV-заголовок поверх пустоты
+                FinalizeWavFile(file);
             }
-            return result;
+            else
+            {
+                // Пользователь нажал Отмена — просто удаляем временный файл с диска
+                if (File.Exists(file))
+                {
+                    File.Delete(file);
+                }
+            }
+
         }
 
-        private void RenderAudio(int sampleRate = 44100, short channels = 2, short bitsPerSample = 16)
+        private void FinalizeWavFile(string file, int sampleRate = 44100, short channels = 2, short bitsPerSample = 16)
         {
-            var now = DateTime.Now;
-            var name = $"Recording{now:ddMMyyyy_hhmmss}.wav";
-            var path = Path.Combine(global::Android.OS.Environment.GetExternalStoragePublicDirectory(global::Android.OS.Environment.DirectoryDownloads)!.AbsolutePath, name);
 
-            var pcmData = GetSoundData(_audioChunks);
-
-            using (var fileStream = new FileStream(path, FileMode.Create, FileAccess.Write))
+            using (var fileStream = new FileStream(file, FileMode.Open, FileAccess.ReadWrite))
             using (var writer = new BinaryWriter(fileStream))
             {
-                var totalDataLength = pcmData.Length;
-                int totalAudioLen = totalDataLength + 36;
-
+                // 1. Высчитываем реальные размеры файла, который записался на диск
+                int totalDataLength = (int)fileStream.Length - 44; // Чистый размер звука без заголовка
+                int totalAudioLen = (int)fileStream.Length - 8;
                 int byteRate = sampleRate * channels * bitsPerSample / 8;
                 short blockAlign = (short)(channels * bitsPerSample / 8);
+
+                // 2. Сдвигаем курсор записи в самый ТОП файла (на позицию 0), где лежат пустые 44 байта
+                fileStream.Seek(0, SeekOrigin.Begin);
 
                 // 2. Пишем RIFF заголовок (всего 44 байта)
                 writer.Write(System.Text.Encoding.ASCII.GetBytes("RIFF")); // Чанк RIFF
@@ -264,10 +252,110 @@ namespace AudioSampler.Android.Services
                 writer.Write(System.Text.Encoding.ASCII.GetBytes("data")); // Подчанк самих данных
                 writer.Write(totalDataLength);                                // Размер только аудио данных
 
-                // 3. Дописываем твой сырой массив байт после заголовка
-                writer.Write(pcmData);
             }
 
+
+            CopyFromInnerStorageToPath(file, Path.GetFileName(file));
+
+            // 4. Переименовываем файл из "temp_..." в нормальное красивое имя, если нужно
+            //string folderPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments);
+            //string finalPath = System.IO.Path.Combine(folderPath, $"guitar_sample_{System.DateTime.Now:yyyyMMdd_HHmmss}.wav");
+
+            //System.IO.File.Move(tempPath, finalPath);
+
+        }
+
+        private void CopyFromInnerStorageToPath(string source, string output)
+        {
+            try
+            {
+                var values = new ContentValues();
+                values.Put(MediaStore.Audio.Media.InterfaceConsts.DisplayName, output);
+                values.Put(MediaStore.Audio.Media.InterfaceConsts.MimeType, "audio/wav");
+                values.Put(MediaStore.Audio.Media.InterfaceConsts.RelativePath, "Recordings/AudioSampler");
+
+                var uri = ContentResolver.Insert(MediaStore.Audio.Media.GetContentUri("external"), values);
+                if (uri == null) return;
+
+                using (var inStream = System.IO.File.OpenRead(source))
+                using (var outStream = ContentResolver.OpenOutputStream(uri))
+                {
+                    inStream.CopyTo(outStream!);
+                }
+            }
+            catch (System.Exception ex) { System.Diagnostics.Debug.WriteLine(ex.Message); }
+        }
+
+
+        #region record to list of bytes
+        //private void StartRecording()
+        //{
+        //    _isRecording = true;
+
+        //    var config = new AudioPlaybackCaptureConfiguration.Builder(_mediaProjection!)
+        //        .AddMatchingUsage(AudioUsageKind.Media)
+        //        .Build();
+
+        //    var sampleRate = 44100;
+        //    short channels = 2;
+        //    short bitsPerSample = 16;
+
+        //    var audioFormat = new AudioFormat.Builder()
+        //        .SetEncoding(Encoding.Pcm16bit)
+        //        .SetSampleRate(sampleRate)
+        //        .SetChannelMask(ChannelOut.Stereo)
+        //        .Build();
+
+        //    var bufferSize = AudioRecord.GetMinBufferSize(sampleRate, ChannelIn.Stereo, Encoding.Pcm16bit);
+
+        //    _recorder = new AudioRecord.Builder()
+        //        .SetAudioFormat(audioFormat)
+        //        .SetBufferSizeInBytes(bufferSize * 4)
+        //        .SetAudioPlaybackCaptureConfig(config)
+        //        .Build();
+
+        //    _recorder.StartRecording();
+
+        //    var buffer = new byte[4096];
+
+        //    long totalBytes = 0;
+
+        //    while (_isRecording)
+        //    {
+        //        int read = _recorder.Read(buffer, 0, buffer.Length);
+        //        if (read > 0)
+        //        {
+        //            var chunk = new byte[read];
+        //            System.Array.Copy(buffer, 0, chunk, 0, read);
+        //            _audioChunks.Add(chunk);
+
+        //        }
+        //    }
+        //}
+
+        #endregion
+
+        public async Task StopRecordingAsync()
+        {
+            _isRecording = false;
+
+            _recordingResultSource.TrySetResult(true);
+        }
+
+        public void CancelRecording()
+        {
+            _isRecording = false;
+
+            _recordingResultSource.TrySetResult(false);
+        }
+
+
+        public void PauseRecording()
+        {
+            if(_recorder != null)
+            {
+                _recorder.Stop();
+            }
         }
 
 
