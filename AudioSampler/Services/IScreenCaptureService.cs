@@ -1,6 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using AudioSampler.Model;
+using System;
 
 namespace AudioSampler.Services
 {
@@ -9,5 +8,7 @@ namespace AudioSampler.Services
         void StartScreenCapture();
         void StopScreenCapture();
         void ChooseApplicationGivePermission();
+
+        event Action<RecordResult> RecordFinished;
     }
 }

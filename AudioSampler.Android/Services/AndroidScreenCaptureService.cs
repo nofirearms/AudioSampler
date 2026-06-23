@@ -3,6 +3,7 @@ using Android.Content;
 using Android.Media.Projection;
 using Android.OS;
 using AudioSampler.Messages;
+using AudioSampler.Model;
 using AudioSampler.Services;
 using CommunityToolkit.Mvvm.Messaging;
 using System;
@@ -17,9 +18,16 @@ namespace AudioSampler.Android.Services
         private readonly MainActivity _activity;
         private const int CaptureRequestCode = 1001;
 
+        public event Action<RecordResult> RecordFinished;
+
         public AndroidScreenCaptureService()
         {
             _activity = MainActivity.Instance;
+
+            WeakReferenceMessenger.Default.Register<RecordFinishedMessage>(this, (r, m) =>
+            {
+                RecordFinished?.Invoke(m.Value);
+            });
         }
 
         public void StartScreenCapture()

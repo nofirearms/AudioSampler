@@ -1,3 +1,5 @@
+using AudioSampler.Database;
+using AudioSampler.Model;
 using AudioSampler.Services;
 using AudioSampler.ViewModels;
 using AudioSampler.Views;
@@ -5,8 +7,10 @@ using Avalonia;
 using Avalonia.Controls; // Для PageNavigationHost
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.IO;
 
 
 namespace AudioSampler
@@ -48,8 +52,15 @@ namespace AudioSampler
             services.AddSingleton<IFloatingWidgetService>(provider => provider.GetRequiredService<LazyFloatingWidgetServiceWrapper>());
 
 
-            services.AddSingleton<MainViewModel>();
+            services.AddDbContext<AppDbContext>();
 
+            services.AddSingleton<AudioSamplesRepository>();
+            services.AddSingleton<SettingsRepository>();
+            services.AddTransient<DataService>();
+            services.AddTransient<ModalService>();
+
+
+            services.AddSingleton<MainViewModel>();
 
 
             return services.BuildServiceProvider();
@@ -59,7 +70,9 @@ namespace AudioSampler
         public override void OnFrameworkInitializationCompleted()
         {
 
-            var mainViewModel = this.Services.GetRequiredService<MainViewModel>();
+
+            var mainViewModel = Design.IsDesignMode ? new MainViewModel() : Services.GetRequiredService<MainViewModel>();
+            
 
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
@@ -67,6 +80,7 @@ namespace AudioSampler
                 {
                     DataContext = mainViewModel
                 };
+
             }
             else if (ApplicationLifetime is IActivityApplicationLifetime singleViewFactoryApplicationLifetime)
             {
@@ -82,7 +96,6 @@ namespace AudioSampler
                     Page = new MainView { DataContext = mainViewModel }
                 };
             }
-
             base.OnFrameworkInitializationCompleted();
         }
 
@@ -91,15 +104,25 @@ namespace AudioSampler
         {
             private IScreenCaptureService? _realService;
 
+            
+
             public LazyScreenCaptureServiceWrapper()
             {
                 // Подписываемся на событие готовности платформы
-                App.OnScreenCaptureServiceReady = service => _realService = service;
+                App.OnScreenCaptureServiceReady = service =>
+                {
+                    _realService = service;
+                    _realService.RecordFinished += (value) => RecordFinished?.Invoke(value);
+                };
+
+                
             }
 
             public void StartScreenCapture() => _realService?.StartScreenCapture();
             public void StopScreenCapture() => _realService?.StopScreenCapture();
             public void ChooseApplicationGivePermission() => _realService?.ChooseApplicationGivePermission();
+
+            public event Action<RecordResult> RecordFinished;
         }
 
 

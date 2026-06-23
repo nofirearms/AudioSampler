@@ -18,6 +18,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using static Android.Resource;
 
+
 namespace AudioSampler.Android.Services
 {
     [Service(Exported = false, ForegroundServiceType = global::Android.Content.PM.ForegroundService.TypeMediaProjection)]
@@ -252,10 +253,12 @@ namespace AudioSampler.Android.Services
                 writer.Write(System.Text.Encoding.ASCII.GetBytes("data")); // Подчанк самих данных
                 writer.Write(totalDataLength);                                // Размер только аудио данных
 
+
+                var durationMs = (totalDataLength * 1000) / (sampleRate * channels * (bitsPerSample / 8));
+                WeakReferenceMessenger.Default.Send(new RecordFinishedMessage(new RecordResult(file, TimeSpan.FromMilliseconds(durationMs), Path.GetFileName(file), fileStream.Length)));
             }
 
-
-            CopyFromInnerStorageToPath(file, Path.GetFileName(file));
+            //CopyFromInnerStorageToPath(file, Path.GetFileName(file));
 
             // 4. Переименовываем файл из "temp_..." в нормальное красивое имя, если нужно
             //string folderPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments);
