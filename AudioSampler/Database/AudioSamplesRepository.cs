@@ -25,7 +25,7 @@ namespace AudioSampler.Database
             try
             {
                 //var entity = _context.AudioSamples.FindAsync(audioSample.Id);
-                _context.AudioSamples.Update(audioSample);
+                await _context.AudioSamples.AddAsync(audioSample);
 
                 await SaveDatabase();
             }

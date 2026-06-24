@@ -14,6 +14,7 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace AudioSampler.ViewModels
 {
@@ -56,7 +57,14 @@ namespace AudioSampler.ViewModels
 
             captureService.RecordFinished += (value) =>
             {
-
+                var sample = new AudioSample
+                {
+                    Duration = value.Duration,
+                    FileSizeBytes = value.Size,
+                    Name = value.Name,
+                    Path = value.FilePath
+                };
+                AddAudioSample(sample);
             };
 
             var textChanged = this.WhenPropertyChanged(x => x.NameTextFilter)
@@ -80,6 +88,12 @@ namespace AudioSampler.ViewModels
         {
             var samples = _dataService.AudioSamplesRepository.GetAll();
             _audioSamplesCache.AddOrUpdate(samples); 
+        }
+
+        private async Task AddAudioSample(AudioSample audioSample)
+        {
+            _audioSamplesCache.AddOrUpdate(audioSample);
+            await _dataService.AudioSamplesRepository.CreateOrUpdateAsync(audioSample);
         }
 
         [RelayCommand]

@@ -10,10 +10,10 @@ namespace AudioSampler.Model
         public Guid Id { get; set; } = Guid.NewGuid();
         public string Name { get; set; }
         public string Path { get; set; }
-        public long DurationMs { get; set; }
+        public TimeSpan Duration { get; set; }
         public long FileSizeBytes { get; set; }
-        public DateTime DateCreated { get; set; }
-        public string? SourceApp { get; set; }
+        public DateTime DateCreated { get; set; } = DateTime.Now;
+        public string SourceApp { get; set; } = string.Empty;
 
     }
 }

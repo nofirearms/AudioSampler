@@ -128,6 +128,8 @@ namespace AudioSampler.Android.Services
 
         private async Task StartRecordingAsync()
         {
+            if (_isRecording) return;
+
             _isRecording = true;
             _recordingResultSource = new TaskCompletionSource<bool>();
 
@@ -255,7 +257,7 @@ namespace AudioSampler.Android.Services
 
 
                 var durationMs = (totalDataLength * 1000) / (sampleRate * channels * (bitsPerSample / 8));
-                WeakReferenceMessenger.Default.Send(new RecordFinishedMessage(new RecordResult(file, TimeSpan.FromMilliseconds(durationMs), Path.GetFileName(file), fileStream.Length)));
+                WeakReferenceMessenger.Default.Send(new RecordFinishedMessage(new RecordResult(file, TimeSpan.FromMilliseconds(durationMs), Path.GetFileNameWithoutExtension(file), fileStream.Length)));
             }
 
             //CopyFromInnerStorageToPath(file, Path.GetFileName(file));

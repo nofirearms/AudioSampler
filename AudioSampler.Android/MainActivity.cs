@@ -1,12 +1,14 @@
 ﻿using Android.App;
 using Android.Content;
 using Android.Content.PM;
+using Android.Graphics;
 using Android.Media.Projection;
 using Android.Net;
 using Android.OS;
 using Android.Provider;
 using Android.Widget;
 using AndroidX.Core.App;
+using AndroidX.Core.View;
 using AudioSampler.Android.Services;
 using Avalonia;
 using Avalonia.Android;
@@ -33,6 +35,11 @@ namespace AudioSampler.Android
         protected override void OnCreate(Bundle? savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
+
+            //WindowCompat.SetDecorFitsSystemWindows(Window, true);
+
+            //костыль чтобы системные кнопки были белыми
+            Window.SetNavigationBarColor(Color.Black);
 
             Instance = this;
 

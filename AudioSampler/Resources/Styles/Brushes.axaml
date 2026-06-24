@@ -1,0 +1,11 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <Design.PreviewWith>
+      <Border Padding="20" Background="{StaticResource Background3}"/>
+  </Design.PreviewWith>
+
+    <SolidColorBrush x:Key="Background1" Color="#1b1b1b"></SolidColorBrush>
+    <SolidColorBrush x:Key="Background2" Color="#222222"></SolidColorBrush>
+    <SolidColorBrush x:Key="Background3" Color="#313131"></SolidColorBrush>
+    <SolidColorBrush x:Key="AccentBrush1" Color="Orange"/>
+</ResourceDictionary>

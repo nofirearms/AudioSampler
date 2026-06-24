@@ -2,38 +2,60 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:controls="clr-namespace:Material.Styles.Controls;assembly=Material.Styles"
              xmlns:vm="using:AudioSampler.ViewModels"
              mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="600"
              xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
-             x:Class="AudioSampler.Views.MainView"
+             x:Class="AudioSampler.Views.MainView"  Background="{DynamicResource Background2}"
              x:DataType="vm:MainViewModel">
     <Design.DataContext>
         <vm:MainViewModel />
     </Design.DataContext> 
 
-    <Grid>
+    <Grid >
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
-            <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>        
 
-        <Grid x:Name="TopBarGrid">
-            <Button Width="70" Height="70" Margin="5" Content="{materialIcons:MaterialIconExt Kind=Application}" Command="{Binding ChooseCaptureApplitcationCommand}"/>
-        </Grid>
+            <Border BoxShadow="0 2 5 -1 #40000000" CornerRadius="30" Margin="5">
+                <TextBox 
+                    Classes="solo" 
+                    Theme="{StaticResource SoloTextBox}" 
+                    PlaceholderText="Search" 
+                    CornerRadius="30"  
+                    Background="{DynamicResource Background3}"
+                    > 
+                    <TextBox.InnerLeftContent>
+                        <materialIcons:MaterialIcon Foreground="{DynamicResource AccentBrush1}" Kind="Magnify" VerticalAlignment="Center" Width="30" Height="25" Margin="5 0"/>
+                    </TextBox.InnerLeftContent>
+                    <TextBox.Styles>
+                        <Style Selector="TextBox /template/ Border#PART_BorderElement">
+                            <Setter Property="CornerRadius" Value="8"/>
+                        </Style>
+                    </TextBox.Styles>
 
-        <Grid Grid.Row="1" x:Name="SearchBar" Margin="5">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="auto"/>
-                <ColumnDefinition/>
+                </TextBox>
+            </Border>
 
-            </Grid.ColumnDefinitions>
-            <materialIcons:MaterialIcon Kind="Magnify"/>
-            <TextBox PlaceholderText="Search" Text="{Binding NameTextFilter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Column="1" />
-        </Grid>
 
-        <Grid x:Name="SamplesListGrid" Grid.Row="2">
-            <ListBox ItemsSource="{Binding AudioSamples}">
+                   <!-- <Grid x:Name="SearchBar">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <materialIcons:MaterialIcon Foreground="{DynamicResource AccentBrush1}" Kind="Magnify" VerticalAlignment="Center" Width="30" Height="25" Margin="5 0"/>
+                <TextBox 
+                    PlaceholderText="Search" HorizontalAlignment="Left" Width="300" HorizontalContentAlignment="Left" MaxWidth="200"
+                    Text="{Binding NameTextFilter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                    Grid.Column="1" Margin="0 0 20 0"  >
+                </TextBox>
+            </Grid> -->
+
+
+        <Grid x:Name="SamplesListGrid" Grid.Row="1">
+            <ListBox ItemsSource="{Binding AudioSamples}" Background="{DynamicResource Background2}">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <Grid>
@@ -44,7 +66,33 @@
             </ListBox>
         </Grid>
 
-    </Grid>
+        <Grid Grid.Row="2" x:Name="BottomBarGrid" Background="{DynamicResource Background2}">
 
+           <controls:ColorZone Padding="0" Margin="0 2 0 0" Grid.Column="1" >     
+                <StackPanel  Orientation="Horizontal" HorizontalAlignment="Right" >
+                    <Grid>
+                        <controls:FloatingButton Width="50" Height="50" Margin="-10"  >
+                            <materialIcons:MaterialIcon Kind="CloseCircle" Width="30" />
+                        </controls:FloatingButton>
+                        <controls:FloatingButton 
+                            Width="50" 
+                            Height="50" 
+                            Margin="-10"
+                    
+                            Command="{Binding ChooseCaptureApplitcationCommand}"
+                            HorizontalAlignment="Center">
+                                <materialIcons:MaterialIcon Kind="RecordRec" Width="40" Height="40" />
+                        </controls:FloatingButton>
+                    </Grid>
+
+                    <controls:FloatingButton  Classes="Mini" Width="40" Height="40" Margin="20 0 10 0">
+                        <materialIcons:MaterialIcon Kind="Settings" Width="30" Height="30"/>
+                    </controls:FloatingButton>
+                </StackPanel>
+
+           </controls:ColorZone>
+        </Grid>
+
+    </Grid>
     
 </ContentPage>
