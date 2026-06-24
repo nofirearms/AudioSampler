@@ -134,11 +134,22 @@
         </Grid>
 
 
-                        <!--  Модальные окна  -->
+        <!--  Модальные окна  -->
         <ItemsControl d:Visibility="Collapsed" ItemsSource="{Binding ActiveModals}">
             <ItemsControl.DataTemplates>
                 <DataTemplate DataType="{x:Type modal:SettingsViewModel}">
-                    <TextBlock Text="{Binding Header}" FontSize="50"/>
+                    <Border HorizontalAlignment="Stretch" Height="300" Width="300">
+                         <StackPanel HorizontalAlignment="Stretch" >
+                            <TextBlock Text="Export folder"/>
+                            <Grid ColumnDefinitions="*, auto">
+                                <TextBox Text="Text"/>    
+                                <Button Grid.Column="1"/>
+                            </Grid>
+                        
+                        </StackPanel>
+                    </Border>
+
+                    
                 </DataTemplate>
 
 

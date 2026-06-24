@@ -19,6 +19,7 @@ namespace AudioSampler
     {
         public override void Initialize()
         {
+            //this.EnableHotReload();
             AvaloniaXamlLoader.Load(this);
         }
 
@@ -80,7 +81,6 @@ namespace AudioSampler
                 {
                     DataContext = mainViewModel
                 };
-
             }
             else if (ApplicationLifetime is IActivityApplicationLifetime singleViewFactoryApplicationLifetime)
             {

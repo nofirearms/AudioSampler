@@ -19,7 +19,7 @@
             <Canvas Width="40" Height="40" Background="Transparent">
                 <Path Data="M 0,40 L 40,0 M -10,10 L 10,-10 M 30,50 L 50,30" 
                       Stroke="White" 
-                      StrokeThickness="12" 
+                      StrokeThickness="14" 
                       Opacity="0.05"/>
             </Canvas>
         </VisualBrush.Visual>
