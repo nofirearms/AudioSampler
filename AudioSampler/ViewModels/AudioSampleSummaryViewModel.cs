@@ -14,6 +14,8 @@ namespace AudioSampler.ViewModels
         public string SourceApp => _audioSample.SourceApp;
         public DateTime DateCreated => _audioSample.DateCreated;
 
+        public TimeSpan Duration => _audioSample.Duration;
+
         public AudioSampleSummaryViewModel(AudioSample audioSample) 
         {
             _audioSample = audioSample;

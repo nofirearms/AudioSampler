@@ -7,21 +7,14 @@ using System.Threading.Tasks;
 
 namespace AudioSampler.ViewModels.Modal
 {
-    public abstract class BaseModalViewModel : ObservableObject
+    public interface IModal
     {
-        public event Action OnLoaded;
-        protected void RaiseOnLoaded()
-        {
-            OnLoaded?.Invoke();
-        }
-        public abstract void Loaded();
-        public abstract void CancelObject();
+        string Header { get; set; }
+        void CloseModal(); // Общий метод для принудительного закрытия
     }
-    public abstract partial class BaseModalViewModel<TResult> : BaseModalViewModel
+    public abstract partial class BaseModalViewModel<TResult> : IModal
     {
-
-        [ObservableProperty]
-        private string _header = ""; 
+        public string Header { get; set; }
 
         private TaskCompletionSource<ModalResult<TResult>> _completionSource;
 
@@ -53,19 +46,9 @@ namespace AudioSampler.ViewModels.Modal
             });
         }
 
-        public override void Loaded()
-        {
-            RaiseOnLoaded();
-        }
+        public void CloseModal() => Cancel();
 
-        public override void CancelObject()
-        {
-            Cancel();
-        }
-
-        [RelayCommand]
-        private void CloseModal() => Cancel();
-
+   
         //public abstract void Dispose();
     }
 }

@@ -32,6 +32,23 @@ namespace AudioSampler.Android.Services
 
         public CaptureService()
         {
+
+        }
+
+
+
+        public override IBinder? OnBind(Intent? intent) => null;
+
+        public override void OnCreate()
+        {
+            base.OnCreate();
+
+            var channelId = "capture_channel";
+            var manager = (NotificationManager)GetSystemService(NotificationService);
+            var channel = new NotificationChannel(channelId, "Audio Capture", NotificationImportance.Low);
+            manager.CreateNotificationChannel(channel);
+
+
             // Подписываемся на сообщения из любой точки программы
             WeakReferenceMessenger.Default.Register<ToggleRecordMessage>(this, (r, m) =>
             {
@@ -40,19 +57,19 @@ namespace AudioSampler.Android.Services
                 {
                     StartRecordingAsync();
                 }
-                else if (m.Value == RecordingAction.Stop) 
+                else if (m.Value == RecordingAction.Stop)
                 {
-                    Task.Run(async() => await StopRecordingAsync());
+                    Task.Run(async () => await StopRecordingAsync());
                 }
-                else if(m.Value == RecordingAction.Pause)
+                else if (m.Value == RecordingAction.Pause)
                 {
                     PauseRecording();
                 }
-                else if(m.Value == RecordingAction.Cancel)
+                else if (m.Value == RecordingAction.Cancel)
                 {
                     CancelRecording();
                 }
-                else if(m.Value == RecordingAction.Resume)
+                else if (m.Value == RecordingAction.Resume)
                 {
                     StartRecordingAsync();
                 }
@@ -64,19 +81,17 @@ namespace AudioSampler.Android.Services
             {
                 StopCaptureSession();
             });
+
+            _recordingResultSource = new TaskCompletionSource<bool>();
         }
 
-
-
-        public override IBinder? OnBind(Intent? intent) => null;
-
-        public override void OnCreate()
+        public override void OnDestroy()
         {
-            base.OnCreate();
-            var channelId = "capture_channel";
-            var manager = (NotificationManager)GetSystemService(NotificationService);
-            var channel = new NotificationChannel(channelId, "Audio Capture", NotificationImportance.Low);
-            manager.CreateNotificationChannel(channel);
+            base.OnDestroy();
+
+            WeakReferenceMessenger.Default.Unregister<ToggleRecordMessage>(this);
+            WeakReferenceMessenger.Default.Unregister<HardStopSharingMessage>(this);
+
         }
 
         public override StartCommandResult OnStartCommand(Intent? intent, StartCommandFlags flags, int startId)
@@ -101,7 +116,8 @@ namespace AudioSampler.Android.Services
                         {
                             // Регистрируем наш системный колбэк остановки
                             _mediaProjection.RegisterCallback(new AudioProjectionCallback(), new Handler(Looper.MainLooper));
-
+                            //шлём сообщение кому надо о том что стартовал шаринг, ловим в AndroidScreenCaptureService
+                            WeakReferenceMessenger.Default.Send(new SharingStateChangedMessage(true));
                             // 3. И вот теперь, когда всё успешно завелось, запускаем плавающую панель!
                             Intent panelIntent = new Intent(this, typeof(FloatingButtonService));
                             StartService(panelIntent);
@@ -131,8 +147,7 @@ namespace AudioSampler.Android.Services
             if (_isRecording) return;
 
             _isRecording = true;
-            _recordingResultSource = new TaskCompletionSource<bool>();
-
+            
             var config = new AudioPlaybackCaptureConfiguration.Builder(_mediaProjection!)
                 .AddMatchingUsage(AudioUsageKind.Media)
                 .Build();

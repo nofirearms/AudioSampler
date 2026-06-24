@@ -4,95 +4,212 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:controls="clr-namespace:Material.Styles.Controls;assembly=Material.Styles"
              xmlns:vm="using:AudioSampler.ViewModels"
+             xmlns:modal="using:AudioSampler.ViewModels.Modal"
+             xmlns:customcontrols="using:AudioSampler.Controls"
+             xmlns:converters="using:AudioSampler.Converters"
              mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="600"
              xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              x:Class="AudioSampler.Views.MainView"  Background="{DynamicResource Background2}"
              x:DataType="vm:MainViewModel">
+    <ContentPage.Resources>
+        <converters:ReverseBoolConverter x:Key="ReverseBoolConverter"/>
+    </ContentPage.Resources>
     <Design.DataContext>
         <vm:MainViewModel />
     </Design.DataContext> 
 
-    <Grid >
-        <Grid.RowDefinitions>
-            <RowDefinition Height="auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="auto"/>
-        </Grid.RowDefinitions>        
+    <Grid>
+        <Grid >
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="auto"/>
+            </Grid.RowDefinitions>        
 
-            <Border BoxShadow="0 2 5 -1 #40000000" CornerRadius="30" Margin="5">
-                <TextBox 
-                    Classes="solo" 
-                    Theme="{StaticResource SoloTextBox}" 
-                    PlaceholderText="Search" 
-                    CornerRadius="30"  
-                    Background="{DynamicResource Background3}"
-                    > 
-                    <TextBox.InnerLeftContent>
-                        <materialIcons:MaterialIcon Foreground="{DynamicResource AccentBrush1}" Kind="Magnify" VerticalAlignment="Center" Width="30" Height="25" Margin="5 0"/>
-                    </TextBox.InnerLeftContent>
-                    <TextBox.Styles>
-                        <Style Selector="TextBox /template/ Border#PART_BorderElement">
-                            <Setter Property="CornerRadius" Value="8"/>
-                        </Style>
-                    </TextBox.Styles>
+                <Border BoxShadow="0 2 5 -1 #40000000" CornerRadius="30" Margin="5">
+                    <TextBox 
+                        Classes="solo" 
+                        Theme="{StaticResource SoloTextBox}" 
+                        PlaceholderText="Search" 
+                        CornerRadius="30"  
+                        Background="{DynamicResource Background3}"
+                        Text="{Binding NameTextFilter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                        > 
+                        <TextBox.InnerLeftContent>
+                            <materialIcons:MaterialIcon Foreground="{DynamicResource AccentBrush1}" Kind="Magnify" VerticalAlignment="Center" Width="30" Height="25" Margin="5 0"/>
+                        </TextBox.InnerLeftContent>
 
-                </TextBox>
-            </Border>
+                    </TextBox>
+                </Border>
 
 
-                   <!-- <Grid x:Name="SearchBar">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="auto"/>
-                    <ColumnDefinition/>
-                </Grid.ColumnDefinitions>
-                <materialIcons:MaterialIcon Foreground="{DynamicResource AccentBrush1}" Kind="Magnify" VerticalAlignment="Center" Width="30" Height="25" Margin="5 0"/>
-                <TextBox 
-                    PlaceholderText="Search" HorizontalAlignment="Left" Width="300" HorizontalContentAlignment="Left" MaxWidth="200"
-                    Text="{Binding NameTextFilter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
-                    Grid.Column="1" Margin="0 0 20 0"  >
-                </TextBox>
-            </Grid> -->
+
+            <Grid x:Name="SamplesListGrid" Grid.Row="1">
+                <ScrollViewer>
+                    <ItemsControl 
+                        ItemsSource="{Binding AudioSamples}" 
+                        Background="{DynamicResource Background2}"
+                        ScrollViewer.VerticalSnapPointsType="None"
+                        ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                        ScrollViewer.VerticalScrollBarVisibility="Auto">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border CornerRadius="5" Background="{DynamicResource Background1}" Margin="5 3 10 3" BoxShadow="0 2 5 -1 #ee000000">
+                                    <Grid Background="Transparent" RowDefinitions="Auto, Auto" ColumnDefinitions="*, Auto" RowSpacing="3" Margin="10 10" >
+                                        <TextBlock 
+                                            Grid.Row="0" Grid.Column="0"
+                                            Text="{Binding Name}"
+                                            FontSize="16"/>
+                
+                                        <TextBlock 
+                                            Grid.Row="1" Grid.Column="0"
+                                            FontSize="12"
+                                            Margin="0 5 0 0"
+                                            Text="{Binding DateCreated}"
+                                            FontWeight="Light" 
+                                            Foreground="{DynamicResource InactiveForeground1}"/>
+                
+                                        <TextBlock 
+                                            Grid.Column="1" Grid.Row="0" Grid.RowSpan="2" 
+                                            VerticalAlignment="Center"
+                                            HorizontalAlignment="Right"
+                                            FontSize="14"
+                                            FontWeight="Light" 
+                                            Foreground="{DynamicResource InactiveForeground1}"
+                                            Text="{Binding Duration, StringFormat=hh\\:mm\\:ss}"/>
+                                    </Grid>
+                                </Border>
+
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+
+                            <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <VirtualizingStackPanel Orientation="Vertical" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                    </ItemsControl>
+                </ScrollViewer>
 
 
-        <Grid x:Name="SamplesListGrid" Grid.Row="1">
-            <ListBox ItemsSource="{Binding AudioSamples}" Background="{DynamicResource Background2}">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
+            </Grid>
+
+            <Grid Grid.Row="2" x:Name="BottomBarGrid"  Margin="0 0 0 5">
+
+                    <StackPanel  Orientation="Horizontal" HorizontalAlignment="Right" >
                         <Grid>
-                            <TextBlock Text="{Binding Name}"/>
+                            <controls:FloatingButton 
+                                Width="50" 
+                                Height="50" 
+                                Margin="-10" 
+                                IsVisible="{Binding SharingState}"
+                                Padding="0"
+                                Command="{Binding StopSharingCommand}">
+                                <Grid>
+                                    <materialIcons:MaterialIcon IconSize="50" Kind="Fullscreen" />
+                                    <materialIcons:MaterialIcon IconSize="20" Kind="Close" />
+                                </Grid>
+                            </controls:FloatingButton>
+                            <controls:FloatingButton 
+                                Width="50" 
+                                Height="50" 
+                                Margin="-10"
+                                Padding="0" 
+                                IsVisible="{Binding SharingState, Converter={StaticResource ReverseBoolConverter}}"
+                                Command="{Binding StartSharingCommand}"
+                                HorizontalAlignment="Center">
+                                <Grid>
+                                    <materialIcons:MaterialIcon IconSize="50" Kind="Fullscreen" />
+                                    <materialIcons:MaterialIcon IconSize="15" Kind="Record" />
+                                </Grid>
+                            </controls:FloatingButton>
                         </Grid>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
+
+                        <controls:FloatingButton Command="{Binding OpenSettingsCommand}" Classes="Mini" Width="40" Height="40" Margin="20 0 10 0">
+                            <materialIcons:MaterialIcon Kind="Settings" Width="30" Height="30"/>
+                        </controls:FloatingButton>
+                    </StackPanel>
+            </Grid>
+
         </Grid>
 
-        <Grid Grid.Row="2" x:Name="BottomBarGrid" Background="{DynamicResource Background2}">
 
-           <controls:ColorZone Padding="0" Margin="0 2 0 0" Grid.Column="1" >     
-                <StackPanel  Orientation="Horizontal" HorizontalAlignment="Right" >
+                        <!--  Модальные окна  -->
+        <ItemsControl d:Visibility="Collapsed" ItemsSource="{Binding ActiveModals}">
+            <ItemsControl.DataTemplates>
+                <DataTemplate DataType="{x:Type modal:SettingsViewModel}">
+                    <TextBlock Text="{Binding Header}" FontSize="50"/>
+                </DataTemplate>
+
+
+            </ItemsControl.DataTemplates>
+           <ItemsControl.ItemTemplate>
+                <DataTemplate>
                     <Grid>
-                        <controls:FloatingButton Width="50" Height="50" Margin="-10"  >
-                            <materialIcons:MaterialIcon Kind="CloseCircle" Width="30" />
-                        </controls:FloatingButton>
-                        <controls:FloatingButton 
-                            Width="50" 
-                            Height="50" 
-                            Margin="-10"
-                    
-                            Command="{Binding ChooseCaptureApplitcationCommand}"
-                            HorizontalAlignment="Center">
-                                <materialIcons:MaterialIcon Kind="RecordRec" Width="40" Height="40" />
-                        </controls:FloatingButton>
+                        <Grid.Background>
+                            <SolidColorBrush Opacity="0.5" Color="Black" />
+                        </Grid.Background>
+                        <Border
+                            x:Name="ModalMainBorder"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            CornerRadius="5"
+                            Background="{DynamicResource Background2}"
+                            UseLayoutRounding="True"
+                            BoxShadow="0 5 5 -1 #ee000000">
+                            <Grid Margin="0">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="auto" />
+                                    <RowDefinition />
+                                </Grid.RowDefinitions>
+                                <Border
+                                    Margin="0"
+                                    Padding="2"
+                                    Background="{DynamicResource StripedBrush}"
+                                    CornerRadius="3">
+                                    <Grid Margin="0,3">
+
+                                        <TextBlock
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            Text="{Binding Header}">
+                                        </TextBlock>
+
+                                        <Button
+                                            Width="25"
+                                            Height="25"
+                                            Margin="0,0,5,0"
+                                            Padding="0"
+                                            Theme="{StaticResource MaterialFlatButton}"
+                                            HorizontalAlignment="Right"
+                                            VerticalAlignment="Center"
+                                            Background="{Binding #ModalMainBorder.Background}"
+                                            Command="{Binding CloseModal}"
+                                            >
+                                            <materialIcons:MaterialIcon Kind="Close" IconSize="20" />
+                                        </Button>
+                                    </Grid>
+
+                                </Border>
+
+                                <ContentPresenter
+                                    x:Name="ContentPresenter"
+                                    Grid.Row="1"
+                                    Margin="5"
+                                    Content="{Binding }" />
+                            </Grid>
+                        </Border>
                     </Grid>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
 
-                    <controls:FloatingButton  Classes="Mini" Width="40" Height="40" Margin="20 0 10 0">
-                        <materialIcons:MaterialIcon Kind="Settings" Width="30" Height="30"/>
-                    </controls:FloatingButton>
-                </StackPanel>
-
-           </controls:ColorZone>
-        </Grid>
-
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <Grid />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+        </ItemsControl>
     </Grid>
+    
     
 </ContentPage>

@@ -19,6 +19,7 @@ namespace AudioSampler.Android.Services
         private const int CaptureRequestCode = 1001;
 
         public event Action<RecordResult> RecordFinished;
+        public event Action<bool> SharingStateChanged;
 
         public AndroidScreenCaptureService()
         {
@@ -27,6 +28,11 @@ namespace AudioSampler.Android.Services
             WeakReferenceMessenger.Default.Register<RecordFinishedMessage>(this, (r, m) =>
             {
                 RecordFinished?.Invoke(m.Value);
+            });
+
+            WeakReferenceMessenger.Default.Register<SharingStateChangedMessage>(this, (r, m) =>
+            {
+                SharingStateChanged?.Invoke(m.IsActive);
             });
         }
 
@@ -48,9 +54,14 @@ namespace AudioSampler.Android.Services
         }
 
 
-        public void ChooseApplicationGivePermission()
+        public void StartSharing()
         {
-            _activity.ChooseApplicationGivePermission();
+            _activity.StartSharing();
+        }
+
+        public void StopSharing()
+        {
+            _activity.StopSharing();
         }
 
         //public void EnterMiniMode()

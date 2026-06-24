@@ -7,8 +7,10 @@ namespace AudioSampler.Services
     {
         void StartScreenCapture();
         void StopScreenCapture();
-        void ChooseApplicationGivePermission();
+        void StartSharing();
+        void StopSharing();
 
         event Action<RecordResult> RecordFinished;
+        event Action<bool> SharingStateChanged;
     }
 }

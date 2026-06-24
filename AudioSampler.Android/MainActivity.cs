@@ -10,8 +10,10 @@ using Android.Widget;
 using AndroidX.Core.App;
 using AndroidX.Core.View;
 using AudioSampler.Android.Services;
+using AudioSampler.Messages;
 using Avalonia;
 using Avalonia.Android;
+using CommunityToolkit.Mvvm.Messaging;
 using System.Diagnostics;
 
 namespace AudioSampler.Android
@@ -82,18 +84,12 @@ namespace AudioSampler.Android
         //    }
         //}
 
-        //public void HardStopSharing()
-        //{
-        //    if (_mediaProjection != null)
-        //    {
-        //        // Этот вызов вырубит трансляцию (значок в шторке пропадет) 
-        //        // и автоматически стриггерит AudioProjectionCallback.OnStop()
-        //        _mediaProjection.Stop();
-        //        _mediaProjection = null;
-        //    }
-        //}
+        public void StopSharing()
+        {
+            WeakReferenceMessenger.Default.Send(new HardStopSharingMessage());
+        }
 
-        public void ChooseApplicationGivePermission()
+        public void StartSharing()
         {
             var projectionManager = (MediaProjectionManager?)GetSystemService(Context.MediaProjectionService);
             if (projectionManager != null)

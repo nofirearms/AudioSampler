@@ -12,6 +12,7 @@
     </Application.DataTemplates>    
 
     <Application.Styles>
+        <FluentTheme />
         <materialIcons:MaterialIconStyles />
         <themes:MaterialTheme BaseTheme="Dark" PrimaryColor="Orange" SecondaryColor="Lime" />
     </Application.Styles>

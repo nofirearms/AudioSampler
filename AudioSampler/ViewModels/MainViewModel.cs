@@ -2,6 +2,7 @@
 using AudioSampler.Services;
 using AudioSampler.ViewModels;
 using AudioSampler.ViewModels.Modal;
+using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DynamicData;
@@ -13,6 +14,7 @@ using System.Collections.Specialized;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -26,7 +28,7 @@ namespace AudioSampler.ViewModels
         private readonly ModalService _modalService;
 
         //------------------------ MODAL -------------------------------------
-        public IReadOnlyList<BaseModalViewModel> ActiveModals => _modalService.ActiveModals;
+        public IReadOnlyList<IModal> ActiveModals => _modalService.ActiveModals;
         public bool HasActiveModals => _modalService.ActiveModals.Any();
         //--------------------------------------------------------------------
 
@@ -37,9 +39,32 @@ namespace AudioSampler.ViewModels
         private ReadOnlyObservableCollection<AudioSampleSummaryViewModel> _audioSamples;
 
 
+        [ObservableProperty]
+        private bool _sharingState = false;
+
         public MainViewModel()
         {
 
+            if (Design.IsDesignMode)
+            {
+                var textChanged = this.WhenPropertyChanged(x => x.NameTextFilter)
+                    .Select(_ => CreateFilter());
+
+                // 1. Захватываем UI-поток (здесь он еще доступен)
+                var uiContext = SynchronizationContext.Current;
+
+                _audioSamplesCache.Connect()
+                    .Transform(a => new AudioSampleSummaryViewModel(a))
+                    .Filter(textChanged)
+                    .Sort(SortExpressionComparer<AudioSampleSummaryViewModel>.Descending(s => s.DateCreated))
+                    .ObserveOn(uiContext)
+                    .Bind(out _audioSamples)
+                    .Subscribe();
+
+
+                _audioSamplesCache.AddOrUpdate(new AudioSample { DateCreated = DateTime.Now, Duration = TimeSpan.FromMilliseconds(1200), Name = "RecordTEST", Path = "sdf", SourceApp = "Youtube" });
+                _audioSamplesCache.AddOrUpdate(new AudioSample { DateCreated = DateTime.Now, Duration = TimeSpan.FromMilliseconds(3600), Name = "Record132123123123", Path = "sdf", SourceApp = "Browser" });
+            }
         }
 
         public MainViewModel(IScreenCaptureService captureService, IFloatingWidgetService floatingWidget, DataService dataService, ModalService modalService)
@@ -51,8 +76,8 @@ namespace AudioSampler.ViewModels
 
             ((INotifyCollectionChanged)_modalService.ActiveModals).CollectionChanged += (s, e) =>
             {
-                OnPropertyChanged(nameof(HasActiveModals));
                 OnPropertyChanged(nameof(ActiveModals));
+                OnPropertyChanged(nameof(HasActiveModals));
             };
 
             captureService.RecordFinished += (value) =>
@@ -65,6 +90,11 @@ namespace AudioSampler.ViewModels
                     Path = value.FilePath
                 };
                 AddAudioSample(sample);
+            };
+
+            captureService.SharingStateChanged += (state) =>
+            {
+                SharingState = state;
             };
 
             var textChanged = this.WhenPropertyChanged(x => x.NameTextFilter)
@@ -97,9 +127,15 @@ namespace AudioSampler.ViewModels
         }
 
         [RelayCommand]
-        private void ChooseCaptureApplitcation()
+        private void StartSharing()
         {
-            _captureService.ChooseApplicationGivePermission();
+            _captureService.StartSharing();
+        }
+
+        [RelayCommand]
+        private void StopSharing()
+        {
+            _captureService.StopSharing();
         }
 
         [RelayCommand]
@@ -121,6 +157,13 @@ namespace AudioSampler.ViewModels
             _floatingWidget.MinimizeToFloatingButton();
         }
 
+
+        [RelayCommand]
+        private async void OpenSettings()
+        {
+            //_captureService.EnterMiniMode();
+            await _modalService.OpenSettingsModal();
+        }
 
         [ObservableProperty]
         private string _nameTextFilter;

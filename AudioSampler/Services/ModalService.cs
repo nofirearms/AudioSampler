@@ -8,8 +8,8 @@ namespace AudioSampler.Services
 {
     public class ModalService
     {
-        private readonly ObservableCollection<BaseModalViewModel> _activeModals = new();
-        public IReadOnlyList<BaseModalViewModel> ActiveModals => _activeModals;
+        private readonly ObservableCollection<IModal> _activeModals = new();
+        public IReadOnlyList<IModal> ActiveModals => _activeModals;
 
         public async Task<ModalResult<TResult>> ShowModalAsync<TResult>(BaseModalViewModel<TResult> modalViewModel)
         {
@@ -31,9 +31,14 @@ namespace AudioSampler.Services
 
         }
 
-        public async Task<ModalResult<AudioSample>> OpenDeckModal(AudioSample audioSample)
+        public async Task<ModalResult<AudioSample>> OpenAudioSampleDetailedModal(AudioSample audioSample)
         {
             return await ShowModalAsync(new AudioSampleDetailViewModel(audioSample));
+        }
+
+        public async Task<ModalResult<object>> OpenSettingsModal()
+        {
+            return await ShowModalAsync(new SettingsViewModel());
         }
     }
 }
