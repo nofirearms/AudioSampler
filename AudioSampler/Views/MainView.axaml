@@ -7,6 +7,7 @@
              xmlns:modal="using:AudioSampler.ViewModels.Modal"
              xmlns:customcontrols="using:AudioSampler.Controls"
              xmlns:converters="using:AudioSampler.Converters"
+             xmlns:local="using:AudioSampler.Views" x:Name="self"
              mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="600"
              xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              x:Class="AudioSampler.Views.MainView"  Background="{DynamicResource Background2}"
@@ -135,21 +136,10 @@
 
 
         <!--  Модальные окна  -->
-        <ItemsControl d:Visibility="Collapsed" ItemsSource="{Binding ActiveModals}">
+        <ItemsControl  ItemsSource="{Binding ActiveModals}">
             <ItemsControl.DataTemplates>
                 <DataTemplate DataType="{x:Type modal:SettingsViewModel}">
-                    <Border HorizontalAlignment="Stretch" Height="300" Width="300">
-                         <StackPanel HorizontalAlignment="Stretch" >
-                            <TextBlock Text="Export folder"/>
-                            <Grid ColumnDefinitions="*, auto">
-                                <TextBox Text="Text"/>    
-                                <Button Grid.Column="1"/>
-                            </Grid>
-                        
-                        </StackPanel>
-                    </Border>
-
-                    
+                    <local:SettingsView />
                 </DataTemplate>
 
 
@@ -162,7 +152,8 @@
                         </Grid.Background>
                         <Border
                             x:Name="ModalMainBorder"
-                            HorizontalAlignment="Center"
+                            HorizontalAlignment="Stretch"
+                            Margin="10 0"
                             VerticalAlignment="Center"
                             CornerRadius="5"
                             Background="{DynamicResource Background2}"
@@ -181,6 +172,7 @@
                                     <Grid Margin="0,3">
 
                                         <TextBlock
+                                            FontSize="22"
                                             HorizontalAlignment="Center"
                                             VerticalAlignment="Center"
                                             Text="{Binding Header}">
@@ -205,6 +197,7 @@
 
                                 <ContentPresenter
                                     x:Name="ContentPresenter"
+                                    HorizontalAlignment="Stretch"
                                     Grid.Row="1"
                                     Margin="5"
                                     Content="{Binding }" />
@@ -216,10 +209,13 @@
 
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <Grid />
+                    <Grid  HorizontalAlignment="Stretch"/>
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
         </ItemsControl>
+
+
+            
     </Grid>
     
     

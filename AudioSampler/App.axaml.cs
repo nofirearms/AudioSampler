@@ -79,7 +79,9 @@ namespace AudioSampler
             {
                 desktop.MainWindow = new MainWindow
                 {
-                    DataContext = mainViewModel
+                    DataContext = mainViewModel,
+                    Height = 800,
+                    Width = 500
                 };
             }
             else if (ApplicationLifetime is IActivityApplicationLifetime singleViewFactoryApplicationLifetime)
