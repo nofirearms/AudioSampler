@@ -1,4 +1,5 @@
 ﻿using AudioSampler.Model;
+using AudioSampler.ViewModels;
 using AudioSampler.ViewModels.Modal;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -9,11 +10,19 @@ namespace AudioSampler.Services
     public class ModalService
     {
         private readonly ObservableCollection<IModal> _activeModals = new();
+        private readonly ViewModelFactory _factory;
+
         public IReadOnlyList<IModal> ActiveModals => _activeModals;
+
+
+        public ModalService(ViewModelFactory factory)
+        {
+            _factory = factory;
+        }
 
         public async Task<ModalResult<TResult>> ShowModalAsync<TResult>(BaseModalViewModel<TResult> modalViewModel)
         {
-            await Task.Delay(30);
+            //await Task.Delay(30);
 
             return await App.Current.Dispatcher.Invoke(async () =>
             {
@@ -31,14 +40,14 @@ namespace AudioSampler.Services
 
         }
 
-        public async Task<ModalResult<AudioSample>> OpenAudioSampleDetailedModal(AudioSample audioSample)
+        public async Task<ModalResult<AudioSample>> OpenAudioSampleDetailModal(AudioSample audioSample)
         {
-            return await ShowModalAsync(new AudioSampleDetailViewModel(audioSample));
+            return await ShowModalAsync(_factory.Create<AudioSampleDetailViewModel>(audioSample));
         }
 
         public async Task<ModalResult<object>> OpenSettingsModal()
         {
-            return await ShowModalAsync(new SettingsViewModel());
+            return await ShowModalAsync(_factory.Create<SettingsViewModel>());
         }
     }
 }

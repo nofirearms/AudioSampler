@@ -1,0 +1,25 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+      <Design.PreviewWith>
+          
+          <Button Content="TEST" Theme="{DynamicResource RoundAccentbutton}"/>
+      </Design.PreviewWith>
+
+
+    <ControlTheme x:Key="RoundAccentButton" TargetType="Button">
+            <Setter Property="Background" Value="{DynamicResource AccentBrush1}"/>
+            <Setter Property="Foreground" Value="{DynamicResource Background1}"/>
+            <Setter Property="CornerRadius" Value="40"/>
+        
+            <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Background" Value="{DynamicResource AccentBrush2}" />
+                <Setter Property="Foreground" Value="{DynamicResource Background1}" />
+            </Style>
+        
+            <Style Selector="^:pressed /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Background" Value="{DynamicResource AccentBrush2}" />
+                <Setter Property="Foreground" Value="{DynamicResource Background1}" />
+            </Style>
+        </ControlTheme>
+</ResourceDictionary>

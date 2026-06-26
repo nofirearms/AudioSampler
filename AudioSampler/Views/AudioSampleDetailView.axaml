@@ -5,46 +5,54 @@
              xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              xmlns:controls="clr-namespace:Material.Styles.Controls;assembly=Material.Styles"
              xmlns:customcontrols="using:AudioSampler.Controls"
-
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="AudioSampler.AudioSampleDetailView">
-        <Border HorizontalAlignment="Stretch" VerticalAlignment="Center" Background="{DynamicResource Background1}" CornerRadius="5">
+             xmlns:modal="using:AudioSampler.ViewModels.Modal"
+             x:DataType="modal:AudioSampleDetailViewModel"
+             xmlns:converters="using:AudioSampler.Converters"
+             mc:Ignorable="d" d:DesignWidth="720" d:DesignHeight="450"
+             x:Class="AudioSampler.Views.AudioSampleDetailView">
+    <UserControl.Resources>
+        <converters:ReverseBoolConverter x:Key="ReverseBoolConverter"/>
+    </UserControl.Resources>
+        <Border HorizontalAlignment="Stretch" VerticalAlignment="Center"  CornerRadius="5">
             <Grid RowDefinitions="auto, *, auto, auto">
-                <TextBox Text="Name"/>
-                <customcontrols:AudioGraph Grid.Row="1"/>
+                <TextBox Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                <Border Grid.Row="1" Background="{DynamicResource Background1}" BorderThickness="1" Margin="0 5">
+                    <customcontrols:AudioGraph Height="100" Points="{Binding AudioGraphPoints}" />    
+                </Border>
+                
                 <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center">
                     <Grid>
-                        <controls:FloatingButton Classes="Mini" Width="40" Height="40" Margin="5 0">
+                        <Button Width="40" Height="40" Margin="5 0" Command="{Binding StopCommand}" IsVisible="{Binding IsPlaying}">
                             <materialIcons:MaterialIcon Kind="Stop" Width="30" Height="30"/>
-                        </controls:FloatingButton>
-                        <controls:FloatingButton Classes="Mini" Width="40" Height="40" Margin="5 0">
+                        </Button>
+                        <Button Width="40" Height="40" Margin="5 0" Command="{Binding PlayCommand}" IsVisible="{Binding IsPlaying, Converter={StaticResource ReverseBoolConverter}}">
                             <materialIcons:MaterialIcon Kind="Play" Width="30" Height="30"/>
-                        </controls:FloatingButton>
+                        </Button>
                     </Grid>
 
-                    <controls:FloatingButton Classes="Mini" Width="40" Height="40" Margin="5 0">
+                    <Button Width="40" Height="40" Margin="5 0">
                         <materialIcons:MaterialIcon Kind="Crop" Width="30" Height="30"/>
-                    </controls:FloatingButton>
+                    </Button>
 
-                    <controls:FloatingButton Classes="Mini" Width="40" Height="40" Margin="5 0">
+<!--                    <controls:FloatingButton Classes="Mini" Width="40" Height="40" Margin="5 0">
                         <materialIcons:MaterialIcon Kind="ContentCut" Width="30" Height="30"/>
-                    </controls:FloatingButton>
+                    </controls:FloatingButton>-->
 
-                    <controls:FloatingButton Classes="Mini" Width="40" Height="40" Margin="5 0">
+                    <ToggleButton Width="40" Height="40" Margin="5 0" Command="{Binding NormalizeCommand}" CommandParameter="{Binding $self.IsChecked}">
                         <materialIcons:MaterialIcon Kind="Waveform" Width="30" Height="30"/>
-                    </controls:FloatingButton>
+                    </ToggleButton>
 
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Grid.Row="3" HorizontalAlignment="Right" Margin="0 10 0 0">
-                    <controls:FloatingButton Classes="Flat" Width="40" Height="40" Margin="5 0">
+                    <Button  Width="40" Height="40" Margin="5 0">
                         <materialIcons:MaterialIcon Kind="ContentSaveEdit" Width="30" Height="30"/>
-                    </controls:FloatingButton>
-                                        <controls:FloatingButton Classes="Flat" Width="40" Height="40" Margin="5 0">
+                    </Button>
+                    <Button  Width="40" Height="40" Margin="5 0">
                         <materialIcons:MaterialIcon Kind="ContentSaveMove" Width="30" Height="30"/>
-                    </controls:FloatingButton>
-                                        <controls:FloatingButton Classes="Mini" Width="40" Height="40" Margin="5 0">
+                    </Button>
+                    <Button  Width="40" Height="40" Margin="5 0">
                         <materialIcons:MaterialIcon Kind="Close" Width="30" Height="30"/>
-                    </controls:FloatingButton>
+                    </Button>
                 </StackPanel>
             </Grid>
         </Border>

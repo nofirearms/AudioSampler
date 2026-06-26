@@ -14,13 +14,14 @@
     <Application.Styles>
         <FluentTheme />
         <materialIcons:MaterialIconStyles />
-        <themes:MaterialTheme BaseTheme="Dark" PrimaryColor="Orange" SecondaryColor="Lime" />
+        <!--<themes:MaterialTheme BaseTheme="Dark" PrimaryColor="Orange" SecondaryColor="Lime" />-->
     </Application.Styles>
 
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceInclude Source="avares://AudioSampler/Resources/Styles/Brushes.axaml" />
+                <ResourceInclude Source="avares://AudioSampler/Resources/Styles/Controls.axaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

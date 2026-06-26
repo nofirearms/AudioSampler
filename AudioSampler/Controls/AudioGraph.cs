@@ -20,9 +20,26 @@ namespace AudioSampler.Controls
             set => SetValue(PointsProperty, value);
         }
 
-        // Кисти для кастомизации цветов
-        public IBrush BarBrush { get; set; } = Brushes.Orange;
-        public float BarSpacing { get; set; } = 2f; // Расстояние между столбиками в пикселях
+
+
+        public static readonly StyledProperty<IBrush> BarBrushProperty =
+            AvaloniaProperty.Register<AudioGraph, IBrush>(nameof(BarBrush), Brushes.Orange);
+
+        public IBrush BarBrush
+        {
+            get => this.GetValue(BarBrushProperty);
+            set => SetValue(BarBrushProperty, value);
+        }
+
+
+        public static readonly StyledProperty<float> BarSpacingProperty =
+            AvaloniaProperty.Register<AudioGraph, float>(nameof(BarSpacing), 2f);
+
+        public float BarSpacing
+        {
+            get => this.GetValue(BarSpacingProperty);
+            set => SetValue(BarSpacingProperty, value);
+        }
 
         public AudioGraph()
         {
@@ -52,17 +69,25 @@ namespace AudioSampler.Controls
                 double amplitude = points[i];
 
                 // Вычисляем высоту столбика (минимум 2 пикселя, чтобы не пропадал совсем)
-                double barHeight = Math.Max(height * amplitude, 2);
+                double barHeight = Math.Max(height * amplitude, 1) / 2;
 
                 double x = i * (barWidth + BarSpacing);
-                double y = (height - barHeight) / 2; // Центрирование по вертикали
+                
+                double middle_y = height / 2;
+
+                double top_y = middle_y - barHeight ;
+                double bottom_y = middle_y;
 
                 // Округляем для четкости на мобилках (anti-aliasing)
-                var rect = new Rect(Math.Round(x), Math.Round(y), Math.Round(barWidth), Math.Round(barHeight));
+                var top_rect = new Rect(Math.Round(x), Math.Round(top_y), Math.Round(barWidth), Math.Round(barHeight));
+                var bottom_rect = new Rect(Math.Round(x), Math.Round(bottom_y), Math.Round(barWidth), Math.Round(barHeight));
 
                 // Рисуем скругленный столбик (CornerRadius)
-                context.DrawRectangle(BarBrush, null, rect, 2, 2);
+                context.DrawRectangle(BarBrush, null, top_rect);
+                context.DrawRectangle(new SolidColorBrush(Colors.DarkOrange), null, bottom_rect);
+
             }
         }
+
     }
 }

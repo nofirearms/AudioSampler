@@ -12,7 +12,7 @@ namespace AudioSampler.ViewModels.Modal
         string Header { get; set; }
         void CloseModal(); // Общий метод для принудительного закрытия
     }
-    public abstract partial class BaseModalViewModel<TResult> : IModal
+    public abstract partial class BaseModalViewModel<TResult> : ObservableObject, IModal
     {
         public string Header { get; set; }
 

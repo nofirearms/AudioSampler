@@ -12,6 +12,7 @@ namespace AudioSampler.Desktop.Services
     {
         private readonly AudioService _audioService;
         private string _outputFile;
+        private int _recordStream;
 
         public event Action<RecordResult> RecordFinished;
         public event Action<bool> SharingStateChanged;
@@ -29,7 +30,7 @@ namespace AudioSampler.Desktop.Services
         public void StartSharing()
         {
             _outputFile = $"Recording{DateTime.Now:hhmmss}.wav";
-            _audioService.StartRecordingWav(_outputFile);
+            _recordStream = _audioService.StartRecordingWav(_outputFile);
             SharingStateChanged?.Invoke(true);
         }
 
@@ -40,9 +41,15 @@ namespace AudioSampler.Desktop.Services
 
         public void StopSharing()
         {
-            _audioService.StopRecordingWav();
+            _audioService.StopRecordingWav(_recordStream);
             SharingStateChanged?.Invoke(false);
-            RecordFinished?.Invoke(new RecordResult(_outputFile, TimeSpan.FromSeconds(4), Path.GetFileNameWithoutExtension(_outputFile), 100));
+
+            var stream = _audioService.CreatePlaybackStream(_outputFile);
+            var duration = _audioService.GetLengthSeconds(stream);
+
+            RecordFinished?.Invoke(new RecordResult(_outputFile, TimeSpan.FromSeconds(duration), Path.GetFileNameWithoutExtension(_outputFile), 100));
+
+
         }
     }
 }

@@ -124,12 +124,13 @@ namespace AudioSampler.ViewModels
             await _dataService.AudioSamplesRepository.CreateOrUpdateAsync(audioSample);
         }
 
+        //не используется
         [RelayCommand]
         private void StartSharing()
         {
             _captureService.StartSharing();
         }
-
+        //не используется
         [RelayCommand]
         private void StopSharing()
         {
@@ -154,6 +155,15 @@ namespace AudioSampler.ViewModels
         {
             //_captureService.EnterMiniMode();
             await _modalService.OpenSettingsModal();
+        }
+
+
+        [RelayCommand]
+        private async void OpenAudioSampleDetail(AudioSampleSummaryViewModel audioSampleVM)
+        {
+            if (audioSampleVM is not AudioSampleSummaryViewModel) return;
+
+            await _modalService.OpenAudioSampleDetailModal(audioSampleVM.AudioSample);
         }
 
         [ObservableProperty]

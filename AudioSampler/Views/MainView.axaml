@@ -7,6 +7,7 @@
              xmlns:modal="using:AudioSampler.ViewModels.Modal"
              xmlns:customcontrols="using:AudioSampler.Controls"
              xmlns:i="using:Avalonia.Xaml.Interactivity"
+             xmlns:ia="using:Avalonia.Xaml.Interactions.Core"
              xmlns:behaviors="using:AudioSampler.Behaviors"
              xmlns:converters="using:AudioSampler.Converters"
              xmlns:local="using:AudioSampler.Views" x:Name="self"
@@ -14,6 +15,35 @@
              xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              x:Class="AudioSampler.Views.MainView"  Background="{DynamicResource Background2}"
              x:DataType="vm:MainViewModel">
+    <ContentPage.Styles>
+        <Style Selector="ListBoxItem">
+            <Setter Property="IsSelected" Value="False" />
+            <Setter Property="Focusable" Value="False" />
+            
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Margin" Value="0" />
+            <Setter Property="RenderTransform" Value="scale(1)" />
+            <Setter Property="Transitions">
+                <Transitions>
+                    <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.08" Easing="SineEaseInOut" />
+                </Transitions>
+            </Setter>
+        </Style>
+
+        <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style Selector="ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+
+        <Style Selector="ListBoxItem:pressed">
+            <Setter Property="RenderTransform" Value="scale(0.98)" />
+        </Style>
+    </ContentPage.Styles>
+
+
     <ContentPage.Resources>
         <converters:ReverseBoolConverter x:Key="ReverseBoolConverter"/>
     </ContentPage.Resources>
@@ -29,17 +59,29 @@
                 <RowDefinition Height="auto"/>
             </Grid.RowDefinitions>        
 
-                <Border BoxShadow="0 2 5 -1 #40000000" CornerRadius="30" Margin="5">
-                    <TextBox 
-                        Classes="solo" 
-                        Theme="{StaticResource SoloTextBox}" 
+                <Border BoxShadow="0 1 5 -1 #ee000000" CornerRadius="30" Margin="5">
+
+                    <TextBox  
                         PlaceholderText="Search" 
                         CornerRadius="30"  
-                        Background="{DynamicResource Background3}"
+                        BorderThickness="0" 
+                        CaretBrush="{DynamicResource AccentBrush1}"
+                        VerticalContentAlignment="Center"
+                        Background="{DynamicResource Background1}"
                         Text="{Binding NameTextFilter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                         > 
+
+                        <TextBox.Resources>
+                            <StaticResource x:Key="TextControlBackgroundFocused" ResourceKey="Background1"  />
+                            <StaticResource x:Key="TextControlBorderBrushFocused" ResourceKey="Background1"  />
+        
+                            <StaticResource x:Key="TextControlBackgroundPointerOver" ResourceKey="Background1"  />
+                            <StaticResource x:Key="TextControlBackground" ResourceKey="Background1" />
+                        </TextBox.Resources>
+    
+
                         <TextBox.InnerLeftContent>
-                            <materialIcons:MaterialIcon Foreground="{DynamicResource AccentBrush1}" Kind="Magnify" VerticalAlignment="Center" Width="30" Height="25" Margin="5 0"/>
+                            <materialIcons:MaterialIcon Foreground="{DynamicResource AccentBrush1}" Kind="Magnify" VerticalAlignment="Center" Width="20" Height="20" Margin="10 0 0 0"/>
                         </TextBox.InnerLeftContent>
 
                     </TextBox>
@@ -48,90 +90,96 @@
 
 
             <Grid x:Name="SamplesListGrid" Grid.Row="1">
-                <ScrollViewer>
-                    <ItemsControl 
-                        ItemsSource="{Binding AudioSamples}" 
-                        Background="{DynamicResource Background2}"
-                        ScrollViewer.VerticalSnapPointsType="None"
-                        ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                        ScrollViewer.VerticalScrollBarVisibility="Auto">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Border CornerRadius="5" Background="{DynamicResource Background1}" Margin="5 3 10 3" BoxShadow="0 2 5 -1 #ee000000">
-                                    <Grid Background="Transparent" RowDefinitions="Auto, Auto" ColumnDefinitions="*, Auto" RowSpacing="3" Margin="10 10" >
-                                        <TextBlock 
-                                            Grid.Row="0" Grid.Column="0"
-                                            Text="{Binding Name}"
-                                            FontSize="16"/>
+                <ListBox 
+                    ItemsSource="{Binding AudioSamples}" 
+                    Background="{DynamicResource Background2}"
+                    ScrollViewer.VerticalSnapPointsType="None"
+                    ScrollViewer.HorizontalScrollBarVisibility="Disabled"  
+                    ScrollViewer.VerticalScrollBarVisibility="Auto">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Border CornerRadius="5" Background="{DynamicResource Background1}" Margin="5 3 10 3" BoxShadow="0 1 5 -1 #ee000000">
+                                <Grid Background="Transparent" RowDefinitions="Auto, Auto" ColumnDefinitions="*, Auto" RowSpacing="3" Margin="10 10" >
+                                    
+                                    <i:Interaction.Behaviors>
+                                        <ia:EventTriggerBehavior EventName="Tapped">
+                                            <InvokeCommandAction Command="{Binding $parent[ListBox].DataContext.OpenAudioSampleDetailCommand}" CommandParameter="{Binding}"/>
+                                        </ia:EventTriggerBehavior>    
+                                    </i:Interaction.Behaviors>    
+                                    <TextBlock 
+                                        Grid.Row="0" Grid.Column="0"
+                                        Text="{Binding Name}"
+                                        FontSize="16"/>
                 
-                                        <TextBlock 
-                                            Grid.Row="1" Grid.Column="0"
-                                            FontSize="12"
-                                            Margin="0 5 0 0"
-                                            Text="{Binding DateCreated}"
-                                            FontWeight="Light" 
-                                            Foreground="{DynamicResource InactiveForeground1}"/>
+                                    <TextBlock 
+                                        Grid.Row="1" Grid.Column="0"
+                                        FontSize="12"
+                                        Margin="0 5 0 0"
+                                        Text="{Binding DateCreated}"
+                                        FontWeight="Light" 
+                                        Foreground="{DynamicResource InactiveForeground1}"/>
                 
-                                        <TextBlock 
-                                            Grid.Column="1" Grid.Row="0" Grid.RowSpan="2" 
-                                            VerticalAlignment="Center"
-                                            HorizontalAlignment="Right"
-                                            FontSize="14"
-                                            FontWeight="Light" 
-                                            Foreground="{DynamicResource InactiveForeground1}"
-                                            Text="{Binding Duration, StringFormat=hh\\:mm\\:ss}"/>
-                                    </Grid>
-                                </Border>
+                                    <TextBlock 
+                                        Grid.Column="1" Grid.Row="0" Grid.RowSpan="2" 
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Right"
+                                        FontSize="14"
+                                        FontWeight="Light" 
+                                        Foreground="{DynamicResource InactiveForeground1}"
+                                        Text="{Binding Duration, StringFormat=hh\\:mm\\:ss}"/>
+                                </Grid>
+                            </Border>
 
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
 
-                            <ItemsControl.ItemsPanel>
+                        <ListBox.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <VirtualizingStackPanel Orientation="Vertical" />
                             </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                    </ItemsControl>
-                </ScrollViewer>
-
+                    </ListBox.ItemsPanel>
+                </ListBox>
 
             </Grid>
 
             <Grid Grid.Row="2" x:Name="BottomBarGrid"  Margin="0 0 0 5">
+                
+                <StackPanel  Orientation="Horizontal" HorizontalAlignment="Right" >
+                    <Grid>
 
-                    <StackPanel  Orientation="Horizontal" HorizontalAlignment="Right" >
-                        <Grid>
-                            <controls:FloatingButton 
-                                Width="50" 
-                                Height="50" 
-                                Margin="-10" 
-                                IsVisible="{Binding SharingState}"
-                                Padding="0"
-                                Command="{Binding StopSharingCommand}">
-                                <Grid>
-                                    <materialIcons:MaterialIcon IconSize="50" Kind="Fullscreen" />
-                                    <materialIcons:MaterialIcon IconSize="20" Kind="Close" />
-                                </Grid>
-                            </controls:FloatingButton>
-                            <controls:FloatingButton 
-                                Width="50" 
-                                Height="50" 
-                                Margin="-10"
-                                Padding="0" 
-                                IsVisible="{Binding SharingState, Converter={StaticResource ReverseBoolConverter}}"
-                                Command="{Binding StartSharingCommand}"
-                                HorizontalAlignment="Center">
-                                <Grid>
-                                    <materialIcons:MaterialIcon IconSize="50" Kind="Fullscreen" />
-                                    <materialIcons:MaterialIcon IconSize="15" Kind="Record" />
-                                </Grid>
-                            </controls:FloatingButton>
-                        </Grid>
+                        <Button 
+                            Theme="{DynamicResource RoundAccentButton}"
+                            Width="50" 
+                            Height="50" 
+                            Margin="-10" 
+                            IsVisible="{Binding SharingState}"
+                            Padding="0"
+                            Command="{Binding StopSharingCommand}">
+                            <Grid>
+                                <materialIcons:MaterialIcon IconSize="50" Kind="Fullscreen" />
+                                <materialIcons:MaterialIcon IconSize="20" Kind="Close" />
+                            </Grid>
+                        </Button>
+                        <Button 
+                            Theme="{DynamicResource RoundAccentButton}"
+                            Width="50" 
+                            Height="50" 
+                            Margin="-10"
+                            Padding="0" 
+                            IsVisible="{Binding SharingState, Converter={StaticResource ReverseBoolConverter}}"
+                            Command="{Binding StartSharingCommand}"
+                            HorizontalAlignment="Center">
+                            <Grid>
+                                <materialIcons:MaterialIcon IconSize="50" Kind="Fullscreen" />
+                                <materialIcons:MaterialIcon IconSize="15" Kind="Record" />
+                            </Grid>
+                        </Button>
+                    </Grid>
 
-                        <controls:FloatingButton Command="{Binding OpenSettingsCommand}" Classes="Mini" Width="40" Height="40" Margin="20 0 10 0">
-                            <materialIcons:MaterialIcon Kind="Settings" Width="30" Height="30"/>
-                        </controls:FloatingButton>
-                    </StackPanel>
+                    <Button Command="{Binding OpenSettingsCommand}" Width="40" Height="40" Margin="15 0 5 0" Theme="{DynamicResource RoundAccentButton}">
+                        <materialIcons:MaterialIcon Kind="Settings" Width="30" Height="30"/>
+                    </Button>
+                </StackPanel>
             </Grid>
 
         </Grid>
@@ -144,7 +192,9 @@
                 <DataTemplate DataType="{x:Type modal:SettingsViewModel}">
                     <local:SettingsView />
                 </DataTemplate>
-
+                <DataTemplate DataType="{x:Type modal:AudioSampleDetailViewModel}">
+                    <local:AudioSampleDetailView/>
+                </DataTemplate>
 
             </ItemsControl.DataTemplates>
            <ItemsControl.ItemTemplate>

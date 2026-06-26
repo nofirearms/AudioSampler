@@ -2,7 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 
-namespace AudioSampler;
+namespace AudioSampler.Views;
 
 public partial class AudioSampleDetailView : UserControl
 {

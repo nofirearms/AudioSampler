@@ -3,6 +3,7 @@ using ManagedBass.Enc;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,24 +12,22 @@ namespace AudioSampler.Services
 {
     public class AudioService
     {
-        private string _currentFile;
-        private int _playStream;
         private WaveFileWriter _wavWriter;
-        private int _recordStream;
 
         public AudioService()
         {
             Bass.Init();
         }
 
+        //--------------------------------------------------------------- LOAD and GRAPH --------------------------------------------------
+
         /// <summary>
         /// 1. ОТКРЫТЬ АУДИО И ПОЛУЧИТЬ СЭМПЛЫ ДЛЯ ГРАФИКА
         /// </summary>
-        public async Task<float[]> LoadAudioAndGetSamplesAsync(string filePath)
+        public async Task<float[]> GetSamplesAsync(string filePath)
         {
             return await Task.Run(() =>
             {
-                _currentFile = filePath;
                 // Открываем файл в режиме Decode, чтобы просто вытащить данные
                 int decodeStream = Bass.CreateStream(filePath, 0, 0, BassFlags.Decode | BassFlags.Float);
                 if (decodeStream == 0)
@@ -52,47 +51,113 @@ namespace AudioSampler.Services
                 finally
                 {
                     Bass.StreamFree(decodeStream);
+                    
+                    
                 }
             });
         }
 
+        public async Task<float[]> RenderWaveformAsync(string filePath, int samplesCount)
+        {
+            return await Task.Run(async () =>
+            {
+                var samples = await GetSamplesAsync(filePath);
+
+                var samplesPerPoint = samples.Length / samplesCount;
+
+                var output = new float[samplesCount];
+
+                for (int i = 0; i < samplesCount; i++)
+                {
+                    var position = i * samplesPerPoint;
+                    output[i] = samples.Skip(position).Take(samplesPerPoint).Max();
+                }
+
+                return output;
+            });
+        }
+
+        public int CreatePlaybackStream(string path)
+        {
+            return Bass.CreateStream(path, 0, 0, BassFlags.Default);
+        }
+
+        public double GetLengthSeconds(int stream) 
+        {
+            // 1. Получаем длину в байтах
+            long lengthInBytes = Bass.ChannelGetLength(stream);
+
+            // 2. Переводим байты в секунды
+            double lengthInSeconds = Bass.ChannelBytes2Seconds(stream, lengthInBytes);
+
+            return lengthInSeconds; 
+        }
+
+        public double GetMaxPeak(float[] samples)
+        {
+            return samples.Max(Math.Abs);
+        }
+
+        public void Normalize(int stream, double maxPeak)
+        {
+            // 2. Считаем коэффициент (на сколько всё умножить, чтоб дотянуть до 1.0)
+            double gain = 1.0d / maxPeak;
+
+            // 3. Крутим громкость для плеера на лету
+            Bass.ChannelSetAttribute(stream, ChannelAttribute.Volume, gain);
+
+        }
+
+        public double CheckPlaybackPosition(int stream, double endSeconds)
+        {
+            // Получаем текущую секунду, которая играет прямо сейчас
+            long currentBytes = Bass.ChannelGetPosition(stream);
+            double currentSeconds = Bass.ChannelBytes2Seconds(stream, currentBytes);
+
+            return currentSeconds;
+        }
+
+        //--------------------------------------------------------- PLAYBACK ------------------------------------------------------
+
         /// <summary>
         /// 2. ВОСПРОИЗВЕДЕНИЕ С РАЗНЫХ МЕСТ
         /// </summary>
-        public void Play(double startSeconds)
+        public void Play(int stream, double startSeconds, double endSeconds)
         {
-            if (string.IsNullOrEmpty(_currentFile)) return;
+            Stop(stream);
 
-            // Если что-то уже играет, освобождаем поток
-            Stop();
+            if (stream == 0) throw new Exception($"Не удалось создать поток воспроизведения: {Bass.LastError}");
 
-            // Создаем обычный поток для воспроизведения
-            _playStream = Bass.CreateStream(_currentFile);
-            if (_playStream == 0)
-                throw new Exception($"Не удалось создать поток воспроизведения: {Bass.LastError}");
 
             // Перемотка на нужное место (переводим секунды в байты)
-            long positionInBytes = Bass.ChannelSeconds2Bytes(_playStream, startSeconds);
-            Bass.ChannelSetPosition(_playStream, positionInBytes);
+            long startBytes = Bass.ChannelSeconds2Bytes(stream, startSeconds);
+            Bass.ChannelSetPosition(stream, startBytes);
+
+            long endBytes = Bass.ChannelSeconds2Bytes(stream, endSeconds);
+
+            //Bass.ChannelSetSync(stream, SyncFlags.Position, endBytes, (handle, channel, data, user) =>
+            //{
+            //    Bass.ChannelStop(channel); // Мягко останавливаем
+            //                               // Тут можно оповестить UI, что воспроизведение закончено
+            //});
 
             // Запуск
-            Bass.ChannelPlay(_playStream);
+            Bass.ChannelPlay(stream);
         }
 
-        public void Pause()
+
+        public void Pause(int stream)
         {
-            if (_playStream != 0) Bass.ChannelPause(_playStream);
+            if (stream != 0) Bass.ChannelPause(stream);
         }
 
-        public void Stop()
+        public void Stop(int stream)
         {
-            if (_playStream != 0)
-            {
-                Bass.ChannelStop(_playStream);
-                Bass.StreamFree(_playStream);
-                _playStream = 0;
-            }
+            Bass.ChannelStop(stream);
         }
+
+
+
 
         /// <summary>
         /// 3. НОРМАЛИЗАЦИЯ (Чистый C# над массивом float)
@@ -125,16 +190,18 @@ namespace AudioSampler.Services
             return samples;
         }
 
+        //-------------------------------------------------------- RECORDING ---------------------------------------------------------------
+
         /// <summary>
         /// 4. ОБРЕЗКА И ЭКСПОРТ (Из текущего открытого файла)
         /// </summary>
         public async Task TrimAndSaveAsync(string outputPath, double startSeconds, double endSeconds, bool toMp3 = true)
         {
-            if (string.IsNullOrEmpty(_currentFile)) throw new Exception("Нет открытого файла для обрезки");
+            if (string.IsNullOrEmpty(outputPath)) throw new Exception("Нет открытого файла для обрезки");
 
             await Task.Run(() =>
             {
-                int decodeStream = Bass.CreateStream(_currentFile, 0, 0, BassFlags.Decode);
+                int decodeStream = Bass.CreateStream(outputPath, 0, 0, BassFlags.Decode);
                 if (decodeStream == 0) throw new Exception("Ошибка обрезки");
 
                 try
@@ -206,7 +273,7 @@ namespace AudioSampler.Services
         /// НАЧАТЬ ЗАПИСЬ В WAV
         /// </summary>
         /// <param name="outputPath">Путь к файлу, например: Path.Combine(AppContext.BaseDirectory, "record.wav")</param>
-        public void StartRecordingWav(string outputPath)
+        public int StartRecordingWav(string outputPath)
         {
             // На случай, если забыли вызвать Bass.Init() в Program.cs / MainActivity.cs
             Bass.Init();
@@ -224,14 +291,16 @@ namespace AudioSampler.Services
 
             // 4. Запускаем захват звука с микрофона.
             // Передаем частоту (44100), каналы (2) и наш метод-коллбэк RecordCallback
-            _recordStream = Bass.RecordStart(44100, 2, BassFlags.Default, RecordCallback, IntPtr.Zero);
+            var recordStream = Bass.RecordStart(44100, 2, BassFlags.Default, RecordCallback, IntPtr.Zero);
 
-            if (_recordStream == 0)
+            if (recordStream == 0)
             {
                 _wavWriter.Dispose();
                 _wavWriter = null;
-                throw new Exception($"Не удалось запустить запись: {Bass.LastError}");
+                return 0;
             }
+
+            return recordStream;
         }
 
         /// <summary>
@@ -260,13 +329,13 @@ namespace AudioSampler.Services
         /// <summary>
         /// ОСТАНОВИТЬ ЗАПИСЬ И СОХРАНИТЬ ФАЙЛ
         /// </summary>
-        public void StopRecordingWav()
+        public void StopRecordingWav(int recordStream)
         {
             // 1. Останавливаем нативный поток захвата звука
-            if (_recordStream != 0)
+            if (recordStream != 0)
             {
-                Bass.ChannelStop(_recordStream);
-                _recordStream = 0;
+                Bass.ChannelStop(recordStream);
+                recordStream = 0;
             }
 
             // 2. Закрываем наш WaveFileWriter
@@ -282,10 +351,12 @@ namespace AudioSampler.Services
             Bass.RecordFree();
         }
 
+        //------------------------------------------------------------------------------------------------------------------------------------
 
-        public void Dispose()
+        public void Dispose(int stream)
         {
-            Stop();
+            Stop(stream);
+            Bass.StreamFree(stream);
             Bass.Free();
         }
     }

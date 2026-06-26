@@ -7,7 +7,8 @@
     <SolidColorBrush x:Key="Background1" Color="#1b1b1b"></SolidColorBrush>
     <SolidColorBrush x:Key="Background2" Color="#222222"></SolidColorBrush>
     <SolidColorBrush x:Key="Background3" Color="#2f2f2f"></SolidColorBrush>
-    <SolidColorBrush x:Key="AccentBrush1" Color="Orange"/>
+    <SolidColorBrush x:Key="AccentBrush1" Color="#ffa500"/>
+    <SolidColorBrush x:Key="AccentBrush2" Color="#d08600"/>
     <SolidColorBrush x:Key="InactiveForeground1" Color="#a1a1a1"></SolidColorBrush>
 
     <VisualBrush x:Key="StripedBrush" 
