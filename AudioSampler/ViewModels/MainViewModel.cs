@@ -23,7 +23,6 @@ namespace AudioSampler.ViewModels
     public partial class MainViewModel : ViewModelBase
     {
         private readonly IScreenCaptureService _captureService;
-        private readonly IFloatingWidgetService _floatingWidget;
         private readonly DataService _dataService;
         private readonly ModalService _modalService;
 
@@ -67,10 +66,9 @@ namespace AudioSampler.ViewModels
             }
         }
 
-        public MainViewModel(IScreenCaptureService captureService, IFloatingWidgetService floatingWidget, DataService dataService, ModalService modalService)
+        public MainViewModel(IScreenCaptureService captureService, DataService dataService, ModalService modalService)
         {
             _captureService = captureService;
-            _floatingWidget = floatingWidget;
             _dataService = dataService;
             _modalService = modalService;
 
@@ -148,13 +146,6 @@ namespace AudioSampler.ViewModels
         private void StopCapture()
         {
             _captureService.StopScreenCapture();
-        }
-
-        [RelayCommand]
-        private void OpenMiniMode()
-        {
-            //_captureService.EnterMiniMode();
-            _floatingWidget.MinimizeToFloatingButton();
         }
 
 

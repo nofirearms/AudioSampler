@@ -6,6 +6,8 @@
              xmlns:vm="using:AudioSampler.ViewModels"
              xmlns:modal="using:AudioSampler.ViewModels.Modal"
              xmlns:customcontrols="using:AudioSampler.Controls"
+             xmlns:i="using:Avalonia.Xaml.Interactivity"
+             xmlns:behaviors="using:AudioSampler.Behaviors"
              xmlns:converters="using:AudioSampler.Converters"
              xmlns:local="using:AudioSampler.Views" x:Name="self"
              mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="600"
@@ -135,6 +137,7 @@
         </Grid>
 
 
+
         <!--  Модальные окна  -->
         <ItemsControl  ItemsSource="{Binding ActiveModals}">
             <ItemsControl.DataTemplates>
@@ -150,6 +153,7 @@
                         <Grid.Background>
                             <SolidColorBrush Opacity="0.5" Color="Black" />
                         </Grid.Background>
+
                         <Border
                             x:Name="ModalMainBorder"
                             HorizontalAlignment="Stretch"
@@ -157,8 +161,14 @@
                             VerticalAlignment="Center"
                             CornerRadius="5"
                             Background="{DynamicResource Background2}"
-                            UseLayoutRounding="True"
+                            UseLayoutRounding="True" 
                             BoxShadow="0 5 5 -1 #ee000000">
+
+                                
+                            <i:Interaction.Behaviors>
+                                <behaviors:ModalAnimationBehavior/>
+                            </i:Interaction.Behaviors>                  
+
                             <Grid Margin="0">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="auto" />

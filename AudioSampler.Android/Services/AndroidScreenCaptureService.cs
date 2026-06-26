@@ -21,9 +21,9 @@ namespace AudioSampler.Android.Services
         public event Action<RecordResult> RecordFinished;
         public event Action<bool> SharingStateChanged;
 
-        public AndroidScreenCaptureService()
+        public AndroidScreenCaptureService(MainActivity activity)
         {
-            _activity = MainActivity.Instance;
+            _activity = activity;
 
             WeakReferenceMessenger.Default.Register<RecordFinishedMessage>(this, (r, m) =>
             {

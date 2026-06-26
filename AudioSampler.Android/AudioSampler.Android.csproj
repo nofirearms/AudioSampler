@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net10.0-android</TargetFramework>
@@ -25,4 +25,27 @@
   <ItemGroup>
     <ProjectReference Include="..\AudioSampler\AudioSampler.csproj" />
   </ItemGroup>
+
+	<ItemGroup>
+		<AndroidNativeLibrary Include="Resources\lib\arm64-v8a\libbass.so" />
+		<AndroidNativeLibrary Include="Resources\lib\arm64-v8a\libbass_fx.so" />
+		<AndroidNativeLibrary Include="Resources\lib\arm64-v8a\libbassenc.so" />
+		<AndroidNativeLibrary Include="Resources\lib\arm64-v8a\libbassenc_mp3.so" />
+
+
+		<AndroidNativeLibrary Include="Resources\lib\armeabi-v7a\libbass.so" />
+		<AndroidNativeLibrary Include="Resources\lib\armeabi-v7a\libbass_fx.so" />
+		<AndroidNativeLibrary Include="Resources\lib\armeabi-v7a\libbassenc.so" />
+		<AndroidNativeLibrary Include="Resources\lib\armeabi-v7a\libbassenc_mp3.so" />
+		
+		<AndroidNativeLibrary Include="Resources\lib\x86\libbass.so" />
+		<AndroidNativeLibrary Include="Resources\lib\x86\libbass_fx.so" />
+		<AndroidNativeLibrary Include="Resources\lib\x86\libbassenc.so" />
+		<AndroidNativeLibrary Include="Resources\lib\x86\libbassenc_mp3.so" />
+
+		<AndroidNativeLibrary Include="Resources\lib\x86_64\libbass.so" />
+		<AndroidNativeLibrary Include="Resources\lib\x86_64\libbass_fx.so" />
+		<AndroidNativeLibrary Include="Resources\lib\x86_64\libbassenc.so" />
+		<AndroidNativeLibrary Include="Resources\lib\x86_64\libbassenc_mp3.so" />
+	</ItemGroup>
 </Project>

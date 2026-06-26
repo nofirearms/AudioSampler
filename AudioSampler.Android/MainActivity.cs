@@ -11,6 +11,7 @@ using AndroidX.Core.App;
 using AndroidX.Core.View;
 using AudioSampler.Android.Services;
 using AudioSampler.Messages;
+using AudioSampler.Services;
 using Avalonia;
 using Avalonia.Android;
 using CommunityToolkit.Mvvm.Messaging;
@@ -29,28 +30,17 @@ namespace AudioSampler.Android
     public class MainActivity : AvaloniaMainActivity
     {
         private const int CaptureRequestCode = 1001;
-        public static MainActivity Instance { get; private set; }
-
-        private AndroidScreenCaptureService? _androidService;
-        private AndroidFloatingWidgetService? _floatingService;
 
         protected override void OnCreate(Bundle? savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
 
-            //WindowCompat.SetDecorFitsSystemWindows(Window, true);
-
             //костыль чтобы системные кнопки были белыми
             Window.SetNavigationBarColor(Color.Black);
 
-            Instance = this;
 
             // Создаем реальный сервис, передавая ему контекст этой Activity
-            _androidService = new AndroidScreenCaptureService();
-            App.OnScreenCaptureServiceReady?.Invoke(_androidService);
-
-            _floatingService = new AndroidFloatingWidgetService();
-            App.OnFloatingWidgetServiceReady?.Invoke(_floatingService);
+            LazyScreenCaptureServiceWrapper.Instance.RegisterRealService(new AndroidScreenCaptureService(this));
 
             CheckOverlayPermission();
             CheckNotificationPermission();
@@ -71,18 +61,6 @@ namespace AudioSampler.Android
             }
         }
 
-        // Метод срабатывает, когда пользователь нажимает кнопку Home или сворачивает приложение
-        //protected override void OnUserLeaveHint()
-        //{
-        //    base.OnUserLeaveHint();
-
-        //    // Метод срабатывает, когда пользователь нажимает кнопку Home или сворачивает приложение
-        //    if (Settings.CanDrawOverlays(this))
-        //    {
-        //        Intent intent = new Intent(this, typeof(FloatingButtonService));
-        //        StartService(intent);
-        //    }
-        //}
 
         public void StopSharing()
         {

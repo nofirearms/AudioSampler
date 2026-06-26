@@ -7,6 +7,7 @@ using Avalonia;
 using Avalonia.Controls; // Для PageNavigationHost
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using ManagedBass;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -33,25 +34,11 @@ namespace AudioSampler
 
         public IServiceProvider Services { get; }
 
-        // Сюда мы лениво подложим реальный андроидный сервис, когда он создастся
-        public static Action<IScreenCaptureService>? OnScreenCaptureServiceReady { get; set; }
-
-        // Сюда мы лениво подложим реальный андроидный сервис, когда он создастся
-        public static Action<IFloatingWidgetService>? OnFloatingWidgetServiceReady { get; set; }
-
         private IServiceProvider ConfigureServices()
         {
             var services = new ServiceCollection();
 
-            // Регистрируем ленивую прослойку: 
-            // Когда ViewModel попросит IScreenCaptureService, контейнер будет ждать, 
-            // пока Android не запишет туда себя.
-            services.AddSingleton<LazyScreenCaptureServiceWrapper>();
-            services.AddSingleton<IScreenCaptureService>(provider => provider.GetRequiredService<LazyScreenCaptureServiceWrapper>());
-
-            services.AddSingleton<LazyFloatingWidgetServiceWrapper>();
-            services.AddSingleton<IFloatingWidgetService>(provider => provider.GetRequiredService<LazyFloatingWidgetServiceWrapper>());
-
+            services.AddTransient<IScreenCaptureService>(provider => LazyScreenCaptureServiceWrapper.Instance);
 
             services.AddDbContext<AppDbContext>();
 
@@ -59,7 +46,7 @@ namespace AudioSampler
             services.AddSingleton<SettingsRepository>();
             services.AddSingleton<DataService>();
             services.AddSingleton<ModalService>();
-
+            services.AddTransient<AudioService>();
 
             services.AddSingleton<MainViewModel>();
 
@@ -70,8 +57,6 @@ namespace AudioSampler
 
         public override void OnFrameworkInitializationCompleted()
         {
-
-
             var mainViewModel = Design.IsDesignMode ? new MainViewModel() : Services.GetRequiredService<MainViewModel>();
             
 
@@ -83,6 +68,7 @@ namespace AudioSampler
                     Height = 800,
                     Width = 500
                 };
+                
             }
             else if (ApplicationLifetime is IActivityApplicationLifetime singleViewFactoryApplicationLifetime)
             {
@@ -99,48 +85,6 @@ namespace AudioSampler
                 };
             }
             base.OnFrameworkInitializationCompleted();
-        }
-
-        // Вспомогательный класс-прослойка для ленивой загрузки
-        public class LazyScreenCaptureServiceWrapper : IScreenCaptureService
-        {
-            private IScreenCaptureService? _realService;
-
-            public LazyScreenCaptureServiceWrapper()
-            {
-                // Подписываемся на событие готовности платформы
-                App.OnScreenCaptureServiceReady = service =>
-                {
-                    _realService = service;
-                    _realService.RecordFinished += (value) => RecordFinished?.Invoke(value);
-                    _realService.SharingStateChanged += (value) => SharingStateChanged?.Invoke(value);
-                };
-
-                
-            }
-
-            public void StartScreenCapture() => _realService?.StartScreenCapture();
-            public void StopScreenCapture() => _realService?.StopScreenCapture();
-            public void StartSharing() => _realService?.StartSharing();
-            public void StopSharing() => _realService?.StopSharing();
-
-            public event Action<RecordResult> RecordFinished;
-            public event Action<bool> SharingStateChanged;
-        }
-
-
-        // Вспомогательный класс-прослойка для ленивой загрузки
-        public class LazyFloatingWidgetServiceWrapper : IFloatingWidgetService
-        {
-
-            private IFloatingWidgetService? _floatingService;
-
-            public LazyFloatingWidgetServiceWrapper()
-            {
-                // Подписываемся на событие готовности платформы
-                App.OnFloatingWidgetServiceReady = service => _floatingService = service;
-            }
-            public void MinimizeToFloatingButton() => _floatingService?.MinimizeToFloatingButton();
         }
     }
 }

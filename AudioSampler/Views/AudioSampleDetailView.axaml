@@ -2,7 +2,50 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             xmlns:controls="clr-namespace:Material.Styles.Controls;assembly=Material.Styles"
+             xmlns:customcontrols="using:AudioSampler.Controls"
+
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="AudioSampler.AudioSampleDetailView">
-  Welcome to Avalonia!
+        <Border HorizontalAlignment="Stretch" VerticalAlignment="Center" Background="{DynamicResource Background1}" CornerRadius="5">
+            <Grid RowDefinitions="auto, *, auto, auto">
+                <TextBox Text="Name"/>
+                <customcontrols:AudioGraph Grid.Row="1"/>
+                <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Grid>
+                        <controls:FloatingButton Classes="Mini" Width="40" Height="40" Margin="5 0">
+                            <materialIcons:MaterialIcon Kind="Stop" Width="30" Height="30"/>
+                        </controls:FloatingButton>
+                        <controls:FloatingButton Classes="Mini" Width="40" Height="40" Margin="5 0">
+                            <materialIcons:MaterialIcon Kind="Play" Width="30" Height="30"/>
+                        </controls:FloatingButton>
+                    </Grid>
+
+                    <controls:FloatingButton Classes="Mini" Width="40" Height="40" Margin="5 0">
+                        <materialIcons:MaterialIcon Kind="Crop" Width="30" Height="30"/>
+                    </controls:FloatingButton>
+
+                    <controls:FloatingButton Classes="Mini" Width="40" Height="40" Margin="5 0">
+                        <materialIcons:MaterialIcon Kind="ContentCut" Width="30" Height="30"/>
+                    </controls:FloatingButton>
+
+                    <controls:FloatingButton Classes="Mini" Width="40" Height="40" Margin="5 0">
+                        <materialIcons:MaterialIcon Kind="Waveform" Width="30" Height="30"/>
+                    </controls:FloatingButton>
+
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Grid.Row="3" HorizontalAlignment="Right" Margin="0 10 0 0">
+                    <controls:FloatingButton Classes="Flat" Width="40" Height="40" Margin="5 0">
+                        <materialIcons:MaterialIcon Kind="ContentSaveEdit" Width="30" Height="30"/>
+                    </controls:FloatingButton>
+                                        <controls:FloatingButton Classes="Flat" Width="40" Height="40" Margin="5 0">
+                        <materialIcons:MaterialIcon Kind="ContentSaveMove" Width="30" Height="30"/>
+                    </controls:FloatingButton>
+                                        <controls:FloatingButton Classes="Mini" Width="40" Height="40" Margin="5 0">
+                        <materialIcons:MaterialIcon Kind="Close" Width="30" Height="30"/>
+                    </controls:FloatingButton>
+                </StackPanel>
+            </Grid>
+        </Border>
 </UserControl>
