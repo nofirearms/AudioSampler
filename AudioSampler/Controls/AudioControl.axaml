@@ -1,0 +1,51 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="AudioSampler.Controls.AudioControl"
+             xmlns:local="using:AudioSampler.Controls">
+    <Grid Name="MainGrid" Background="Transparent"  
+                PointerMoved="MainGrid_PointerMoved" 
+                PointerReleased="MainGrid_PointerReleased" >
+        
+        <Border BorderBrush="Orange" BorderThickness="1" >
+               <Grid Name="SliderGrid">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="0.0*"/> 
+                        <ColumnDefinition Width="1.0*"/> 
+                        <ColumnDefinition Width="0.0*"/> 
+                    </Grid.ColumnDefinitions>
+
+                    <Rectangle Grid.Column="0" Fill="{DynamicResource Background1}" Opacity="0.95" VerticalAlignment="Stretch"/>
+                    <Rectangle Grid.Column="2" Fill="{DynamicResource Background1}" Opacity="0.95"/>
+
+                   <Border BoxShadow="0 1 5 -1 #ee000000">                    
+                        <Grid Grid.Column="0" 
+                            HorizontalAlignment="Right" 
+                            Width="2"
+                            PointerPressed="Thumb_PointerPressed" 
+                            Name="StartTarget">
+                        <Border Background="Orange" Width="2" VerticalAlignment="Stretch"/>
+                        <Path 
+                            Fill="Orange" VerticalAlignment="Top"
+                            Data="M 0 0 L 0 30 L 30 0 Z" />
+                    </Grid>
+                   </Border>
+
+
+                    <Grid 
+                        Grid.Column="2" 
+                        Width="2"
+                        HorizontalAlignment="Left" 
+                        PointerPressed="Thumb_PointerPressed"
+                        Name="EndTarget" >
+                        <Border Background="Orange" Width="2" VerticalAlignment="Stretch"/>
+                        <Path 
+                            Fill="Orange" VerticalAlignment="Bottom"
+                            Data="M 0 0 L 0 -30 L -30 0 Z" />
+                    </Grid>
+                </Grid>
+        </Border>
+    </Grid>
+</UserControl>

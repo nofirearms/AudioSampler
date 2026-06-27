@@ -79,7 +79,6 @@
                             <StaticResource x:Key="TextControlBackground" ResourceKey="Background1" />
                         </TextBox.Resources>
     
-
                         <TextBox.InnerLeftContent>
                             <materialIcons:MaterialIcon Foreground="{DynamicResource AccentBrush1}" Kind="Magnify" VerticalAlignment="Center" Width="20" Height="20" Margin="10 0 0 0"/>
                         </TextBox.InnerLeftContent>
@@ -239,11 +238,9 @@
                                         </TextBlock>
 
                                         <Button
-                                            Width="25"
-                                            Height="25"
-                                            Margin="0,0,5,0"
-                                            Padding="0"
-                                            Theme="{StaticResource MaterialFlatButton}"
+                                            Width="30"
+                                            Height="30"
+                                            Theme="{StaticResource TransparentButton}"
                                             HorizontalAlignment="Right"
                                             VerticalAlignment="Center"
                                             Background="{Binding #ModalMainBorder.Background}"

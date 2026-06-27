@@ -39,6 +39,8 @@ namespace AudioSampler.ViewModels.Modal
             _audioService = audioService;
             _audioSample = audioSample;
 
+            Header = "Edit Sample";
+
             LoadData();
         }
 

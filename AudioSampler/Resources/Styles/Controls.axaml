@@ -3,7 +3,7 @@
 
       <Design.PreviewWith>
           
-          <Button Content="TEST" Theme="{DynamicResource RoundAccentbutton}"/>
+          <Button Content="123" Theme="{DynamicResource FloatTransparentButton}" Width="50" Height="50"/>
       </Design.PreviewWith>
 
 
@@ -20,6 +20,125 @@
             <Style Selector="^:pressed /template/ ContentPresenter#PART_ContentPresenter">
                 <Setter Property="Background" Value="{DynamicResource AccentBrush2}" />
                 <Setter Property="Foreground" Value="{DynamicResource Background1}" />
+            </Style>
+        </ControlTheme>
+
+        <ControlTheme x:Key="TransparentButton" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource AccentBrush1}"/>
+            <Setter Property="CornerRadius" Value="40"/>
+        
+            <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Foreground" Value="{DynamicResource AccentBrush2}" />
+            </Style>
+        
+            <Style Selector="^:pressed /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Foreground" Value="{DynamicResource AccentBrush2}" />
+            </Style>
+        </ControlTheme>
+
+        <ControlTheme x:Key="TransparentToggle" TargetType="ToggleButton">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource InactiveForeground1}"/>
+            <Setter Property="CornerRadius" Value="40"/>
+        
+            <Style Selector="^:checked /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Foreground" Value="{DynamicResource AccentBrush1}" />
+            </Style>
+
+            <Style Selector="^:checked:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Foreground" Value="{DynamicResource AccentBrush2}" />
+            </Style>
+
+            <Style Selector="^:checked:pressed /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Foreground" Value="{DynamicResource AccentBrush2}" />
+            </Style>
+
+            <Style Selector="^:unchecked:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Foreground" Value="{DynamicResource InactiveForeground1}" />
+            </Style>
+        
+            <Style Selector="^:unchecked:pressed /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Foreground" Value="{DynamicResource InactiveForeground1}" />
+            </Style>
+        </ControlTheme>
+
+            <ControlTheme x:Key="FloatTransparentButton" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource AccentBrush1}"/>
+            <Setter Property="CornerRadius" Value="40"/>
+            <Setter Property="Padding" Value="3"/>
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Border Name="ShadowBorder"
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="{TemplateBinding CornerRadius}"
+                            BoxShadow="0 1 5 -1 #ee000000" 
+                            Margin="3"
+                            Padding="{TemplateBinding Padding}">
+                
+                        <ContentPresenter x:Name="PART_ContentPresenter" Margin="3"
+                                            Content="{TemplateBinding Content}"
+                                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                                            RecognizesAccessKey="True"
+                                            HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                            VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter>
+
+            <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Foreground" Value="{DynamicResource AccentBrush2}" />
+            </Style>
+        
+            <Style Selector="^:pressed /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Foreground" Value="{DynamicResource AccentBrush2}" />
+            </Style>
+        </ControlTheme>
+
+
+    
+        <ControlTheme x:Key="FloatTransparentToggle" TargetType="ToggleButton">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource InactiveForeground1}"/>
+            <Setter Property="CornerRadius" Value="40"/>
+            <Setter Property="Padding" Value="3"/>
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Border Name="ShadowBorder"
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="{TemplateBinding CornerRadius}"
+                            BoxShadow="0 1 5 -1 #ee000000" 
+                            Margin="3"
+                            Padding="{TemplateBinding Padding}">
+                
+                        <ContentPresenter x:Name="PART_ContentPresenter" Margin="3"
+                                            Content="{TemplateBinding Content}"
+                                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                                            RecognizesAccessKey="True"
+                                            HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                            VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter>
+            <Style Selector="^:checked /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Foreground" Value="{DynamicResource AccentBrush1}" />
+            </Style>
+
+            <Style Selector="^:checked:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Foreground" Value="{DynamicResource AccentBrush2}" />
+            </Style>
+
+            <Style Selector="^:checked:pressed /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Foreground" Value="{DynamicResource AccentBrush2}" />
+            </Style>
+
+            <Style Selector="^:unchecked:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Foreground" Value="{DynamicResource InactiveForeground1}" />
+            </Style>
+        
+            <Style Selector="^:unchecked:pressed /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Foreground" Value="{DynamicResource InactiveForeground1}" />
             </Style>
         </ControlTheme>
 </ResourceDictionary>

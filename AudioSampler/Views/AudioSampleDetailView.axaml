@@ -7,7 +7,7 @@
              xmlns:customcontrols="using:AudioSampler.Controls"
              xmlns:modal="using:AudioSampler.ViewModels.Modal"
              x:DataType="modal:AudioSampleDetailViewModel"
-             xmlns:converters="using:AudioSampler.Converters"
+             xmlns:converters="using:AudioSampler.Converters" 
              mc:Ignorable="d" d:DesignWidth="720" d:DesignHeight="450"
              x:Class="AudioSampler.Views.AudioSampleDetailView">
     <UserControl.Resources>
@@ -15,44 +15,70 @@
     </UserControl.Resources>
         <Border HorizontalAlignment="Stretch" VerticalAlignment="Center"  CornerRadius="5">
             <Grid RowDefinitions="auto, *, auto, auto">
-                <TextBox Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                <TextBox  
+                    PlaceholderText="Name" 
+                    CornerRadius="30"  
+                    BorderThickness="1"  Padding="20 0"
+                    BorderBrush="{DynamicResource AccentBrush1}"
+                    CaretBrush="{DynamicResource AccentBrush1}"
+                    VerticalContentAlignment="Center"
+                    Background="{DynamicResource Background1}"
+                    Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                    > 
+
+                    <TextBox.Resources>
+                        <StaticResource x:Key="TextControlBackgroundFocused" ResourceKey="Background1"  />
+                        <StaticResource x:Key="TextControlBorderBrushFocused" ResourceKey="AccentBrush2"  />
+                        <StaticResource x:Key="TextControlBorderBrushPointerOver" ResourceKey="AccentBrush2"  />
+        
+                        <StaticResource x:Key="TextControlBackgroundPointerOver" ResourceKey="Background1"  />
+                        <StaticResource x:Key="TextControlBackground" ResourceKey="Background1" />
+                    </TextBox.Resources>
+
+                </TextBox>
                 <Border Grid.Row="1" Background="{DynamicResource Background1}" BorderThickness="1" Margin="0 5">
-                    <customcontrols:AudioGraph Height="100" Points="{Binding AudioGraphPoints}" />    
+                    <Grid>
+                        <customcontrols:AudioGraph Height="100" Points="{Binding AudioGraphPoints}" />    
+                        <customcontrols:AudioControl Height="100" Start="{Binding StartPercent, Mode=TwoWay}" End="{Binding EndPercent, Mode=TwoWay}"/>
+                    </Grid>
+                    
+
                 </Border>
                 
                 <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center">
                     <Grid>
-                        <Button Width="40" Height="40" Margin="5 0" Command="{Binding StopCommand}" IsVisible="{Binding IsPlaying}">
+
+                        <Button Theme="{StaticResource FloatTransparentButton}" Width="40" Height="40" Margin="5 0" Command="{Binding StopCommand}" IsVisible="{Binding IsPlaying}">
                             <materialIcons:MaterialIcon Kind="Stop" Width="30" Height="30"/>
                         </Button>
-                        <Button Width="40" Height="40" Margin="5 0" Command="{Binding PlayCommand}" IsVisible="{Binding IsPlaying, Converter={StaticResource ReverseBoolConverter}}">
+                        <Button Theme="{StaticResource FloatTransparentButton}" Width="40" Height="40" Margin="5 0" Command="{Binding PlayCommand}" IsVisible="{Binding IsPlaying, Converter={StaticResource ReverseBoolConverter}}">
                             <materialIcons:MaterialIcon Kind="Play" Width="30" Height="30"/>
                         </Button>
                     </Grid>
 
-                    <Button Width="40" Height="40" Margin="5 0">
+<!--                    <Button Width="40" Height="40" Margin="5 0">
                         <materialIcons:MaterialIcon Kind="Crop" Width="30" Height="30"/>
-                    </Button>
+                    </Button>-->
 
 <!--                    <controls:FloatingButton Classes="Mini" Width="40" Height="40" Margin="5 0">
                         <materialIcons:MaterialIcon Kind="ContentCut" Width="30" Height="30"/>
                     </controls:FloatingButton>-->
 
-                    <ToggleButton Width="40" Height="40" Margin="5 0" Command="{Binding NormalizeCommand}" CommandParameter="{Binding $self.IsChecked}">
+                    <ToggleButton Theme="{StaticResource FloatTransparentToggle}" Width="40" Height="40" Margin="5 0" Command="{Binding NormalizeCommand}" CommandParameter="{Binding $self.IsChecked}">
                         <materialIcons:MaterialIcon Kind="Waveform" Width="30" Height="30"/>
                     </ToggleButton>
 
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Grid.Row="3" HorizontalAlignment="Right" Margin="0 10 0 0">
-                    <Button  Width="40" Height="40" Margin="5 0">
-                        <materialIcons:MaterialIcon Kind="ContentSaveEdit" Width="30" Height="30"/>
+                    <Button Theme="{StaticResource FloatTransparentButton}"  Width="45" Height="45" Margin="5 0">
+                        <materialIcons:MaterialIcon Kind="ContentSaveEdit" IconSize="25"/>
                     </Button>
-                    <Button  Width="40" Height="40" Margin="5 0">
-                        <materialIcons:MaterialIcon Kind="ContentSaveMove" Width="30" Height="30"/>
+                    <Button Theme="{StaticResource FloatTransparentButton}" Width="45" Height="45" Margin="0 0">
+                        <materialIcons:MaterialIcon Kind="ContentSaveMove" IconSize="25"/>
                     </Button>
-                    <Button  Width="40" Height="40" Margin="5 0">
+<!--                    <Button  Width="40" Height="40" Margin="5 0">
                         <materialIcons:MaterialIcon Kind="Close" Width="30" Height="30"/>
-                    </Button>
+                    </Button>-->
                 </StackPanel>
             </Grid>
         </Border>
