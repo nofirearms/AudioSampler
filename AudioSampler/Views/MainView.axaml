@@ -15,34 +15,6 @@
              xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              x:Class="AudioSampler.Views.MainView"  Background="{DynamicResource Background2}"
              x:DataType="vm:MainViewModel">
-    <ContentPage.Styles>
-        <Style Selector="ListBoxItem">
-            <Setter Property="IsSelected" Value="False" />
-            <Setter Property="Focusable" Value="False" />
-            
-            <Setter Property="Background" Value="Transparent" />
-            <Setter Property="Padding" Value="0" />
-            <Setter Property="Margin" Value="0" />
-            <Setter Property="RenderTransform" Value="scale(1)" />
-            <Setter Property="Transitions">
-                <Transitions>
-                    <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.08" Easing="SineEaseInOut" />
-                </Transitions>
-            </Setter>
-        </Style>
-
-        <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-            <Setter Property="Background" Value="Transparent" />
-        </Style>
-        <Style Selector="ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
-            <Setter Property="Background" Value="Transparent" />
-        </Style>
-
-        <Style Selector="ListBoxItem:pressed">
-            <Setter Property="RenderTransform" Value="scale(0.98)" />
-        </Style>
-    </ContentPage.Styles>
-
 
     <ContentPage.Resources>
         <converters:ReverseBoolConverter x:Key="ReverseBoolConverter"/>
@@ -72,11 +44,10 @@
                         > 
 
                         <TextBox.Resources>
-                            <StaticResource x:Key="TextControlBackgroundFocused" ResourceKey="Background1"  />
-                            <StaticResource x:Key="TextControlBorderBrushFocused" ResourceKey="Background1"  />
-        
-                            <StaticResource x:Key="TextControlBackgroundPointerOver" ResourceKey="Background1"  />
-                            <StaticResource x:Key="TextControlBackground" ResourceKey="Background1" />
+                            <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="{DynamicResource BackgroundColor1}" />
+                            <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="{DynamicResource BackgroundColor1}" />
+                            <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="{DynamicResource BackgroundColor1}" />
+                            <SolidColorBrush x:Key="TextControlBackground" Color="{DynamicResource BackgroundColor1}" />
                         </TextBox.Resources>
     
                         <TextBox.InnerLeftContent>

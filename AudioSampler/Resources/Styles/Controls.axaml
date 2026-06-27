@@ -141,4 +141,7 @@
                 <Setter Property="Foreground" Value="{DynamicResource InactiveForeground1}" />
             </Style>
         </ControlTheme>
+
+
+
 </ResourceDictionary>

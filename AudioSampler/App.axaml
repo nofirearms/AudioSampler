@@ -4,6 +4,7 @@
              x:Class="AudioSampler.App" 
              xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              xmlns:themes="clr-namespace:Material.Styles.Themes;assembly=Material.Styles"
+             xmlns:services="using:AudioSampler.Services"
              RequestedThemeVariant="Dark">
              <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
 
@@ -14,7 +15,7 @@
     <Application.Styles>
         <FluentTheme />
         <materialIcons:MaterialIconStyles />
-        <!--<themes:MaterialTheme BaseTheme="Dark" PrimaryColor="Orange" SecondaryColor="Lime" />-->
+        <StyleInclude Source="avares://AudioSampler/Resources/Styles/Styles.axaml" />
     </Application.Styles>
 
     <Application.Resources>
@@ -23,6 +24,12 @@
                 <ResourceInclude Source="avares://AudioSampler/Resources/Styles/Brushes.axaml" />
                 <ResourceInclude Source="avares://AudioSampler/Resources/Styles/Controls.axaml" />
             </ResourceDictionary.MergedDictionaries>
+
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceInclude x:Key="{x:Static services:ThemeService.BlueTheme}" Source="avares://AudioSampler/Resources/Themes/BlueTheme.axaml" />
+                <ResourceInclude x:Key="{x:Static services:ThemeService.OrangeTheme}" Source="avares://AudioSampler/Resources/Themes/OrangeTheme.axaml" />
+            </ResourceDictionary.ThemeDictionaries>
         </ResourceDictionary>
+
     </Application.Resources>
 </Application>

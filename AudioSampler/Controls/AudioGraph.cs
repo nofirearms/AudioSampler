@@ -22,13 +22,22 @@ namespace AudioSampler.Controls
 
 
 
-        public static readonly StyledProperty<IBrush> BarBrushProperty =
-            AvaloniaProperty.Register<AudioGraph, IBrush>(nameof(BarBrush), Brushes.Orange);
+        public static readonly StyledProperty<IBrush> BarTopBrushProperty =
+            AvaloniaProperty.Register<AudioGraph, IBrush>(nameof(BarTopBrush), Brushes.Orange);
 
-        public IBrush BarBrush
+        public IBrush BarTopBrush
         {
-            get => this.GetValue(BarBrushProperty);
-            set => SetValue(BarBrushProperty, value);
+            get => this.GetValue(BarTopBrushProperty);
+            set => SetValue(BarTopBrushProperty, value);
+        }
+
+        public static readonly StyledProperty<IBrush> BarBottomBrushProperty =
+            AvaloniaProperty.Register<AudioGraph, IBrush>(nameof(BarBottomBrush), Brushes.Orange);
+
+        public IBrush BarBottomBrush
+        {
+            get => this.GetValue(BarBottomBrushProperty);
+            set => SetValue(BarBottomBrushProperty, value);
         }
 
 
@@ -83,8 +92,8 @@ namespace AudioSampler.Controls
                 var bottom_rect = new Rect(Math.Round(x), Math.Round(bottom_y), Math.Round(barWidth), Math.Round(barHeight));
 
                 // Рисуем скругленный столбик (CornerRadius)
-                context.DrawRectangle(BarBrush, null, top_rect);
-                context.DrawRectangle(new SolidColorBrush(Colors.DarkOrange), null, bottom_rect);
+                context.DrawRectangle(BarTopBrush, null, top_rect);
+                context.DrawRectangle(BarBottomBrush, null, bottom_rect);
 
             }
         }

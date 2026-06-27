@@ -22,23 +22,22 @@
                     BorderBrush="{DynamicResource AccentBrush1}"
                     CaretBrush="{DynamicResource AccentBrush1}"
                     VerticalContentAlignment="Center"
-                    Background="{DynamicResource Background1}"
+
                     Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                     > 
 
                     <TextBox.Resources>
-                        <StaticResource x:Key="TextControlBackgroundFocused" ResourceKey="Background1"  />
-                        <StaticResource x:Key="TextControlBorderBrushFocused" ResourceKey="AccentBrush2"  />
-                        <StaticResource x:Key="TextControlBorderBrushPointerOver" ResourceKey="AccentBrush2"  />
-        
-                        <StaticResource x:Key="TextControlBackgroundPointerOver" ResourceKey="Background1"  />
-                        <StaticResource x:Key="TextControlBackground" ResourceKey="Background1" />
+                        <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="{DynamicResource BackgroundColor1}" />
+                        <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="{DynamicResource AccentColor2}" />
+                        <SolidColorBrush x:Key="TextControlBorderBrushPointerOver" Color="{DynamicResource AccentColor2}" />
+                        <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="{DynamicResource BackgroundColor1}" />
+                        <SolidColorBrush x:Key="TextControlBackground" Color="{DynamicResource BackgroundColor1}" />
                     </TextBox.Resources>
 
                 </TextBox>
                 <Border Grid.Row="1" Background="{DynamicResource Background1}" BorderThickness="1" Margin="0 5">
                     <Grid>
-                        <customcontrols:AudioGraph Height="100" Points="{Binding AudioGraphPoints}" />    
+                        <customcontrols:AudioGraph Height="100" Points="{Binding AudioGraphPoints}" BarTopBrush="{DynamicResource AccentBrush2}" BarBottomBrush="{DynamicResource AccentBrush3}"/>    
                         <customcontrols:AudioControl Height="100" Start="{Binding StartPercent, Mode=TwoWay}" End="{Binding EndPercent, Mode=TwoWay}"/>
                     </Grid>
                     

@@ -7,17 +7,20 @@ using Avalonia;
 using Avalonia.Controls; // Для PageNavigationHost
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Avalonia.Styling;
 using ManagedBass;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.IO;
+using System.Threading.Tasks;
 
 
 namespace AudioSampler
 {
     public partial class App : Application
     {
+
         public override void Initialize()
         {
             //this.EnableHotReload();
@@ -47,6 +50,7 @@ namespace AudioSampler
             services.AddSingleton<DataService>();
             services.AddSingleton<ModalService>();
             services.AddTransient<AudioService>();
+            services.AddSingleton<ThemeService>();
 
             services.AddSingleton<ViewModelFactory>();
 
@@ -57,8 +61,11 @@ namespace AudioSampler
         }
 
 
-        public override void OnFrameworkInitializationCompleted()
+        public override async void OnFrameworkInitializationCompleted()
         {
+            var themeService = Services.GetRequiredService<ThemeService>();
+            await themeService.LoadFromSettings();
+
             var mainViewModel = Design.IsDesignMode ? new MainViewModel() : Services.GetRequiredService<MainViewModel>();
             
 

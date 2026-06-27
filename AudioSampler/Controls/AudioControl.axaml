@@ -9,7 +9,7 @@
                 PointerMoved="MainGrid_PointerMoved" 
                 PointerReleased="MainGrid_PointerReleased" >
         
-        <Border BorderBrush="Orange" BorderThickness="1" >
+        <Border BorderBrush="{DynamicResource AccentBrush1}" BorderThickness="1" >
                <Grid Name="SliderGrid">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="0.0*"/> 
@@ -26,9 +26,9 @@
                             Width="2"
                             PointerPressed="Thumb_PointerPressed" 
                             Name="StartTarget">
-                        <Border Background="Orange" Width="2" VerticalAlignment="Stretch"/>
+                        <Border Background="{DynamicResource AccentBrush1}" Width="2" VerticalAlignment="Stretch"/>
                         <Path 
-                            Fill="Orange" VerticalAlignment="Top"
+                            Fill="{DynamicResource AccentBrush1}" VerticalAlignment="Top"
                             Data="M 0 0 L 0 30 L 30 0 Z" />
                     </Grid>
                    </Border>
@@ -40,9 +40,9 @@
                         HorizontalAlignment="Left" 
                         PointerPressed="Thumb_PointerPressed"
                         Name="EndTarget" >
-                        <Border Background="Orange" Width="2" VerticalAlignment="Stretch"/>
+                        <Border Background="{DynamicResource AccentBrush1}" Width="2" VerticalAlignment="Stretch"/>
                         <Path 
-                            Fill="Orange" VerticalAlignment="Bottom"
+                            Fill="{DynamicResource AccentBrush1}" VerticalAlignment="Bottom"
                             Data="M 0 0 L 0 -30 L -30 0 Z" />
                     </Grid>
                 </Grid>
