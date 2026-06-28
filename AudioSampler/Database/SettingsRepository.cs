@@ -20,7 +20,7 @@ namespace AudioSampler.Database
             var setting = _context.Settings.FirstOrDefault(s => s.Key == key);
             if (setting is null) 
             { 
-                setting = new Model.Setting(key, value);
+                setting = new Setting(key, value);
                 _context.Add(setting);
             }
             else
@@ -32,9 +32,16 @@ namespace AudioSampler.Database
             await SaveDatabase();
 
         }
+        public async Task ChangeValue(SettingKey key, string value)
+        {
+            ChangeValue(key.ToString(), value);
+        }
+
 
         public Setting Get(string key) => _context.Settings.FirstOrDefault(s => s.Key == key);
 
-        public async Task SaveDatabase() => await _context.SaveChangesAsync();
+        public Setting Get(SettingKey key) => _context.Settings.FirstOrDefault(s => s.Key == key.ToString());
+
+        private async Task SaveDatabase() => await _context.SaveChangesAsync();
     }
 }

@@ -12,6 +12,7 @@ namespace AudioSampler.Model
         public ExportFormat Format { get; set; }
         public bool Trim { get; set; }
         public bool Normalize { get; set; }
+        public FolderBookmark FolderBookmark { get; set; }
 
     }
 

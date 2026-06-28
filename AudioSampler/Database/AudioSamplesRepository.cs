@@ -42,6 +42,6 @@ namespace AudioSampler.Database
             await SaveDatabase();
         }
 
-        public async Task SaveDatabase() => await _context.SaveChangesAsync();
+        private async Task SaveDatabase() => await _context.SaveChangesAsync();
     }
 }

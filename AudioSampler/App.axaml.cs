@@ -47,6 +47,7 @@ namespace AudioSampler
 
             services.AddSingleton<AudioSamplesRepository>();
             services.AddSingleton<SettingsRepository>();
+            services.AddSingleton<FolderBookmarksRepository>();
             services.AddSingleton<DataService>();
             services.AddSingleton<ModalService>();
             services.AddTransient<AudioService>();

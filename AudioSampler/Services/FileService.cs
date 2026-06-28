@@ -1,4 +1,5 @@
-﻿using Avalonia.Controls;
+﻿using AudioSampler.Model;
+using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Platform.Storage;
 using System;
@@ -11,7 +12,12 @@ namespace AudioSampler.Services
 {
     public class FileService
     {
+        private readonly DataService _dataService;
 
+        public FileService(DataService dataService)
+        {
+            _dataService = dataService;
+        }
 
         private TopLevel GetTopLevel()
         {
@@ -60,7 +66,7 @@ namespace AudioSampler.Services
         }
 
 
-        public async Task<string> GetPathAsync()
+        public async Task<string> GetDefaultPathAsync()
         {
             var storageProvider = GetTopLevel().StorageProvider;
             IStorageFolder? targetFolder = null;
@@ -70,18 +76,75 @@ namespace AudioSampler.Services
             return targetFolder.Path.AbsolutePath;
         }
 
-        public async Task<string?> RequestCustomFolderAsync()
+        public async Task<FolderBookmark> RequestFolderBookmarkAsync(bool saveFolder = false)
         {
             var storageProvider = GetTopLevel().StorageProvider;
 
             var folders = await storageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
             {
-                Title = "Выберите папку для экспорта аудио",
+                Title = "Export folder",
                 AllowMultiple = false
             });
 
-            return folders.Count > 0 ? folders[0].Path.ToString() : null;
+            if(folders.Count > 0)
+            {
+                var selectedFolder = folders[0];
+
+                var folderBookmark = new FolderBookmark();
+
+                if (selectedFolder.CanBookmark)
+                {
+                    folderBookmark.Bookmark = await selectedFolder.SaveBookmarkAsync();                   
+                }
+                if (saveFolder)
+                {
+                    await _dataService.FolderBooksmarksReposity.CreateAsync(folderBookmark);
+                }
+
+                return folderBookmark;
+
+
+            }
+            return null;
         }
 
+
+        public async Task<IStorageFolder?> GetStorageFolderFromFolderBookmarkAsync(FolderBookmark bookmark)
+        {
+            var topLevel = GetTopLevel();
+
+            // Если это дефолтная папка по умолчанию
+            if (bookmark.Bookmark == "DEFAULT")
+            {
+                // Получаем доступ к системной папке Downloads через Avalonia StorageProvider
+                // WellKnownFolder.Downloads поддерживается в Avalonia для Android
+                return await topLevel.StorageProvider.TryGetWellKnownFolderAsync(WellKnownFolder.Downloads);
+            }
+            else
+            {
+                // Если это кастомный букмарк из базы
+                return await topLevel.StorageProvider.OpenFolderBookmarkAsync(bookmark.Bookmark);
+            }
+            
+        }
+
+
+        public async Task GetFolderFromDatabase()
+        {
+            string savedBookmark = "";//GetFolderBookmarkFromSettings();
+
+            if (!string.IsNullOrEmpty(savedBookmark))
+            {
+                var topLevel = GetTopLevel();
+
+                // Возвращаем объект папки по её закладке. ОС вспомнит, что права у нас есть.
+                IStorageFolder? restoredFolder = await topLevel.StorageProvider.OpenFolderBookmarkAsync(savedBookmark);
+
+                if (restoredFolder != null)
+                {
+                    // Папка готова к работе, права активны!
+                }
+            }
+        }
     }
 }

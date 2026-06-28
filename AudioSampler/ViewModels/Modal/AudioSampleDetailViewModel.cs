@@ -16,7 +16,7 @@ namespace AudioSampler.ViewModels.Modal
     {
         private readonly AudioService _audioService;
         private readonly ModalService _modalService;
-        private readonly SettingsRepository _settings;
+        private readonly DataService _dataService;
         private readonly FileService _fileService;
         private AudioSample _audioSample;
 
@@ -45,13 +45,13 @@ namespace AudioSampler.ViewModels.Modal
         public AudioSampleDetailViewModel(
             AudioService audioService, 
             ModalService modalService, 
-            SettingsRepository settings, 
+            DataService dataService, 
             FileService fileService, 
             AudioSample audioSample)
         {
             _audioService = audioService;
             _modalService = modalService;
-            _settings = settings;
+            _dataService = dataService;
             _fileService = fileService;
             _audioSample = audioSample;
 
@@ -124,10 +124,18 @@ namespace AudioSampler.ViewModels.Modal
         [RelayCommand]
         public async void Export()
         {
-            //var path = _settings.Get("ExportPath") is null ? 
-            var folder = await _fileService.GetPathAsync();
+            //Собираем настройки для модального окна
 
-            var result = await _modalService.OpenExportModal(new ExportSettings() { Name = Name, Path = folder, Normalize = _normalized });
+            var setting = _dataService.SettingsRepository.Get(SettingKey.FolderBookmark);
+
+            //var folderBookmark = _dataService.FolderBooksmarksReposity.GetAll().FirstOrDefault(b => b.Bookmark == value);
+
+            var folderBookmark = setting is null ? new FolderBookmark("DEFAULT") : new FolderBookmark(setting.Value);
+
+            var folder = await _fileService.GetStorageFolderFromFolderBookmarkAsync(folderBookmark);
+
+            //Открываем модальное окно с найстройками экспорта
+            var result = await _modalService.OpenExportModal(new ExportSettings() { Name = Name, Path = folder.Path.AbsolutePath, Normalize = _normalized, FolderBookmark = folderBookmark });
 
             if (result.Success)
             {
@@ -140,6 +148,8 @@ namespace AudioSampler.ViewModels.Modal
                         result.Data.Trim ? EndPercent * _audioSample.Duration.TotalSeconds : _audioSample.Duration.TotalSeconds, 
                         result.Data.Normalize, 
                         result.Data.Format);
+
+                await _dataService.SettingsRepository.ChangeValue(SettingKey.FolderBookmark, result.Data.FolderBookmark.Bookmark);
             }
             
         }

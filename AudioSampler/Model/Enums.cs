@@ -15,4 +15,10 @@ namespace AudioSampler.Model
     {
         wav, mp3
     }
+
+    public enum SettingKey
+    {
+        Theme,
+        FolderBookmark
+    }
 }

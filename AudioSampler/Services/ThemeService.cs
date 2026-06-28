@@ -15,9 +15,9 @@ namespace AudioSampler.Services
         public static readonly ThemeVariant OrangeTheme = new ThemeVariant("Orange", ThemeVariant.Dark);
         public static readonly ThemeVariant BlueTheme = new ThemeVariant("Blue", ThemeVariant.Dark);
 
-        public ThemeService(SettingsRepository settingsRepository)
+        public ThemeService(DataService dataService)
         {
-            _settings = settingsRepository; 
+            _settings = dataService.SettingsRepository; 
         }
 
         public async Task Change(ThemeVariant theme)
@@ -29,7 +29,7 @@ namespace AudioSampler.Services
 
         public async Task LoadFromSettings()
         {
-            var theme = _settings.Get("Theme");
+            var theme = _settings.Get(Model.SettingKey.Theme);
 
             if(theme is null)
             {
