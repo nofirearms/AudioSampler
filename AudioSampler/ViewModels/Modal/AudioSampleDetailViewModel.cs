@@ -1,9 +1,12 @@
-﻿using AudioSampler.Model;
+﻿using AudioSampler.Database;
+using AudioSampler.Model;
 using AudioSampler.Services;
+using Avalonia.Controls;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System;
+using System.IO;
 using System.Linq;
 
 
@@ -12,6 +15,9 @@ namespace AudioSampler.ViewModels.Modal
     public partial class AudioSampleDetailViewModel : BaseModalViewModel<AudioSample>
     {
         private readonly AudioService _audioService;
+        private readonly ModalService _modalService;
+        private readonly SettingsRepository _settings;
+        private readonly FileService _fileService;
         private AudioSample _audioSample;
 
         [ObservableProperty]
@@ -34,12 +40,22 @@ namespace AudioSampler.ViewModels.Modal
 
         [ObservableProperty]
         private bool _isPlaying = false;
-        public AudioSampleDetailViewModel(AudioService audioService, AudioSample audioSample)
+
+        private bool _normalized = false;
+        public AudioSampleDetailViewModel(
+            AudioService audioService, 
+            ModalService modalService, 
+            SettingsRepository settings, 
+            FileService fileService, 
+            AudioSample audioSample)
         {
             _audioService = audioService;
+            _modalService = modalService;
+            _settings = settings;
+            _fileService = fileService;
             _audioSample = audioSample;
 
-            Header = "Edit Sample";
+            Header = "Edit";
 
             LoadData();
         }
@@ -79,6 +95,7 @@ namespace AudioSampler.ViewModels.Modal
         {
             if (normalize)
             {
+                _normalized = true;
                 _audioService.Normalize(_stream, _maxPeak);
                 var gain = 1d / _maxPeak;
                 var points = AudioGraphPoints.Select(p => p * (float)gain).ToArray();
@@ -86,6 +103,7 @@ namespace AudioSampler.ViewModels.Modal
             }
             else
             {
+                _normalized = false;
                 _audioService.Normalize(_stream, 1);
                 AudioGraphPoints = AudioGraphPoints.Select(p => p * (float)_maxPeak).ToArray();
             }
@@ -101,6 +119,29 @@ namespace AudioSampler.ViewModels.Modal
             {
                 Stop();
             }
+        }
+
+        [RelayCommand]
+        public async void Export()
+        {
+            //var path = _settings.Get("ExportPath") is null ? 
+            var folder = await _fileService.GetPathAsync();
+
+            var result = await _modalService.OpenExportModal(new ExportSettings() { Name = Name, Path = folder, Normalize = _normalized });
+
+            if (result.Success)
+            {
+
+                await _audioService.RenderToFileAsync(_audioSample.Path, 
+                    Path.Combine(
+                        result.Data.Path, 
+                        $"{result.Data.Name}.{result.Data.Format}"),
+                        result.Data.Trim ? StartPercent * _audioSample.Duration.TotalSeconds : 0,
+                        result.Data.Trim ? EndPercent * _audioSample.Duration.TotalSeconds : _audioSample.Duration.TotalSeconds, 
+                        result.Data.Normalize, 
+                        result.Data.Format);
+            }
+            
         }
     }
 }

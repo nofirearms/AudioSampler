@@ -10,4 +10,9 @@ namespace AudioSampler.Model
     {
         Start, Stop, Pause, Cancel, Resume
     }
+
+    public enum ExportFormat
+    {
+        wav, mp3
+    }
 }

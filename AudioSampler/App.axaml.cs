@@ -51,6 +51,7 @@ namespace AudioSampler
             services.AddSingleton<ModalService>();
             services.AddTransient<AudioService>();
             services.AddSingleton<ThemeService>();
+            services.AddSingleton<FileService>();
 
             services.AddSingleton<ViewModelFactory>();
 

@@ -1,0 +1,59 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             xmlns:vm="using:AudioSampler.ViewModels"
+             xmlns:controls="using:AudioSampler.Controls"
+             xmlns:modal="using:AudioSampler.ViewModels.Modal"
+             x:Class="AudioSampler.Views.ExportAudioSampleView"
+             x:DataType="modal:ExportAudioSampleViewModel">
+    <Grid RowDefinitions="* auto">
+        
+        <StackPanel Grid.Row="0" Orientation="Vertical">
+            <TextBlock Text="Name" Margin="10 0" Foreground="{DynamicResource InactiveForeground1}"/>
+            <Border BoxShadow="0 2 5 -1 #40000000" CornerRadius="30" Margin="5 2">
+                <TextBox 
+                    Classes="solo" 
+                    Theme="{StaticResource SoloTextBox}" 
+                    CornerRadius="10"  IsReadOnly="True" 
+                    Background="{DynamicResource Background3}"
+                    Text="{Binding FileName}" > 
+                </TextBox>
+            </Border>
+
+            <TextBlock Text="Folder" Margin="10 0" Foreground="{DynamicResource InactiveForeground1}"/>
+            <Border BoxShadow="0 2 5 -1 #40000000" CornerRadius="30" Margin="5 2">
+                <TextBox 
+                    Classes="solo" 
+                    Theme="{StaticResource SoloTextBox}" 
+                    CornerRadius="10"  IsReadOnly="True" 
+                    Background="{DynamicResource Background3}"
+                    Text="{Binding Path}" 
+                    > 
+                    <TextBox.InnerRightContent>
+                        <Button Margin="0 0 0 0" Padding="0" Theme="{StaticResource MaterialFlatButton}" Width="35" Height="35" CornerRadius="30" >
+                            <materialIcons:MaterialIcon 
+                                Foreground="{DynamicResource AccentBrush1}" 
+                                Kind="Folder" 
+                                VerticalAlignment="Center" 
+                                Width="30" Height="25" 
+                                Margin="5 0"/>    
+                        </Button>
+                    </TextBox.InnerRightContent>
+                </TextBox>
+            </Border>
+            <StackPanel Orientation="Horizontal">
+                <controls:ListButton Theme="{StaticResource FloatTransparentButton}" Items="{Binding Formats}" SelectedItem="{Binding Format, Mode=TwoWay}" />
+                <ToggleButton IsChecked="{Binding Normalize, Mode=TwoWay}">
+                    <materialIcons:MaterialIcon Kind="Waveform" Width="30" Height="30"/>
+                </ToggleButton>
+                <ToggleButton IsChecked="{Binding Trim, Mode=TwoWay}">
+                    <materialIcons:MaterialIcon Kind="ContentCut" Width="30" Height="30"/>
+                </ToggleButton>
+            </StackPanel>
+        </StackPanel>
+        <Button Grid.Row="1" Command="{Binding ExportCommand}" Content="Export"/>
+    </Grid>
+</UserControl>

@@ -49,5 +49,10 @@ namespace AudioSampler.Services
         {
             return await ShowModalAsync(_factory.Create<SettingsViewModel>());
         }
+
+        public async Task<ModalResult<ExportSettings>> OpenExportModal(ExportSettings settings)
+        {
+            return await ShowModalAsync(_factory.Create<ExportAudioSampleViewModel>(settings));
+        }
     }
 }

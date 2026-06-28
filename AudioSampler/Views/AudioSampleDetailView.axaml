@@ -72,7 +72,7 @@
                     <Button Theme="{StaticResource FloatTransparentButton}"  Width="45" Height="45" Margin="5 0">
                         <materialIcons:MaterialIcon Kind="ContentSaveEdit" IconSize="25"/>
                     </Button>
-                    <Button Theme="{StaticResource FloatTransparentButton}" Width="45" Height="45" Margin="0 0">
+                    <Button Command="{Binding ExportCommand}" Theme="{StaticResource FloatTransparentButton}" Width="45" Height="45" Margin="0 0">
                         <materialIcons:MaterialIcon Kind="ContentSaveMove" IconSize="25"/>
                     </Button>
 <!--                    <Button  Width="40" Height="40" Margin="5 0">

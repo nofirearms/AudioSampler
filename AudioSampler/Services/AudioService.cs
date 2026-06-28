@@ -1,5 +1,7 @@
-﻿using ManagedBass;
+﻿using AudioSampler.Model;
+using ManagedBass;
 using ManagedBass.Enc;
+using ManagedBass.Fx;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -19,10 +21,10 @@ namespace AudioSampler.Services
             Bass.Init();
         }
 
-        //--------------------------------------------------------------- LOAD and GRAPH --------------------------------------------------
+        //--------------------------------------------------------------- UTILITY --------------------------------------------------
 
         /// <summary>
-        /// 1. ОТКРЫТЬ АУДИО И ПОЛУЧИТЬ СЭМПЛЫ ДЛЯ ГРАФИКА
+        /// Получаем сэмплы из файла для графика и нормализации, спользуется при воспроизведении
         /// </summary>
         public async Task<float[]> GetSamplesAsync(string filePath)
         {
@@ -51,12 +53,40 @@ namespace AudioSampler.Services
                 finally
                 {
                     Bass.StreamFree(decodeStream);
-                    
-                    
                 }
             });
         }
 
+        /// <summary>
+        /// Получаем сэмплы из уже открытого стрима
+        /// </summary>
+        /// <param name="streamHandle"></param>
+        /// <returns></returns>
+        public async Task<float[]> GetSamplesFromStreamAsync(int streamHandle)
+        {
+            return await Task.Run(() =>
+            {
+                long lengthInBytes = Bass.ChannelGetLength(streamHandle);
+                if (lengthInBytes <= 0) return Array.Empty<float>();
+
+                // Так как мы указали флаг BassFlags.Float, BASS сам конвертирует 
+                // аудио (даже MP3) в массив float-сэмплов (от -1.0 до 1.0)
+                int floatCount = (int)(lengthInBytes / 4);
+                float[] samples = new float[floatCount];
+
+                // Читаем все сэмплы из потока в наш массив
+                int bytesRead = Bass.ChannelGetData(streamHandle, samples, (int)lengthInBytes);
+
+                return samples;
+            });
+        }
+
+        /// <summary>
+        /// Рэндерим точки для графа 
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <param name="samplesCount"></param>
+        /// <returns></returns>
         public async Task<float[]> RenderWaveformAsync(string filePath, int samplesCount)
         {
             return await Task.Run(async () =>
@@ -77,11 +107,18 @@ namespace AudioSampler.Services
             });
         }
 
+        /// <summary>
+        /// Получаем ID стрима
+        /// </summary>
+        /// <returns>ID стрима</returns>
         public int CreatePlaybackStream(string path)
         {
             return Bass.CreateStream(path, 0, 0, BassFlags.Default);
         }
 
+        /// <summary>
+        /// Определить длину стрима в секундах
+        /// </summary>
         public double GetLengthSeconds(int stream) 
         {
             // 1. Получаем длину в байтах
@@ -93,11 +130,21 @@ namespace AudioSampler.Services
             return lengthInSeconds; 
         }
 
+        /// <summary>
+        /// Максимальная амплитуда для нормализации
+        /// </summary>
+        /// <param name="samples"></param>
+        /// <returns></returns>
         public double GetMaxPeak(float[] samples)
         {
             return samples.Max(Math.Abs);
         }
 
+        /// <summary>
+        /// Нормализации, испльзуется только для воспроизведения аудио
+        /// </summary>
+        /// <param name="stream"></param>
+        /// <param name="maxPeak"></param>
         public void Normalize(int stream, double maxPeak)
         {
             // 2. Считаем коэффициент (на сколько всё умножить, чтоб дотянуть до 1.0)
@@ -108,6 +155,78 @@ namespace AudioSampler.Services
 
         }
 
+        /// <summary>
+        /// Нормализация всего стрима для экспорта
+        /// </summary>
+        public async Task NormalizeAsync(int stream)
+        {
+            var samples = await GetSamplesFromStreamAsync(stream);
+            var maxPeak = GetMaxPeak(samples);
+
+            if (maxPeak <= 0) return; // Защита от тишины
+            var gain = 1.0f / (float)maxPeak;
+
+
+            var volumeParam = new VolumeParameters
+            {
+                fTarget = gain,                    // Наш коэффициент нормализации
+                lChannel = FXChannelFlags.All,     // Применить ко всем каналам (стерео/моно)
+                fCurrent = gain,                   // Текущая громкость (ставим такую же, чтоб без плавного перехода)
+                fTime = 0f                         // Время перехода (0 - мгновенно)
+            };
+            var fxHandle = Bass.ChannelSetFX(stream, EffectType.Volume, 0);
+            Bass.FXSetParameters(fxHandle, volumeParam);
+        }
+
+
+        /// <summary>
+        /// Нормализация выбранного участка стрима для экспорта
+        /// </summary>
+        public async Task NormalizeRangeAsync(int decodeStream, long startBytes, long bytesToRead)
+        {
+            // 1. Прыгаем в начало выделенного участка
+            Bass.ChannelSetPosition(decodeStream, startBytes);
+
+            // 2. Выделяем буфер под размер участка (или читаем чанками, если участок огромный)
+            // Для примера считаем, что выделенный кусок поместится в память для анализа пиков:
+            float[] sampleBuffer = new float[bytesToRead / sizeof(float)];
+
+            // Читаем ровно bytesToRead данных из стрима в наш массив float
+            int bytesRead = Bass.ChannelGetData(decodeStream, sampleBuffer, (int)bytesToRead);
+
+            // 3. Считаем пик только по прочитанному буферу
+            float maxPeak = 0f;
+            for (int i = 0; i < bytesRead / sizeof(float); i++)
+            {
+                float absValue = Math.Abs(sampleBuffer[i]);
+                if (absValue > maxPeak) maxPeak = absValue;
+            }
+
+            if (maxPeak <= 0) return; // Тишина
+            float gain = 1f / maxPeak;
+
+            // 4. Навешиваем наш рабочий Volume FX
+            var volumeEffect = Bass.ChannelSetFX(decodeStream, EffectType.Volume, 0);
+            var volumeParams = new VolumeParameters
+            {
+                fTarget = gain,
+                lChannel = FXChannelFlags.All,
+                fCurrent = gain,
+                fTime = 0f
+            };
+            Bass.FXSetParameters(volumeEffect, volumeParams);
+
+            // 5. КРИТИЧЕСКИ ВАЖНО: Возвращаем позицию стрима обратно в начало участка!
+            // Так как ChannelGetData сдвинул "курсор" стрима к концу участка.
+            Bass.ChannelSetPosition(decodeStream, startBytes);
+        }
+
+        /// <summary>
+        /// Определяем текущее положение воспроизведения в секундах
+        /// </summary>
+        /// <param name="stream"></param>
+        /// <param name="endSeconds"></param>
+        /// <returns></returns>
         public double CheckPlaybackPosition(int stream, double endSeconds)
         {
             // Получаем текущую секунду, которая играет прямо сейчас
@@ -117,8 +236,115 @@ namespace AudioSampler.Services
             return currentSeconds;
         }
 
+
+        /// <summary>
+        /// Экспорт аудио
+        /// </summary>
+        public async Task RenderToFileAsync(string inputPath, string outputPath, double startSeconds, double endSeconds, bool normalize, ExportFormat exportFormat = ExportFormat.wav)
+        {
+            if (string.IsNullOrEmpty(outputPath)) throw new Exception("Нет открытого файла для обрезки");
+
+            await Task.Run(async () =>
+            {
+                int decodeStream = Bass.CreateStream(inputPath, 0, 0, BassFlags.Decode | BassFlags.Float);
+                if (decodeStream == 0) throw new Exception("Ошибка обрезки");
+
+
+                try
+                {
+                    long startBytes = Bass.ChannelSeconds2Bytes(decodeStream, startSeconds);
+                    long endBytes = Bass.ChannelSeconds2Bytes(decodeStream, endSeconds);
+                    long bytesToRead = endBytes - startBytes;
+
+                    if (normalize)
+                    {
+                        await NormalizeRangeAsync(decodeStream, startBytes, bytesToRead);
+                    }
+                    else
+                    {
+                        Bass.ChannelSetPosition(decodeStream, startBytes);
+                    }
+
+                    if (exportFormat == ExportFormat.mp3)
+                    {
+                        // === ЛОГИКА ДЛЯ MP3 ===
+                        int encoder = BassEnc_Mp3.Start(decodeStream, "-b 320", EncodeFlags.Default, outputPath);
+                        if (encoder == 0) throw new Exception("Не удалось запустить кодировщик MP3");
+
+                        byte[] buffer = new byte[20480];
+                        long totalBytesRead = 0;
+
+                        // Для MP3 нам нужно прогонять данные через Bass.ChannelGetData,
+                        // чтобы они улетали в нативный энкодер libbassenc_mp3.so
+                        while (totalBytesRead < bytesToRead)
+                        {
+                            int toReadNow = (int)Math.Min(buffer.Length, bytesToRead - totalBytesRead);
+                            int read = Bass.ChannelGetData(decodeStream, buffer, toReadNow);
+                            if (read <= 0) break;
+
+                            totalBytesRead += read;
+                        }
+
+                        // Обязательно тушим энкодер после цикла, чтобы файл корректно закрылся
+                        BassEnc.EncodeStop(encoder);
+                    }
+                    else if (exportFormat == ExportFormat.wav)
+                    {
+                        // === ЛОГИКА ДЛЯ WAV ===
+                        Bass.ChannelGetInfo(decodeStream, out ChannelInfo info);
+
+                        int bitsPerSample = info.Flags.HasFlag(BassFlags.Float) ? 32 : 16;
+                        var format = new WaveFormat(info.Frequency, bitsPerSample, info.Channels);
+
+
+                        var encoder = BassEnc.EncodeStart(decodeStream, Filename: outputPath, EncodeFlags.PCM | EncodeFlags.ConvertFloatTo16BitInt, null);
+                        if (encoder == 0) return;
+
+                        byte[] buf = new byte[20480];
+                        long totalBytesRead1 = 0;
+
+                        while (totalBytesRead1 < bytesToRead)
+                        {
+                            int toReadNow = (int)Math.Min(buf.Length, bytesToRead - totalBytesRead1);
+                            int read = Bass.ChannelGetData(decodeStream, buf, toReadNow);
+                            if (read <= 0) break;
+
+                            totalBytesRead1 += read;
+                        }
+
+                        BassEnc.EncodeStop(encoder);
+
+                        //using (var fs = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
+                        //using (var waveWriter = new WaveFileWriter(fs, format))
+                        //{
+                        //    byte[] buf = new byte[20480];
+                        //    long totalBytesRead1 = 0;
+
+                        //    while (totalBytesRead1 < bytesToRead)
+                        //    {
+                        //        int toReadNow = (int)Math.Min(buf.Length, bytesToRead - totalBytesRead1);
+                        //        int read = Bass.ChannelGetData(decodeStream, buf, toReadNow);
+                        //        if (read <= 0) break;
+
+                        //        waveWriter.Write(buf, read);
+                        //        totalBytesRead1 += read;
+                        //    }
+                        //} // Здесь waveWriter закроется сам и допишет размеры
+                    }
+                }
+                finally
+                {
+                    Bass.StreamFree(decodeStream);
+                }
+            });
+        }
+
+
+
+
         //--------------------------------------------------------- PLAYBACK ------------------------------------------------------
 
+        #region PLAYBACK
         /// <summary>
         /// 2. ВОСПРОИЗВЕДЕНИЕ С РАЗНЫХ МЕСТ
         /// </summary>
@@ -156,118 +382,11 @@ namespace AudioSampler.Services
             Bass.ChannelStop(stream);
         }
 
-
-
-
-        /// <summary>
-        /// 3. НОРМАЛИЗАЦИЯ (Чистый C# над массивом float)
-        /// Находит самый громкий пик и подтягивает весь массив так, чтобы пик стал равен 1.0 (0 дБ)
-        /// </summary>
-        public float[] Normalize(float[] samples)
-        {
-            if (samples == null || samples.Length == 0) return samples;
-
-            // 1. Ищем максимальный пик амплитуды
-            float maxPeak = 0f;
-            for (int i = 0; i < samples.Length; i++)
-            {
-                float absValue = Math.Abs(samples[i]);
-                if (absValue > maxPeak) maxPeak = absValue;
-            }
-
-            // Если файл пустой или уже нормализован
-            if (maxPeak == 0f || Math.Abs(maxPeak - 1.0f) < 0.001f) return samples;
-
-            // 2. Вычисляем коэффициент нормализации
-            float gain = 1.0f / maxPeak;
-
-            // 3. Умножаем каждый сэмпл на коэффициент
-            for (int i = 0; i < samples.Length; i++)
-            {
-                samples[i] *= gain;
-            }
-
-            return samples;
-        }
+        #endregion
 
         //-------------------------------------------------------- RECORDING ---------------------------------------------------------------
 
-        /// <summary>
-        /// 4. ОБРЕЗКА И ЭКСПОРТ (Из текущего открытого файла)
-        /// </summary>
-        public async Task TrimAndSaveAsync(string outputPath, double startSeconds, double endSeconds, bool toMp3 = true)
-        {
-            if (string.IsNullOrEmpty(outputPath)) throw new Exception("Нет открытого файла для обрезки");
-
-            await Task.Run(() =>
-            {
-                int decodeStream = Bass.CreateStream(outputPath, 0, 0, BassFlags.Decode);
-                if (decodeStream == 0) throw new Exception("Ошибка обрезки");
-
-                try
-                {
-                    long startBytes = Bass.ChannelSeconds2Bytes(decodeStream, startSeconds);
-                    long endBytes = Bass.ChannelSeconds2Bytes(decodeStream, endSeconds);
-                    long bytesToRead = endBytes - startBytes;
-
-                    Bass.ChannelSetPosition(decodeStream, startBytes);
-
-                    if (toMp3)
-                    {
-                        // === ЛОГИКА ДЛЯ MP3 ===
-                        int encoder = BassEnc_Mp3.Start(decodeStream, "-b 192", EncodeFlags.Default, outputPath);
-                        if (encoder == 0) throw new Exception("Не удалось запустить кодировщик MP3");
-
-                        byte[] buffer = new byte[20480];
-                        long totalBytesRead = 0;
-
-                        // Для MP3 нам нужно прогонять данные через Bass.ChannelGetData,
-                        // чтобы они улетали в нативный энкодер libbassenc_mp3.so
-                        while (totalBytesRead < bytesToRead)
-                        {
-                            int toReadNow = (int)Math.Min(buffer.Length, bytesToRead - totalBytesRead);
-                            int read = Bass.ChannelGetData(decodeStream, buffer, toReadNow);
-                            if (read <= 0) break;
-
-                            totalBytesRead += read;
-                        }
-
-                        // Обязательно тушим энкодер после цикла, чтобы файл корректно закрылся
-                        BassEnc.EncodeStop(encoder);
-                    }
-                    else
-                    {
-                        // === ЛОГИКА ДЛЯ WAV ===
-                        Bass.ChannelGetInfo(decodeStream, out ChannelInfo info);
-
-                        int bitsPerSample = info.Flags.HasFlag(BassFlags.Float) ? 32 : 16;
-                        var format = new WaveFormat(info.Frequency, bitsPerSample, info.Channels);
-
-                        using (var fs = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
-                        using (var waveWriter = new WaveFileWriter(fs, format))
-                        {
-                            byte[] buf = new byte[20480];
-                            long totalBytesRead1 = 0;
-
-                            while (totalBytesRead1 < bytesToRead)
-                            {
-                                int toReadNow = (int)Math.Min(buf.Length, bytesToRead - totalBytesRead1);
-                                int read = Bass.ChannelGetData(decodeStream, buf, toReadNow);
-                                if (read <= 0) break;
-
-                                waveWriter.Write(buf, read);
-                                totalBytesRead1 += read;
-                            }
-                        } // Здесь waveWriter закроется сам и допишет размеры
-                    }
-                }
-                finally
-                {
-                    Bass.StreamFree(decodeStream);
-                }
-            });
-        }
-
+        #region RECORDING
 
         /// <summary>
         /// НАЧАТЬ ЗАПИСЬ В WAV
@@ -350,6 +469,8 @@ namespace AudioSampler.Services
             // Освобождаем микрофон
             Bass.RecordFree();
         }
+
+        #endregion
 
         //------------------------------------------------------------------------------------------------------------------------------------
 
