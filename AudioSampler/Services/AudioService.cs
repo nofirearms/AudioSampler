@@ -1,4 +1,5 @@
 ﻿using AudioSampler.Model;
+using Avalonia.Platform.Storage;
 using ManagedBass;
 using ManagedBass.Enc;
 using ManagedBass.Fx;
@@ -240,9 +241,9 @@ namespace AudioSampler.Services
         /// <summary>
         /// Экспорт аудио
         /// </summary>
-        public async Task RenderToFileAsync(string inputPath, string outputPath, double startSeconds, double endSeconds, bool normalize, ExportFormat exportFormat = ExportFormat.wav)
+        public async Task RenderToFileAsync(string inputPath, IStorageFolder outputFolder, string outputName, double startSeconds, double endSeconds, bool normalize, ExportFormat exportFormat = ExportFormat.wav)
         {
-            if (string.IsNullOrEmpty(outputPath)) throw new Exception("Нет открытого файла для обрезки");
+            //if (string.IsNullOrEmpty(outputPath)) throw new Exception("Нет открытого файла для обрезки");
 
             await Task.Run(async () =>
             {
@@ -256,6 +257,16 @@ namespace AudioSampler.Services
                     long endBytes = Bass.ChannelSeconds2Bytes(decodeStream, endSeconds);
                     long bytesToRead = endBytes - startBytes;
 
+                    //временная папка для энкода, из неё потом копируем в нужную
+                    var cacheDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "cache");
+                    if (!Directory.Exists(cacheDir))
+                    {
+                        Directory.CreateDirectory(cacheDir);
+                    }
+
+                    string tempOutputPath = Path.Combine(cacheDir, outputName);
+
+
                     if (normalize)
                     {
                         await NormalizeRangeAsync(decodeStream, startBytes, bytesToRead);
@@ -267,9 +278,13 @@ namespace AudioSampler.Services
 
                     if (exportFormat == ExportFormat.mp3)
                     {
-                        // === ЛОГИКА ДЛЯ MP3 ===
-                        int encoder = BassEnc_Mp3.Start(decodeStream, "-b 320", EncodeFlags.Default, outputPath);
-                        if (encoder == 0) throw new Exception("Не удалось запустить кодировщик MP3");
+
+                        int encoder = BassEnc_Mp3.Start(decodeStream, "-b 320", EncodeFlags.Default, tempOutputPath);
+                        if (encoder == 0)
+                        {
+                            var errorCode = Bass.LastError;
+                            throw new Exception($"BASS Error: {errorCode}");
+                        }
 
                         byte[] buffer = new byte[20480];
                         long totalBytesRead = 0;
@@ -287,6 +302,7 @@ namespace AudioSampler.Services
 
                         // Обязательно тушим энкодер после цикла, чтобы файл корректно закрылся
                         BassEnc.EncodeStop(encoder);
+
                     }
                     else if (exportFormat == ExportFormat.wav)
                     {
@@ -297,7 +313,7 @@ namespace AudioSampler.Services
                         var format = new WaveFormat(info.Frequency, bitsPerSample, info.Channels);
 
 
-                        var encoder = BassEnc.EncodeStart(decodeStream, Filename: outputPath, EncodeFlags.PCM | EncodeFlags.ConvertFloatTo16BitInt, null);
+                        var encoder = BassEnc.EncodeStart(decodeStream, tempOutputPath, EncodeFlags.PCM | EncodeFlags.ConvertFloatTo16BitInt, null);
                         if (encoder == 0) return;
 
                         byte[] buf = new byte[20480];
@@ -331,6 +347,29 @@ namespace AudioSampler.Services
                         //    }
                         //} // Здесь waveWriter закроется сам и допишет размеры
                     }
+
+                    //ПОСЛЕ ЭНКОДА КОПИРУЕМ В ТАРГЕТНУЮ ПАПКУ
+                    // Создаем файл там, куда пользователь разрешил доступ
+                    IStorageFile? userFile = await outputFolder.CreateFileAsync($"{outputName}.{exportFormat.ToString()}");
+
+                    if (userFile != null)
+                    {
+                        // Перекачиваем байты через стандартные стримы C#
+                        using (var sourceStream = File.OpenRead(tempOutputPath))
+                        using (var destStream = await userFile.OpenWriteAsync())
+                        {
+                            await sourceStream.CopyToAsync(destStream);
+                        }
+
+                        // Подчищаем за собой кэш, чтобы не забивать память телефона
+                        File.Delete(tempOutputPath);
+
+                    }
+                    else
+                    {
+                        throw new Exception("Android не разрешил создать файл в выбранной папке.");
+                    }
+
                 }
                 finally
                 {

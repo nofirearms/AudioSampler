@@ -27,7 +27,7 @@
                     CornerRadius="10"  
                     IsReadOnly="True" 
                     Background="{DynamicResource Background3}"
-                    Text="{Binding Path}" 
+                    Text="{Binding Folder.Path}" 
                     > 
                     <TextBox.InnerRightContent>
                         <StackPanel Orientation="Horizontal">

@@ -1,6 +1,7 @@
 ﻿
 using AudioSampler.Model;
 using Avalonia.Xaml.Interactions.Core;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -34,13 +35,13 @@ namespace AudioSampler.Database
         }
         public async Task ChangeValue(SettingKey key, string value)
         {
-            ChangeValue(key.ToString(), value);
+            ChangeValue(Enum.GetName(typeof(SettingKey), key), value);
         }
 
 
         public Setting Get(string key) => _context.Settings.FirstOrDefault(s => s.Key == key);
 
-        public Setting Get(SettingKey key) => _context.Settings.FirstOrDefault(s => s.Key == key.ToString());
+        public Setting Get(SettingKey key) => _context.Settings.FirstOrDefault(s => s.Key == Enum.GetName(typeof(SettingKey), key));
 
         private async Task SaveDatabase() => await _context.SaveChangesAsync();
     }

@@ -26,8 +26,11 @@ namespace AudioSampler.Services
             if (lifetime is IClassicDesktopStyleApplicationLifetime desktop)
                 return desktop.MainWindow;
 
-            if (lifetime is ISingleViewApplicationLifetime mobile && mobile.MainView != null)
-                return TopLevel.GetTopLevel(mobile.MainView);
+            if (lifetime is IActivityApplicationLifetime mobile && mobile != null)
+            {
+                return TopLevel.GetTopLevel(App.Current.AndroidRootView);
+            }
+                
 
             throw new InvalidOperationException("Не удалось найти TopLevel. Приложение еще не инициализировано?");
         }

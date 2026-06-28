@@ -271,7 +271,8 @@ namespace AudioSampler.Android.Services
                 writer.Write(totalDataLength);                                // Размер только аудио данных
 
 
-                var durationMs = (totalDataLength * 1000) / (sampleRate * channels * (bitsPerSample / 8));
+                long durationMs = ((long)totalDataLength * 1000) / (sampleRate * channels * (bitsPerSample / 8));
+
                 WeakReferenceMessenger.Default.Send(new RecordFinishedMessage(new RecordResult(file, TimeSpan.FromMilliseconds(durationMs), Path.GetFileNameWithoutExtension(file), fileStream.Length)));
             }
 

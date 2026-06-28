@@ -6,6 +6,7 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
@@ -125,32 +126,41 @@ namespace AudioSampler.ViewModels.Modal
         public async void Export()
         {
             //Собираем настройки для модального окна
-
-            var setting = _dataService.SettingsRepository.Get(SettingKey.FolderBookmark);
-
-            //var folderBookmark = _dataService.FolderBooksmarksReposity.GetAll().FirstOrDefault(b => b.Bookmark == value);
-
-            var folderBookmark = setting is null ? new FolderBookmark("DEFAULT") : new FolderBookmark(setting.Value);
-
-            var folder = await _fileService.GetStorageFolderFromFolderBookmarkAsync(folderBookmark);
-
-            //Открываем модальное окно с найстройками экспорта
-            var result = await _modalService.OpenExportModal(new ExportSettings() { Name = Name, Path = folder.Path.AbsolutePath, Normalize = _normalized, FolderBookmark = folderBookmark });
-
-            if (result.Success)
+            try
             {
+                var setting = _dataService.SettingsRepository.Get(SettingKey.FolderBookmark);
 
-                await _audioService.RenderToFileAsync(_audioSample.Path, 
-                    Path.Combine(
-                        result.Data.Path, 
-                        $"{result.Data.Name}.{result.Data.Format}"),
+                //var folderBookmark = _dataService.FolderBooksmarksReposity.GetAll().FirstOrDefault(b => b.Bookmark == value);
+
+                var folderBookmark = setting is null ? new FolderBookmark("DEFAULT") : new FolderBookmark(setting.Value);
+
+                var folder = await _fileService.GetStorageFolderFromFolderBookmarkAsync(folderBookmark);
+
+                //Открываем модальное окно с найстройками экспорта
+                var result = await _modalService.OpenExportModal(new ExportSettings() { Name = Name, Folder = folder, Normalize = _normalized, FolderBookmark = folderBookmark });
+
+                if (result.Success)
+                {
+
+                    await _audioService.RenderToFileAsync(
+                        _audioSample.Path, 
+                        result.Data.Folder, 
+                        result.Data.Name,
                         result.Data.Trim ? StartPercent * _audioSample.Duration.TotalSeconds : 0,
-                        result.Data.Trim ? EndPercent * _audioSample.Duration.TotalSeconds : _audioSample.Duration.TotalSeconds, 
-                        result.Data.Normalize, 
+                        result.Data.Trim ? EndPercent * _audioSample.Duration.TotalSeconds : _audioSample.Duration.TotalSeconds,
+                        result.Data.Normalize,
                         result.Data.Format);
 
-                await _dataService.SettingsRepository.ChangeValue(SettingKey.FolderBookmark, result.Data.FolderBookmark.Bookmark);
+                    await _dataService.SettingsRepository.ChangeValue(SettingKey.FolderBookmark, result.Data.FolderBookmark.Bookmark);
+                }
             }
+            catch(Exception ex)
+            {
+                Debug.WriteLine(ex);
+            }
+            
+
+
             
         }
     }

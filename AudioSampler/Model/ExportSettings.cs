@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Avalonia.Platform.Storage;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -8,7 +9,7 @@ namespace AudioSampler.Model
     {
 
         public string Name { get; set; }
-        public string Path {  get; set; }
+        public IStorageFolder Folder{  get; set; }
         public ExportFormat Format { get; set; }
         public bool Trim { get; set; }
         public bool Normalize { get; set; }

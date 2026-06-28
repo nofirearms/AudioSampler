@@ -10,8 +10,10 @@ using Avalonia.Markup.Xaml;
 using Avalonia.Styling;
 using ManagedBass;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -20,6 +22,8 @@ namespace AudioSampler
 {
     public partial class App : Application
     {
+
+        public Control? AndroidRootView { get; private set; }
 
         public override void Initialize()
         {
@@ -83,10 +87,18 @@ namespace AudioSampler
             }
             else if (ApplicationLifetime is IActivityApplicationLifetime singleViewFactoryApplicationLifetime)
             {
-                singleViewFactoryApplicationLifetime.MainViewFactory = () => new PageNavigationHost()
+                singleViewFactoryApplicationLifetime.MainViewFactory = () =>
                 {
-                    Page = new MainView { DataContext = mainViewModel }
+                    var host = new PageNavigationHost()
+                    {
+                        Page = new MainView { DataContext = mainViewModel }
+                    };
+                    App.Current.AndroidRootView = host;
+
+                    return host;
                 };
+
+                
             }
             else if (ApplicationLifetime is ISingleViewApplicationLifetime singleViewPlatform)
             {

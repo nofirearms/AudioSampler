@@ -18,8 +18,9 @@ namespace AudioSampler.ViewModels.Modal
     {
         private readonly FileService _fileService;
         private readonly DataService _dataService;
+
         [ObservableProperty]
-        private string _path;
+        private IStorageFolder _folder;
 
         [ObservableProperty]
         private string _fileName;
@@ -33,7 +34,7 @@ namespace AudioSampler.ViewModels.Modal
         partial void OnSelectedFolderChanged(FolderBookmarkListItem? oldValue, FolderBookmarkListItem newValue)
         {
             if (newValue is null) return;
-            Path = newValue.Path;
+            Folder = newValue.Storage;
             _bookmark = newValue.Bookmark;
         }
 
@@ -56,7 +57,7 @@ namespace AudioSampler.ViewModels.Modal
             _fileService = fileService;
             _dataService = dataService;
 
-            _path = exportSettings.Path;
+            _folder = exportSettings.Folder;
             _fileName = exportSettings.Name;
             _format = exportSettings.Format;
             _trim = exportSettings.Trim;
@@ -93,8 +94,7 @@ namespace AudioSampler.ViewModels.Modal
             if(result != null)
             {
                 _bookmark = result;
-                var storageFolder = await _fileService.GetStorageFolderFromFolderBookmarkAsync(_bookmark) ;
-                Path = storageFolder.Path.AbsolutePath;
+                Folder = await _fileService.GetStorageFolderFromFolderBookmarkAsync(_bookmark);
             }
         }
 
@@ -121,7 +121,7 @@ namespace AudioSampler.ViewModels.Modal
                 Format = Format,
                 Name = FileName,
                 Normalize = Normalize,
-                Path = Path,
+                Folder = Folder,
                 FolderBookmark = _bookmark,
                 Trim = Trim
             };
@@ -148,6 +148,6 @@ namespace AudioSampler.ViewModels.Modal
         public IStorageFolder Storage { get; set; }
         public FolderBookmark Bookmark { get; set; }
 
-        public string Path => Uri.UnescapeDataString(Storage.Path.AbsolutePath);
+        public string Path => Storage.Path.LocalPath; //Uri.UnescapeDataString(Storage.Path.AbsolutePath); 
     }
 }

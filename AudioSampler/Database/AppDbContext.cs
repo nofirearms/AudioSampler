@@ -38,8 +38,8 @@ namespace AudioSampler.Database
         {
             base.OnConfiguring(optionsBuilder);
 
-            //var dbFolder = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
-            string appDataRoot = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            var appDataRoot = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
+            //string appDataRoot = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             string dbFolder = Path.Combine(appDataRoot, "AudioSampler");
             // Железно проверяем и создаем директорию, если её нет
             if (!Directory.Exists(dbFolder))
