@@ -1,0 +1,66 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="700" d:DesignHeight="450"
+             xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             xmlns:vm="using:AudioSampler.ViewModels"
+             xmlns:modal="using:AudioSampler.ViewModels.Modal"
+             x:Class="AudioSampler.Views.FoldersListView"
+             x:DataType="modal:FoldersListViewModel">
+
+    <Grid RowDefinitions="*, auto, auto">
+        <ListBox Classes="CustomSelectedBackground" ItemsSource="{Binding Folders}" SelectedItem="{Binding SelectedFolder}" >
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Border>
+                        <StackPanel Orientation="Vertical">
+                            <TextBlock Text="{Binding Name}"/>
+                            <TextBlock Text="{Binding Path}" Foreground="{DynamicResource InactiveForeground1}" FontSize="12"/>
+                        </StackPanel>                        
+                    </Border>                   
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
+        <StackPanel Orientation="Horizontal" Grid.Row="1" HorizontalAlignment="Center">
+            <Button 
+                Theme="{StaticResource FloatTransparentButton}"
+                Command="{Binding AddExportFolderCommand}"
+                Margin="0 0 0 0" Padding="0"  Width="50" Height="50" CornerRadius="30" >
+                <materialIcons:MaterialIcon 
+                    Kind="FolderPlus" 
+                    VerticalAlignment="Center" 
+                    Width="30" Height="30" />    
+            </Button>
+            <Button 
+                Theme="{StaticResource FloatTransparentButton}"
+                Command="{Binding RemoveFolderCommand}"
+                Margin="0 0 0 0" Padding="0"  Width="50" Height="50" CornerRadius="30" >
+                <materialIcons:MaterialIcon 
+                    Kind="FolderMinus" 
+                    VerticalAlignment="Center" 
+                    Width="30" Height="30" />    
+            </Button>
+        </StackPanel>
+        <StackPanel  Orientation="Horizontal" Grid.Row="2" HorizontalAlignment="Right">
+            <Button 
+                Theme="{DynamicResource RoundAccentButton}"
+                Command="{Binding AcceptCommand}"
+                Width="50" 
+                Height="50" 
+                Padding="0">
+                <materialIcons:MaterialIcon IconSize="40" Kind="CheckBold" />
+            </Button>
+<!--            <Button 
+                VerticalAlignment="Bottom"    
+                Command="{Binding CancelCommand}" 
+                Width="40" 
+                Height="40" 
+                Margin="5 0 0 0" 
+                Theme="{DynamicResource RoundAccentButton}">
+                <materialIcons:MaterialIcon Kind="CloseBold" Width="30" Height="30"/>
+            </Button>-->
+        </StackPanel>
+    </Grid>
+</UserControl>

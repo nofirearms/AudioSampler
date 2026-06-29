@@ -54,5 +54,10 @@ namespace AudioSampler.Services
         {
             return await ShowModalAsync(_factory.Create<ExportAudioSampleViewModel>(settings));
         }
+
+        public async Task<ModalResult<FolderBookmarkListItem>> OpenFoldersListModal(FolderBookmark bookmark)
+        {
+            return await ShowModalAsync(_factory.Create<FoldersListViewModel>(bookmark));
+        }
     }
 }

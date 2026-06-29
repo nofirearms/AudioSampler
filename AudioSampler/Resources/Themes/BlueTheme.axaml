@@ -10,7 +10,7 @@
     <Color x:Key="AccentColor3">#52729a</Color>
 
     <Color x:Key="InactiveColor1">#a1a1a1</Color>
-
+    <Color x:Key="SelectedListBoxItemColor1">White</Color>
 
    <SolidColorBrush x:Key="Background1" Color="{StaticResource BackgroundColor1}"/>
     <SolidColorBrush x:Key="Background2" Color="{StaticResource BackgroundColor2}"/>

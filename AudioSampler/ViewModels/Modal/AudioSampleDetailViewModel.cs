@@ -159,9 +159,10 @@ namespace AudioSampler.ViewModels.Modal
                 Debug.WriteLine(ex);
             }
             
-
-
             
         }
+
+        [RelayCommand]
+        public void Cancel() => base.Cancel();
     }
 }

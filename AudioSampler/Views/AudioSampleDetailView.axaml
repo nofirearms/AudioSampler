@@ -25,7 +25,6 @@
 
                     Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                     > 
-
                     <TextBox.Resources>
                         <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="{DynamicResource BackgroundColor1}" />
                         <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="{DynamicResource AccentColor2}" />
@@ -44,13 +43,19 @@
 
                 </Border>
                 
-                <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center">
+                <StackPanel Margin="5 0" Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center">
                     <Grid>
 
-                        <Button Theme="{StaticResource FloatTransparentButton}" Width="40" Height="40" Margin="5 0" Command="{Binding StopCommand}" IsVisible="{Binding IsPlaying}">
+                        <Button 
+                            Theme="{StaticResource FloatTransparentButton}" 
+                            Command="{Binding StopCommand}" 
+                            IsVisible="{Binding IsPlaying}">
                             <materialIcons:MaterialIcon Kind="Stop" Width="30" Height="30"/>
                         </Button>
-                        <Button Theme="{StaticResource FloatTransparentButton}" Width="40" Height="40" Margin="5 0" Command="{Binding PlayCommand}" IsVisible="{Binding IsPlaying, Converter={StaticResource ReverseBoolConverter}}">
+                        <Button 
+                            Theme="{StaticResource FloatTransparentButton}" 
+                             Command="{Binding PlayCommand}" 
+                            IsVisible="{Binding IsPlaying, Converter={StaticResource ReverseBoolConverter}}">
                             <materialIcons:MaterialIcon Kind="Play" Width="30" Height="30"/>
                         </Button>
                     </Grid>
@@ -63,20 +68,37 @@
                         <materialIcons:MaterialIcon Kind="ContentCut" Width="30" Height="30"/>
                     </controls:FloatingButton>-->
 
-                    <ToggleButton Theme="{StaticResource FloatTransparentToggle}" Width="40" Height="40" Margin="5 0" Command="{Binding NormalizeCommand}" CommandParameter="{Binding $self.IsChecked}">
+                    <ToggleButton 
+                        Theme="{StaticResource FloatTransparentToggle}" 
+                        Margin="0 0" Command="{Binding NormalizeCommand}" 
+                        CommandParameter="{Binding $self.IsChecked}">
                         <materialIcons:MaterialIcon Kind="Waveform" Width="30" Height="30"/>
                     </ToggleButton>
 
                 </StackPanel>
-                <StackPanel Orientation="Horizontal" Grid.Row="3" HorizontalAlignment="Right" Margin="0 10 0 0">
-                    <Button Theme="{StaticResource FloatTransparentButton}"  Width="45" Height="45" Margin="5 0">
-                        <materialIcons:MaterialIcon Kind="ContentSaveEdit" IconSize="25"/>
+                <StackPanel Orientation="Horizontal" Grid.Row="3" HorizontalAlignment="Right" Margin="0 30 0 0">
+                    <Button 
+                        Theme="{StaticResource RoundAccentButton}" 
+                        Margin="5 0" 
+                        Width="50" 
+                        Height="50">
+                        <materialIcons:MaterialIcon Kind="ContentSaveEdit" IconSize="30"/>
                     </Button>
-                    <Button Command="{Binding ExportCommand}" Theme="{StaticResource FloatTransparentButton}" Width="45" Height="45" Margin="0 0">
-                        <materialIcons:MaterialIcon Kind="ContentSaveMove" IconSize="25"/>
+                    <Button 
+                        Command="{Binding ExportCommand}" 
+                        Theme="{StaticResource RoundAccentButton}" 
+                        Margin="0 0"
+                        Width="50" 
+                        Height="50">
+                        <materialIcons:MaterialIcon Kind="ContentSaveMove" IconSize="30"/>
                     </Button>
-<!--                    <Button  Width="40" Height="40" Margin="5 0">
-                        <materialIcons:MaterialIcon Kind="Close" Width="30" Height="30"/>
+<!--                    <Button 
+                        VerticalAlignment="Bottom"    
+                        Width="40" 
+                        Height="40" 
+                        Margin="5 0 0 0" 
+                        Theme="{DynamicResource RoundAccentButton}">
+                        <materialIcons:MaterialIcon Kind="CloseBold" Width="30" Height="30"/>
                     </Button>-->
                 </StackPanel>
             </Grid>

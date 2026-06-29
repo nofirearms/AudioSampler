@@ -18,26 +18,13 @@ namespace AudioSampler.ViewModels.Modal
     {
         private readonly FileService _fileService;
         private readonly DataService _dataService;
+        private readonly ModalService _modalService;
 
         [ObservableProperty]
         private IStorageFolder _folder;
 
         [ObservableProperty]
         private string _fileName;
-
-        [ObservableProperty]
-        private ObservableCollection<FolderBookmarkListItem> _folders = new();
-
-        [ObservableProperty]
-        private FolderBookmarkListItem _selectedFolder;
-
-        partial void OnSelectedFolderChanged(FolderBookmarkListItem? oldValue, FolderBookmarkListItem newValue)
-        {
-            if (newValue is null) return;
-            Folder = newValue.Storage;
-            _bookmark = newValue.Bookmark;
-        }
-
 
         public List<ExportFormat> Formats => Enum.GetValues(typeof(ExportFormat)).Cast<ExportFormat>().ToList();
 
@@ -52,39 +39,27 @@ namespace AudioSampler.ViewModels.Modal
 
         private FolderBookmark _bookmark;
 
-        public ExportAudioSampleViewModel(DataService dataService, FileService fileService, ExportSettings exportSettings)
+        public ExportAudioSampleViewModel(DataService dataService, FileService fileService, ModalService modalService, ExportSettings exportSettings)
         {
             _fileService = fileService;
             _dataService = dataService;
+            _modalService = modalService;
 
             _folder = exportSettings.Folder;
-            _fileName = exportSettings.Name;
+            _fileName = exportSettings.Name; 
             _format = exportSettings.Format;
             _trim = exportSettings.Trim;
             _normalize = exportSettings.Normalize;
             _bookmark = exportSettings.FolderBookmark;
 
-            LoadData();
+            Header = "Export";
+
+            var _ = LoadDataAsync();
         }
 
-        private async Task LoadData()
+        private async Task LoadDataAsync()
         {
-            var bookmarks = _dataService.FolderBooksmarksReposity.GetAll();
-            foreach(var bookmark in bookmarks)
-            {
-                var storage = await _fileService.GetStorageFolderFromFolderBookmarkAsync(bookmark);
-                var item = new FolderBookmarkListItem
-                {
-                    Storage = storage,
-                    Bookmark = bookmark
-                };
-                Folders.Add(item);
-
-                if(bookmark.Bookmark == _bookmark.Bookmark)
-                {
-                    SelectedFolder = item;
-                }
-            }
+            
         }
 
         [RelayCommand]
@@ -99,17 +74,13 @@ namespace AudioSampler.ViewModels.Modal
         }
 
         [RelayCommand]
-        public async void AddExportFolder()
+        public async void OpenFoldersList()
         {
-            var result = await _fileService.RequestFolderBookmarkAsync(false);
-            if (result != null)
+            var result = await _modalService.OpenFoldersListModal(_bookmark);
+            if (result.Success)
             {
-                _bookmark = result;
-                var storageFolder = await _fileService.GetStorageFolderFromFolderBookmarkAsync(_bookmark);
-                await _dataService.FolderBooksmarksReposity.CreateAsync(_bookmark);
-                var item = new FolderBookmarkListItem { Bookmark = _bookmark, Storage = storageFolder};
-                Folders.Add(item);
-                SelectedFolder = item;
+                Folder = result.Data.Storage;
+                _bookmark = result.Data.Bookmark;
             }
         }
 
@@ -130,24 +101,7 @@ namespace AudioSampler.ViewModels.Modal
         }
 
         [RelayCommand]
-        public async void RemoveFolder()
-        {
-            if (SelectedFolder is null) return;
+        public void Cancel() => base.Cancel();
 
-            if (SelectedFolder.Bookmark.Bookmark == "DEFAULT") return;
-
-            await _dataService.FolderBooksmarksReposity.RemoveAsync(SelectedFolder.Bookmark);
-
-            Folders.Remove(SelectedFolder);
-            
-        }
-    }
-
-    public class FolderBookmarkListItem
-    {
-        public IStorageFolder Storage { get; set; }
-        public FolderBookmark Bookmark { get; set; }
-
-        public string Path => Storage.Path.LocalPath; //Uri.UnescapeDataString(Storage.Path.AbsolutePath); 
     }
 }

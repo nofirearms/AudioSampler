@@ -23,6 +23,7 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceInclude Source="avares://AudioSampler/Resources/Styles/Brushes.axaml" />
                 <ResourceInclude Source="avares://AudioSampler/Resources/Styles/Controls.axaml" />
+                <ResourceInclude Source="avares://AudioSampler/Resources/Styles/Properties.axaml" />
             </ResourceDictionary.MergedDictionaries>
 
             <ResourceDictionary.ThemeDictionaries>

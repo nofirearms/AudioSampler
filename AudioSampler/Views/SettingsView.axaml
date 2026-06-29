@@ -3,52 +3,33 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             xmlns:controls="clr-namespace:Material.Styles.Controls;assembly=Material.Styles"
              xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              x:Class="AudioSampler.Views.SettingsView">
 
         <Border MinHeight="200">
             <Grid RowDefinitions="*, auto">
-                <StackPanel >
-                    <TextBlock Text="Export folder" Margin="10 0" Foreground="{DynamicResource InactiveForeground1}"/>
-                    <Border BoxShadow="0 2 5 -1 #40000000" CornerRadius="30" Margin="5 2">
-                        <TextBox 
-                            Classes="solo" 
-                            Theme="{StaticResource SoloTextBox}" 
-                            CornerRadius="10"  IsReadOnly="True" 
-                            Background="{DynamicResource Background3}"
-                            Text="" 
-                            > 
-                            <TextBox.InnerRightContent>
-                                <Button Margin="0 0 0 0" Padding="0" Theme="{StaticResource MaterialFlatButton}" Width="35" Height="35" CornerRadius="30" >
-                                    <materialIcons:MaterialIcon 
-                                        Foreground="{DynamicResource AccentBrush1}" 
-                                        Kind="Folder" 
-                                        VerticalAlignment="Center" 
-                                        Width="30" Height="25" 
-                                        Margin="5 0"/>    
-                                </Button>
-                            </TextBox.InnerRightContent>
-                        </TextBox>
-                    </Border>
-                </StackPanel>
+
+
+
 
                 <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Grid.Row="1" Margin="5 5 5 0">
-                    <controls:FloatingButton>
-                        <materialIcons:MaterialIcon 
-                            Kind="ContentSaveOutline" 
-                            VerticalAlignment="Center" 
-                            Width="30" Height="25" 
-                            Margin="5 0"/>    
-                    </controls:FloatingButton>
-                    <controls:FloatingButton Classes="Mini" Margin="5 5 5 0">
-                        <materialIcons:MaterialIcon 
-                                
-                            Kind="Close" 
-                            VerticalAlignment="Center" 
-                            Width="30" Height="25" 
-                            Margin="5 0"/>    
-                    </controls:FloatingButton>
+                    <Button 
+                        Theme="{DynamicResource RoundAccentButton}"
+
+                        Width="50" 
+                        Height="50" 
+                        Padding="0">
+                        <materialIcons:MaterialIcon IconSize="40" Kind="ContentSave" />
+                    </Button>
+<!--                    <Button 
+                        VerticalAlignment="Bottom"    
+
+                        Width="40" 
+                        Height="40" 
+                        Margin="5 0 0 0" 
+                        Theme="{DynamicResource RoundAccentButton}">
+                        <materialIcons:MaterialIcon Kind="CloseBold" Width="30" Height="30"/>
+                    </Button>-->
                 </StackPanel>
             </Grid>
 

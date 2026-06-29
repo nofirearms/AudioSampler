@@ -41,17 +41,21 @@ namespace AudioSampler.Controls
 
             Update();
 
+            this.HorizontalContentAlignment = Avalonia.Layout.HorizontalAlignment.Center;
+            this.VerticalContentAlignment = Avalonia.Layout.VerticalAlignment.Center;
         }
 
+
+        protected override Type StyleKeyOverride => typeof(Button);
 
         public void Update()
         {
             Content = SelectedItem?.ToString() ?? "";
         }
 
-        protected override void OnPointerPressed(PointerPressedEventArgs e)
+        protected override void OnClick()
         {
-            base.OnPointerPressed(e);
+            base.OnClick();
 
             if (Items == null || Items.Count == 0)
             {

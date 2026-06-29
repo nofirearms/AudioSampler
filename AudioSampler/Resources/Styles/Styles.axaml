@@ -21,6 +21,10 @@
             <Setter Property="RenderTransform" Value="scale(0.95)" />
         </Style>
 
+        <Style Selector="Button.CustomInactive:disabled">
+            <Setter Property="Foreground" Value="{DynamicResource InactiveForeground1}"/>
+        </Style>
+
     <!-- TOGGLE BUTTONS -->
 
         <Style Selector="ToggleButton">
@@ -38,7 +42,7 @@
 
     <!-- LIST BOX -->
 
-      <Style Selector="ListBoxItem">
+      <Style Selector="ListBox.MainList ListBoxItem">
             <Setter Property="IsSelected" Value="False" />
             <Setter Property="Focusable" Value="False" />
             
@@ -53,15 +57,39 @@
             </Setter>
         </Style>
 
-        <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Style Selector="ListBox.MainList ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
             <Setter Property="Background" Value="Transparent" />
         </Style>
-        <Style Selector="ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
+        <Style Selector="ListBox.MainList ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
             <Setter Property="Background" Value="Transparent" />
         </Style>
 
-        <Style Selector="ListBoxItem:pressed">
+        <Style Selector="ListBox.MainList ListBoxItem:pressed">
             <Setter Property="RenderTransform" Value="scale(0.98)" />
+        </Style>
+
+
+
+       <Style Selector="ListBox.CustomSelectedBackground ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background">
+                <Setter.Value>
+                    <SolidColorBrush Color="{DynamicResource SelectedListBoxItemColor1}" Opacity="0.1"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style Selector="ListBox.CustomSelectedBackground ListBoxItem:selected:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background">
+                <Setter.Value>
+                    <SolidColorBrush Color="{DynamicResource SelectedListBoxItemColor1}" Opacity="0.15"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+            <Style Selector="ListBox.CustomSelectedBackground ListBoxItem:pointerover:not(:selected) /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background">
+                <Setter.Value>
+                    <SolidColorBrush Color="{DynamicResource SelectedListBoxItemColor1}" Opacity="0.05"/>
+                </Setter.Value>
+            </Setter>
         </Style>
 
     <!-- TextBox -->

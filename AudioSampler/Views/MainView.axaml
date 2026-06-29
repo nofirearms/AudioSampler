@@ -40,8 +40,7 @@
                         CaretBrush="{DynamicResource AccentBrush1}"
                         VerticalContentAlignment="Center"
                         Background="{DynamicResource Background1}"
-                        Text="{Binding NameTextFilter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
-                        > 
+                        Text="{Binding NameTextFilter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" > 
 
                         <TextBox.Resources>
                             <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="{DynamicResource BackgroundColor1}" />
@@ -61,6 +60,7 @@
 
             <Grid x:Name="SamplesListGrid" Grid.Row="1">
                 <ListBox 
+                    Classes="MainList"
                     ItemsSource="{Binding AudioSamples}" 
                     Background="{DynamicResource Background2}"
                     ScrollViewer.VerticalSnapPointsType="None"
@@ -116,7 +116,6 @@
                 
                 <StackPanel  Orientation="Horizontal" HorizontalAlignment="Right" >
                     <Grid>
-
                         <Button 
                             Theme="{DynamicResource RoundAccentButton}"
                             Width="50" 
@@ -146,7 +145,12 @@
                         </Button>
                     </Grid>
 
-                    <Button Command="{Binding OpenSettingsCommand}" Width="40" Height="40" Margin="15 0 5 0" Theme="{DynamicResource RoundAccentButton}">
+                    <Button 
+                        Command="{Binding OpenSettingsCommand}" 
+                        Width="40" 
+                        Height="40" 
+                        Margin="15 0 5 0" 
+                        Theme="{DynamicResource RoundAccentButton}">
                         <materialIcons:MaterialIcon Kind="Settings" Width="30" Height="30"/>
                     </Button>
                 </StackPanel>
@@ -167,6 +171,9 @@
                 </DataTemplate>
                 <DataTemplate DataType="{x:Type modal:ExportAudioSampleViewModel}">
                     <local:ExportAudioSampleView/>
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type modal:FoldersListViewModel}">
+                    <local:FoldersListView Height="300"/>
                 </DataTemplate>
 
             </ItemsControl.DataTemplates>
