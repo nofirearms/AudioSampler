@@ -1,6 +1,7 @@
 ﻿
 
 using AudioSampler.Model;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -24,8 +25,16 @@ namespace AudioSampler.Database
         {
             try
             {
-                //var entity = _context.AudioSamples.FindAsync(audioSample.Id);
-                await _context.AudioSamples.AddAsync(audioSample);
+                var entity = _context.AudioSamples.FindAsync(audioSample.Id);
+                if(entity == null)
+                {
+                    await _context.AudioSamples.AddAsync(audioSample);
+                }
+                else
+                {
+                    _context.AudioSamples.Update(audioSample);
+                }
+                
 
                 await SaveDatabase();
             }

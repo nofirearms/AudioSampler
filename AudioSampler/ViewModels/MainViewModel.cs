@@ -163,7 +163,11 @@ namespace AudioSampler.ViewModels
         {
             if (audioSampleVM is not AudioSampleSummaryViewModel) return;
 
-            await _modalService.OpenAudioSampleDetailModal(audioSampleVM.AudioSample);
+            var result = await _modalService.OpenAudioSampleDetailModal(audioSampleVM.AudioSample);
+            if (result.Success)
+            {
+                _audioSamplesCache.AddOrUpdate(result.Data);
+            }
         }
 
         [ObservableProperty]

@@ -19,6 +19,9 @@ namespace AudioSampler.Model
     public enum SettingKey
     {
         Theme,
-        FolderBookmark
+        FolderBookmark,
+        ExportFormat,
+        ExportNormalize,
+        ExportTrim
     }
 }

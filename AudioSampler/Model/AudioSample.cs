@@ -15,5 +15,9 @@ namespace AudioSampler.Model
         public DateTime DateCreated { get; set; } = DateTime.Now;
         public string SourceApp { get; set; } = string.Empty;
 
+        public double SelectionStart { get; set; } = 0;
+        public double SelectionEnd { get; set; } = 1;
+        public bool Normalize { get; set; } = false;
+
     }
 }

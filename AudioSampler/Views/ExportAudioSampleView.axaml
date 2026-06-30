@@ -98,7 +98,7 @@
                 Width="50" 
                 Height="50" 
                 Padding="0">
-                <materialIcons:MaterialIcon IconSize="30" Kind="Export" />
+                <materialIcons:MaterialIcon IconSize="30" Kind="ContentSaveMove" />
             </Button>
 <!--            <Button 
                 VerticalAlignment="Bottom"    

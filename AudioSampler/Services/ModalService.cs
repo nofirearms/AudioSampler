@@ -59,5 +59,10 @@ namespace AudioSampler.Services
         {
             return await ShowModalAsync(_factory.Create<FoldersListViewModel>(bookmark));
         }
+
+        public async Task<ModalResult<string>> OpenMessageBoxModal(string header, string message, string[] buttons)
+        {
+            return await ShowModalAsync(_factory.Create<MessageBoxViewModel>(header, message, buttons));
+        }
     }
 }

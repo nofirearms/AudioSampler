@@ -1,0 +1,40 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="AudioSampler.Views.MessageBox"
+             xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             xmlns:modal="using:AudioSampler.ViewModels.Modal"
+             x:DataType="modal:MessageBoxViewModel">
+    <Grid RowDefinitions="auto auto">
+        <TextBlock 
+            Text="{Binding Message}"
+            Grid.Row="0" 
+            TextWrapping="WrapWithOverflow" 
+            HorizontalAlignment="Center"
+            Margin="5 5"/>
+        <ItemsControl HorizontalAlignment="Center" Grid.Row="1" ItemsSource="{Binding Buttons}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Button 
+                        Margin="5 0 0 0"
+                        Command="{Binding $parent[ItemsControl].DataContext.ButtonPressedCommand}" 
+                        CommandParameter="{Binding}"
+                        Theme="{StaticResource FloatTransparentButton}" 
+                        CornerRadius="5" 
+                        Width="NaN" MinWidth="60">
+                        <Button.Content>
+                            <TextBlock Text="{Binding}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Button.Content>
+                    </Button>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="Horizontal"/>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+        </ItemsControl>
+    </Grid>
+</UserControl>

@@ -26,7 +26,7 @@ namespace AudioSampler.ViewModels.Modal
         [NotifyCanExecuteChangedFor(nameof(RemoveFolderCommand))]
         [NotifyCanExecuteChangedFor(nameof(AcceptCommand))]
         private FolderBookmarkListItem _selectedFolder;
-
+        
 
         public FoldersListViewModel(DataService dataService, FileService fileService, FolderBookmark exportFolderBookmark)
         {
@@ -44,6 +44,13 @@ namespace AudioSampler.ViewModels.Modal
             foreach (var bookmark in bookmarks)
             {
                 var storage = await _fileService.GetStorageFolderFromFolderBookmarkAsync(bookmark);
+                //если папки не существует
+                if(storage == null)
+                {
+                    await _dataService.FolderBooksmarksReposity.RemoveAsync(bookmark);
+                    continue;
+                }
+
                 var item = new FolderBookmarkListItem
                 {
                     Storage = storage,

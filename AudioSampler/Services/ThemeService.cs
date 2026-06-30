@@ -2,6 +2,7 @@
 using Avalonia.Styling;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,7 +21,7 @@ namespace AudioSampler.Services
             _settings = dataService.SettingsRepository; 
         }
 
-        public async Task Change(ThemeVariant theme)
+        public async Task Set(ThemeVariant theme)
         {
             App.Current.RequestedThemeVariant = theme; 
 
@@ -33,14 +34,29 @@ namespace AudioSampler.Services
 
             if(theme is null)
             {
-                await Change(OrangeTheme);
+                await Set(OrangeTheme);
             }
             else
             {
                 var themeVariant = GetFromKey(theme.Value);
-                await Change(themeVariant);
+                await Set(themeVariant);
 
             }
+        }
+
+        public ThemeVariant[] GetThemes()
+        {
+            var themes = new List<ThemeVariant>();
+            var fields = typeof(ThemeService).GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+            foreach(var field in fields)
+            {
+                if(field.GetValue(null) is ThemeVariant theme)
+                {
+                    themes.Add(theme);
+                }
+            }
+
+            return themes.ToArray();
         }
 
         public ThemeVariant GetFromKey(string key)

@@ -175,6 +175,9 @@
                 <DataTemplate DataType="{x:Type modal:FoldersListViewModel}">
                     <local:FoldersListView Height="300"/>
                 </DataTemplate>
+                <DataTemplate DataType="{x:Type modal:MessageBoxViewModel}">
+                    <local:MessageBox/>
+                </DataTemplate>
 
             </ItemsControl.DataTemplates>
            <ItemsControl.ItemTemplate>
@@ -186,7 +189,7 @@
 
                         <Border
                             x:Name="ModalMainBorder"
-                            HorizontalAlignment="Stretch"
+                            HorizontalAlignment="{Binding ModalHorizontalAlignment}"
                             Margin="10 0"
                             VerticalAlignment="Center"
                             CornerRadius="5"
@@ -212,7 +215,8 @@
                                     <Grid Margin="0,3">
 
                                         <TextBlock
-                                            FontSize="22"
+                                            FontSize="22" 
+                                            Foreground="{DynamicResource InactiveForeground1}"
                                             HorizontalAlignment="Center"
                                             VerticalAlignment="Center"
                                             Text="{Binding Header}">
@@ -247,7 +251,7 @@
 
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <Grid  HorizontalAlignment="Stretch"/>
+                    <Grid/>
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
         </ItemsControl>

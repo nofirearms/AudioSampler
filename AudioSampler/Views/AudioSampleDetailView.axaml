@@ -69,6 +69,7 @@
                     </controls:FloatingButton>-->
 
                     <ToggleButton 
+                        IsChecked="{Binding Normalized, Mode=TwoWay}"
                         Theme="{StaticResource FloatTransparentToggle}" 
                         Margin="0 0" Command="{Binding NormalizeCommand}" 
                         CommandParameter="{Binding $self.IsChecked}">
@@ -81,6 +82,7 @@
                         Theme="{StaticResource RoundAccentButton}" 
                         Margin="5 0" 
                         Width="50" 
+                        Command="{Binding EditCommand}"
                         Height="50">
                         <materialIcons:MaterialIcon Kind="ContentSaveEdit" IconSize="30"/>
                     </Button>

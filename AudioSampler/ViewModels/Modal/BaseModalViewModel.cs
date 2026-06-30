@@ -1,4 +1,5 @@
 ﻿using AudioSampler.Model;
+using Avalonia.Layout;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System;
@@ -11,14 +12,18 @@ namespace AudioSampler.ViewModels.Modal
     {
         string Header { get; set; }
         void CloseModal(); // Общий метод для принудительного закрытия
+        HorizontalAlignment ModalHorizontalAlignment { get; set; }
     }
     public abstract partial class BaseModalViewModel<TResult> : ObservableObject, IModal
     {
         public string Header { get; set; }
 
+
         private TaskCompletionSource<ModalResult<TResult>> _completionSource;
 
         public Task<ModalResult<TResult>> ResultTask => _completionSource.Task;
+
+        public HorizontalAlignment ModalHorizontalAlignment { get; set; } = HorizontalAlignment.Stretch;
 
         protected BaseModalViewModel()
         {

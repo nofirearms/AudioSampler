@@ -47,9 +47,6 @@ namespace AudioSampler.ViewModels.Modal
 
             _folder = exportSettings.Folder;
             _fileName = exportSettings.Name; 
-            _format = exportSettings.Format;
-            _trim = exportSettings.Trim;
-            _normalize = exportSettings.Normalize;
             _bookmark = exportSettings.FolderBookmark;
 
             Header = "Export";
@@ -59,7 +56,14 @@ namespace AudioSampler.ViewModels.Modal
 
         private async Task LoadDataAsync()
         {
-            
+            var format = _dataService.SettingsRepository.Get(SettingKey.ExportFormat);
+            Format = format == null ? ExportFormat.wav : Enum.Parse<ExportFormat>(format.Value);
+
+            var trim = _dataService.SettingsRepository.Get(SettingKey.ExportTrim);
+            Trim = trim == null ? false : bool.Parse(trim.Value);
+
+            var normalize = _dataService.SettingsRepository.Get(SettingKey.ExportNormalize);
+            Normalize = normalize == null ? false : bool.Parse(normalize.Value);
         }
 
         [RelayCommand]
@@ -85,8 +89,15 @@ namespace AudioSampler.ViewModels.Modal
         }
 
         [RelayCommand]
-        public void Export()
+        public async void Export()
         {
+
+            if (!Directory.Exists(Folder.Path.LocalPath))
+            {
+                await _modalService.OpenMessageBoxModal("Error", "Selected folder doesn't exist.", ["OK"]);
+                return;
+            }
+
             var export = new ExportSettings
             {
                 Format = Format,
@@ -96,6 +107,11 @@ namespace AudioSampler.ViewModels.Modal
                 FolderBookmark = _bookmark,
                 Trim = Trim
             };
+
+            await _dataService.SettingsRepository.ChangeValue(SettingKey.FolderBookmark, _bookmark.Bookmark);
+            await _dataService.SettingsRepository.ChangeValue(SettingKey.ExportFormat, Format.ToString());
+            await _dataService.SettingsRepository.ChangeValue(SettingKey.ExportTrim, Trim.ToString());
+            await _dataService.SettingsRepository.ChangeValue(SettingKey.ExportNormalize, Normalize.ToString());
 
             Close(true, export);
         }

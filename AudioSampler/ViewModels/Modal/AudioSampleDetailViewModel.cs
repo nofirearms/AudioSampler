@@ -6,6 +6,7 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -42,6 +43,7 @@ namespace AudioSampler.ViewModels.Modal
         [ObservableProperty]
         private bool _isPlaying = false;
 
+        [ObservableProperty]
         private bool _normalized = false;
         public AudioSampleDetailViewModel(
             AudioService audioService, 
@@ -65,12 +67,18 @@ namespace AudioSampler.ViewModels.Modal
         {
             Name = _audioSample.Name;
             AudioGraphPoints = await _audioService.RenderWaveformAsync(_audioSample.Path, 100);
+            StartPercent = _audioSample.SelectionStart;
+            EndPercent = _audioSample.SelectionEnd;
+
             _stream = _audioService.CreatePlaybackStream(_audioSample.Path);
             _maxPeak = _audioService.GetMaxPeak(AudioGraphPoints);
 
             _playbackTimer = new DispatcherTimer();
             _playbackTimer.Interval = TimeSpan.FromMilliseconds(100);
             _playbackTimer.Tick += OnPlaybackTimer;
+
+            if(_audioSample.Normalize) Normalize(true);
+
         }
 
 
@@ -96,7 +104,7 @@ namespace AudioSampler.ViewModels.Modal
         {
             if (normalize)
             {
-                _normalized = true;
+                Normalized = true;
                 _audioService.Normalize(_stream, _maxPeak);
                 var gain = 1d / _maxPeak;
                 var points = AudioGraphPoints.Select(p => p * (float)gain).ToArray();
@@ -104,7 +112,7 @@ namespace AudioSampler.ViewModels.Modal
             }
             else
             {
-                _normalized = false;
+                Normalized = false;
                 _audioService.Normalize(_stream, 1);
                 AudioGraphPoints = AudioGraphPoints.Select(p => p * (float)_maxPeak).ToArray();
             }
@@ -122,6 +130,21 @@ namespace AudioSampler.ViewModels.Modal
             }
         }
 
+
+        [RelayCommand]
+        public async void Edit()
+        {
+            _audioSample.Name = Name;
+            _audioSample.SelectionStart = StartPercent;
+            _audioSample.SelectionEnd = EndPercent;
+            _audioSample.Normalize = Normalized;
+
+            await _dataService.AudioSamplesRepository.CreateOrUpdateAsync(_audioSample);
+
+            Close(true, _audioSample);
+        }
+
+
         [RelayCommand]
         public async void Export()
         {
@@ -135,12 +158,22 @@ namespace AudioSampler.ViewModels.Modal
                 var folderBookmark = setting is null ? new FolderBookmark("DEFAULT") : new FolderBookmark(setting.Value);
 
                 var folder = await _fileService.GetStorageFolderFromFolderBookmarkAsync(folderBookmark);
+                //если сохранённая папка удалена
+                if(folder == null)
+                {
+                    await _dataService.SettingsRepository.ChangeValue(SettingKey.FolderBookmark, "DEFAULT");
+                    folder = await _fileService.GetStorageFolderFromFolderBookmarkAsync(new FolderBookmark("DEFAULT"));
+                }
 
                 //Открываем модальное окно с найстройками экспорта
-                var result = await _modalService.OpenExportModal(new ExportSettings() { Name = Name, Folder = folder, Normalize = _normalized, FolderBookmark = folderBookmark });
+                var result = await _modalService.OpenExportModal(new ExportSettings() { Name = Name, Folder = folder, FolderBookmark = folderBookmark });
 
                 if (result.Success)
                 {
+                    if (File.Exists(result.Data.FullFilePath))
+                    {
+                        result.Data.Name = $"{Name} [{DateTime.Now:yyyy-MM-dd HHmmss}]"; 
+                    }
 
                     await _audioService.RenderToFileAsync(
                         _audioSample.Path, 
@@ -151,7 +184,6 @@ namespace AudioSampler.ViewModels.Modal
                         result.Data.Normalize,
                         result.Data.Format);
 
-                    await _dataService.SettingsRepository.ChangeValue(SettingKey.FolderBookmark, result.Data.FolderBookmark.Bookmark);
                 }
             }
             catch(Exception ex)
