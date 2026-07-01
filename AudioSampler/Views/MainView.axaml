@@ -69,35 +69,69 @@
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <Border CornerRadius="5" Background="{DynamicResource Background1}" Margin="5 3 10 3" BoxShadow="0 1 5 -1 #ee000000">
-                                <Grid Background="Transparent" RowDefinitions="Auto, Auto" ColumnDefinitions="*, Auto" RowSpacing="3" Margin="10 10" >
+                                <Grid ColumnDefinitions="auto, *">
+
+                                    <Button 
+                                        Grid.Column="0"  Margin="5 0 -5 0" 
+                                        Classes.playing="{Binding IsPlaying}" 
+                                        Command="{Binding $parent[ListBox].DataContext.StartStopPlaybackCommand}"
+                                        CommandParameter="{Binding}"
+                                        Theme="{StaticResource TransparentButton}">
+                                        <Button.Styles>
+                                            <Style Selector="Button">
+                                                <Setter Property="Content">
+                                                    <Setter.Value>
+                                                        <Template>
+                                                            <materialIcons:MaterialIcon IconSize="35" Kind="Play" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                        </Template>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Style>
+        
+                                            <Style Selector="Button.playing">
+                                                <Setter Property="Content">
+                                                    <Setter.Value>
+                                                        <Template>
+                                                            <materialIcons:MaterialIcon IconSize="35" Kind="Stop" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                        </Template>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Style>
+                                        </Button.Styles>
+                                    </Button>
+
+                                    <Grid Grid.Column="1" Background="Transparent" RowDefinitions="Auto, Auto" ColumnDefinitions="*, Auto" RowSpacing="3" Margin="10 10" >
                                     
-                                    <i:Interaction.Behaviors>
-                                        <ia:EventTriggerBehavior EventName="Tapped">
-                                            <InvokeCommandAction Command="{Binding $parent[ListBox].DataContext.OpenAudioSampleDetailCommand}" CommandParameter="{Binding}"/>
-                                        </ia:EventTriggerBehavior>    
-                                    </i:Interaction.Behaviors>    
-                                    <TextBlock 
-                                        Grid.Row="0" Grid.Column="0"
-                                        Text="{Binding Name}"
-                                        FontSize="16"/>
+                                        <i:Interaction.Behaviors>
+                                            <ia:EventTriggerBehavior EventName="Tapped">
+                                                <InvokeCommandAction Command="{Binding $parent[ListBox].DataContext.OpenAudioSampleDetailCommand}" CommandParameter="{Binding}"/>
+                                            </ia:EventTriggerBehavior>    
+                                        </i:Interaction.Behaviors>    
+
+                                        <TextBlock 
+                                            Grid.Row="0" Grid.Column="0"
+                                            Text="{Binding Name}"
+                                            FontSize="16"/>
                 
-                                    <TextBlock 
-                                        Grid.Row="1" Grid.Column="0"
-                                        FontSize="12"
-                                        Margin="0 5 0 0"
-                                        Text="{Binding DateCreated}"
-                                        FontWeight="Light" 
-                                        Foreground="{DynamicResource InactiveForeground1}"/>
+                                        <TextBlock 
+                                            Grid.Row="1" Grid.Column="0"
+                                            FontSize="12"
+                                            Margin="0 5 0 0"
+                                            Text="{Binding DateCreated}"
+                                            FontWeight="Light" 
+                                            Foreground="{DynamicResource InactiveForeground1}"/>
                 
-                                    <TextBlock 
-                                        Grid.Column="1" Grid.Row="0" Grid.RowSpan="2" 
-                                        VerticalAlignment="Center"
-                                        HorizontalAlignment="Right"
-                                        FontSize="14"
-                                        FontWeight="Light" 
-                                        Foreground="{DynamicResource InactiveForeground1}"
-                                        Text="{Binding Duration, StringFormat=hh\\:mm\\:ss}"/>
+                                        <TextBlock 
+                                            Grid.Column="1" Grid.Row="0" Grid.RowSpan="2" 
+                                            VerticalAlignment="Center"
+                                            HorizontalAlignment="Right"
+                                            FontSize="14"
+                                            FontWeight="Light" 
+                                            Foreground="{DynamicResource InactiveForeground1}"
+                                            Text="{Binding Duration, StringFormat=hh\\:mm\\:ss}"/>
+                                    </Grid>
                                 </Grid>
+
                             </Border>
 
                         </DataTemplate>
@@ -112,18 +146,23 @@
 
             </Grid>
 
-            <Grid Grid.Row="2" x:Name="BottomBarGrid"  Margin="0 0 0 5">
+            <Grid 
+                Grid.Row="1" 
+                x:Name="BottomBarGrid"  
+                Margin="0 0 10 10" 
+                HorizontalAlignment="Right" 
+                VerticalAlignment="Bottom">
                 
-                <StackPanel  Orientation="Horizontal" HorizontalAlignment="Right" >
+                <StackPanel  Orientation="Vertical"  >
                     <Grid>
                         <Button 
                             Theme="{DynamicResource RoundAccentButton}"
                             Width="50" 
                             Height="50" 
-                            Margin="-10" 
                             IsVisible="{Binding SharingState}"
                             Padding="0"
-                            Command="{Binding StopSharingCommand}">
+                            Command="{Binding StopSharingCommand}"
+                            HorizontalAlignment="Center">
                             <Grid>
                                 <materialIcons:MaterialIcon IconSize="50" Kind="Fullscreen" />
                                 <materialIcons:MaterialIcon IconSize="20" Kind="Close" />
@@ -133,7 +172,6 @@
                             Theme="{DynamicResource RoundAccentButton}"
                             Width="50" 
                             Height="50" 
-                            Margin="-10"
                             Padding="0" 
                             IsVisible="{Binding SharingState, Converter={StaticResource ReverseBoolConverter}}"
                             Command="{Binding StartSharingCommand}"
@@ -147,9 +185,9 @@
 
                     <Button 
                         Command="{Binding OpenSettingsCommand}" 
-                        Width="40" 
-                        Height="40" 
-                        Margin="15 0 5 0" 
+                        Width="35" 
+                        Height="35" 
+                        Margin="0 5"
                         Theme="{DynamicResource RoundAccentButton}">
                         <materialIcons:MaterialIcon Kind="Settings" Width="30" Height="30"/>
                     </Button>

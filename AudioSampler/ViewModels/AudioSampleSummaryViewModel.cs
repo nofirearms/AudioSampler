@@ -1,11 +1,12 @@
 ﻿using AudioSampler.Model;
+using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace AudioSampler.ViewModels
 {
-    public class AudioSampleSummaryViewModel : ModdedObservableObject
+    public partial class AudioSampleSummaryViewModel : ModdedObservableObject
     {
         private AudioSample _audioSample;
 
@@ -17,9 +18,27 @@ namespace AudioSampler.ViewModels
         public DateTime DateCreated => _audioSample.DateCreated;
         public TimeSpan Duration => _audioSample.Duration;
 
+
+        [ObservableProperty]
+        private bool _isPlaying = false;
+
+        [ObservableProperty]
+        private double _playbackPosition = 0;
+
+
         public AudioSampleSummaryViewModel(AudioSample audioSample) 
         {
             _audioSample = audioSample;
+        }
+
+        public void Play()
+        {
+            IsPlaying = true;
+        }
+
+        public void Stop()
+        {
+            IsPlaying = false;
         }
     }
 }

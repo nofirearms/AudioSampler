@@ -17,5 +17,10 @@ namespace AudioSampler.Model
             Name = name;
             Size = size;
         }
+
+        public RecordResult(string filePath)
+        {
+            FilePath = filePath;
+        }
     }
 }

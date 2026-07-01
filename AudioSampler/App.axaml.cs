@@ -56,6 +56,7 @@ namespace AudioSampler
             services.AddSingleton<DataService>();
             services.AddSingleton<ModalService>();
             services.AddTransient<AudioService>();
+            services.AddSingleton<AudioEngine>();
             services.AddSingleton<ThemeService>();
             services.AddSingleton<FileService>();
             services.AddSingleton<NotificationService>();
@@ -73,6 +74,8 @@ namespace AudioSampler
         {
             var themeService = Services.GetRequiredService<ThemeService>();
             await themeService.LoadFromSettings();
+
+            var a = Services.GetRequiredService<MainViewModel>(); 
 
             var mainViewModel = Design.IsDesignMode ? new MainViewModel() : Services.GetRequiredService<MainViewModel>();
             

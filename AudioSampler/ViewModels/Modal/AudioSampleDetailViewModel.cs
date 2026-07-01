@@ -39,7 +39,7 @@ namespace AudioSampler.ViewModels.Modal
         private double _playbackPositionPercent;
 
         private int _stream;
-        private double _maxPeak;
+
         private DispatcherTimer _playbackTimer;
 
         [ObservableProperty]
@@ -65,24 +65,22 @@ namespace AudioSampler.ViewModels.Modal
 
             Header = "Edit";
 
-            LoadData();
-        }
+            _stream = _audioService.CreatePlaybackStream(_audioSample.Path);
 
-        private async void LoadData()
-        {
             Name = _audioSample.Name;
-            AudioGraphPoints = await _audioService.RenderWaveformAsync(_audioSample.Path, 100);
+            AudioGraphPoints = _audioSample.WaveformPoints;
             StartPercent = _audioSample.SelectionStart;
             EndPercent = _audioSample.SelectionEnd;
-
-            _stream = _audioService.CreatePlaybackStream(_audioSample.Path);
-            _maxPeak = _audioService.GetMaxPeak(AudioGraphPoints);
 
             _playbackTimer = new DispatcherTimer();
             _playbackTimer.Interval = TimeSpan.FromMilliseconds(100);
             _playbackTimer.Tick += OnPlaybackTimer;
 
-            if(_audioSample.Normalize) Normalize(true);
+            if (_audioSample.Normalize) Normalize(true);
+        }
+
+        private async void LoadData()
+        {
 
         }
 
@@ -110,8 +108,8 @@ namespace AudioSampler.ViewModels.Modal
             if (normalize)
             {
                 Normalized = true;
-                _audioService.Normalize(_stream, _maxPeak);
-                var gain = 1d / _maxPeak;
+                _audioService.Normalize(_stream, _audioSample.MaxPeak);
+                var gain = 1d / _audioSample.MaxPeak;
                 var points = AudioGraphPoints.Select(p => p * (float)gain).ToArray();
                 AudioGraphPoints = points;
             }
@@ -119,7 +117,7 @@ namespace AudioSampler.ViewModels.Modal
             {
                 Normalized = false;
                 _audioService.Normalize(_stream, 1);
-                AudioGraphPoints = AudioGraphPoints.Select(p => p * (float)_maxPeak).ToArray();
+                AudioGraphPoints = AudioGraphPoints.Select(p => p * (float)_audioSample.MaxPeak).ToArray();
             }
 
             

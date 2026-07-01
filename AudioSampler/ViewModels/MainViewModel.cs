@@ -27,6 +27,7 @@ namespace AudioSampler.ViewModels
         private readonly IScreenCaptureService _captureService;
         private readonly DataService _dataService;
         private readonly ModalService _modalService;
+        private readonly AudioEngine _audioEngine;
 
         //------------------------ MODAL -------------------------------------
         public IReadOnlyList<IModal> ActiveModals => _modalService.ActiveModals;
@@ -68,11 +69,12 @@ namespace AudioSampler.ViewModels
             }
         }
 
-        public MainViewModel(IScreenCaptureService captureService, DataService dataService, ModalService modalService)
+        public MainViewModel(IScreenCaptureService captureService, DataService dataService, ModalService modalService, AudioEngine audioEngine)
         {
             _captureService = captureService;
             _dataService = dataService;
             _modalService = modalService;
+            _audioEngine = audioEngine;
 
             ((INotifyCollectionChanged)_modalService.ActiveModals).CollectionChanged += (s, e) =>
             {
@@ -80,16 +82,9 @@ namespace AudioSampler.ViewModels
                 OnPropertyChanged(nameof(HasActiveModals));
             };
 
-            captureService.RecordFinished += (value) =>
+            captureService.RecordFinished += async(value) =>
             {
-                var sample = new AudioSample
-                {
-                    Duration = value.Duration,
-                    FileSizeBytes = value.Size,
-                    Name = value.Name,
-                    Path = value.FilePath
-                };
-                AddAudioSample(sample);
+                await CreateAudioSample(value.FilePath);
             };
 
             captureService.SharingStateChanged += (state) =>
@@ -120,10 +115,11 @@ namespace AudioSampler.ViewModels
             _audioSamplesCache.AddOrUpdate(samples);
         }
 
-        private async Task AddAudioSample(AudioSample audioSample)
+        private async Task CreateAudioSample(string path)
         {
-            _audioSamplesCache.AddOrUpdate(audioSample);
-            await _dataService.AudioSamplesRepository.CreateOrUpdateAsync(audioSample);
+            var sample = await _audioEngine.CreateAudioSampleAsync(path);
+            _audioSamplesCache.AddOrUpdate(sample);
+            await _dataService.AudioSamplesRepository.CreateOrUpdateAsync(sample);
         }
 
         //не используется
@@ -149,6 +145,21 @@ namespace AudioSampler.ViewModels
         private void StopCapture()
         {
             _captureService.StopScreenCapture();
+        }
+
+        [RelayCommand]
+        public void StartStopPlayback(AudioSampleSummaryViewModel audioSampleVM)
+        {
+            if (audioSampleVM.IsPlaying) 
+            {
+                _audioEngine.Stop();
+            }
+            else
+            {
+                _audioEngine.Play(audioSampleVM);
+            }
+
+
         }
 
 

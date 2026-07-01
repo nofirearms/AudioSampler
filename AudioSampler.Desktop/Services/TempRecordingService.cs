@@ -29,7 +29,9 @@ namespace AudioSampler.Desktop.Services
 
         public void StartSharing()
         {
-            _outputFile = $"Recording{DateTime.Now:hhmmss}.wav";
+            var appDataRoot = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
+            //string appDataRoot = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            _outputFile = Path.Combine(appDataRoot, "AudioSampler", $"Recording{DateTime.Now:hhmmss}.wav");
             _recordStream = _audioService.StartRecordingWav(_outputFile);
             SharingStateChanged?.Invoke(true);
         }

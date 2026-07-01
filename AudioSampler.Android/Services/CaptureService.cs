@@ -173,9 +173,9 @@ namespace AudioSampler.Android.Services
 
             _recorder.StartRecording();
 
-            var folder = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments);
+            var folder = System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal);
             Directory.CreateDirectory(folder);
-            var file = Path.Combine(folder, $"Recording{DateTime.Now:yyyyMMdd_HHmmss}.wav");
+            var file = Path.Combine(folder,"AudioSampler", $"Recording{DateTime.Now:yyyyMMdd_HHmmss}.wav");
 
             var writeTask = Task.Run(() =>
             {
@@ -193,7 +193,6 @@ namespace AudioSampler.Android.Services
                         int read = _recorder.Read(buffer, 0, buffer.Length);
                         if (read > 0)
                         {
-                            // Пишем байты на диск мгновенно порциями, память приложения чиста!
                             writer.Write(buffer, 0, read);
                         }
                     }
@@ -225,7 +224,7 @@ namespace AudioSampler.Android.Services
             if (recordResult)
             {
                 // Пользователь нажал Стоп — запечатываем WAV-заголовок поверх пустоты
-                FinalizeWavFile(file);
+                await FinalizeWavFileAsync(file);
             }
             else
             {
@@ -238,43 +237,43 @@ namespace AudioSampler.Android.Services
 
         }
 
-        private void FinalizeWavFile(string file, int sampleRate = 44100, short channels = 2, short bitsPerSample = 16)
+        private Task FinalizeWavFileAsync(string file, int sampleRate = 44100, short channels = 2, short bitsPerSample = 16)
         {
-
-            using (var fileStream = new FileStream(file, FileMode.Open, FileAccess.ReadWrite))
-            using (var writer = new BinaryWriter(fileStream))
+            return Task.Run(() =>
             {
-                // 1. Высчитываем реальные размеры файла, который записался на диск
-                int totalDataLength = (int)fileStream.Length - 44; // Чистый размер звука без заголовка
-                int totalAudioLen = (int)fileStream.Length - 8;
-                int byteRate = sampleRate * channels * bitsPerSample / 8;
-                short blockAlign = (short)(channels * bitsPerSample / 8);
+                using (var fileStream = new FileStream(file, FileMode.Open, FileAccess.ReadWrite))
+                using (var writer = new BinaryWriter(fileStream))
+                {
+                    // 1. Высчитываем реальные размеры файла, который записался на диск
+                    int totalDataLength = (int)fileStream.Length - 44; // Чистый размер звука без заголовка
+                    int totalAudioLen = (int)fileStream.Length - 8;
+                    int byteRate = sampleRate * channels * bitsPerSample / 8;
+                    short blockAlign = (short)(channels * bitsPerSample / 8);
 
-                // 2. Сдвигаем курсор записи в самый ТОП файла (на позицию 0), где лежат пустые 44 байта
-                fileStream.Seek(0, SeekOrigin.Begin);
+                    // 2. Сдвигаем курсор записи в самый ТОП файла (на позицию 0), где лежат пустые 44 байта
+                    fileStream.Seek(0, SeekOrigin.Begin);
 
-                // 2. Пишем RIFF заголовок (всего 44 байта)
-                writer.Write(System.Text.Encoding.ASCII.GetBytes("RIFF")); // Чанк RIFF
-                writer.Write(totalAudioLen);                               // Размер всего файла минус 8 байт
-                writer.Write(System.Text.Encoding.ASCII.GetBytes("WAVE")); // Формат WAVE
+                    // 2. Пишем RIFF заголовок (всего 44 байта)
+                    writer.Write(System.Text.Encoding.ASCII.GetBytes("RIFF")); // Чанк RIFF
+                    writer.Write(totalAudioLen);                               // Размер всего файла минус 8 байт
+                    writer.Write(System.Text.Encoding.ASCII.GetBytes("WAVE")); // Формат WAVE
 
-                writer.Write(System.Text.Encoding.ASCII.GetBytes("fmt ")); // Подчанк параметров звука
-                writer.Write(16);                                          // Размер этого подчанка (16 для PCM)
-                writer.Write((short)1);                                    // Аудио формат (1 - PCM без сжатия)
-                writer.Write(channels);                                    // Количество каналов
-                writer.Write(sampleRate);                                  // Частота дискретизации
-                writer.Write(byteRate);                                    // Количество байт в секунду
-                writer.Write(blockAlign);                                  // Выравнивание блока данных
-                writer.Write(bitsPerSample);                               //
+                    writer.Write(System.Text.Encoding.ASCII.GetBytes("fmt ")); // Подчанк параметров звука
+                    writer.Write(16);                                          // Размер этого подчанка (16 для PCM)
+                    writer.Write((short)1);                                    // Аудио формат (1 - PCM без сжатия)
+                    writer.Write(channels);                                    // Количество каналов
+                    writer.Write(sampleRate);                                  // Частота дискретизации
+                    writer.Write(byteRate);                                    // Количество байт в секунду
+                    writer.Write(blockAlign);                                  // Выравнивание блока данных
+                    writer.Write(bitsPerSample);                               //
 
-                writer.Write(System.Text.Encoding.ASCII.GetBytes("data")); // Подчанк самих данных
-                writer.Write(totalDataLength);                                // Размер только аудио данных
+                    writer.Write(System.Text.Encoding.ASCII.GetBytes("data")); // Подчанк самих данных
+                    writer.Write(totalDataLength);                                // Размер только аудио данных
 
 
-                long durationMs = ((long)totalDataLength * 1000) / (sampleRate * channels * (bitsPerSample / 8));
-
-                WeakReferenceMessenger.Default.Send(new RecordFinishedMessage(new RecordResult(file, TimeSpan.FromMilliseconds(durationMs), Path.GetFileNameWithoutExtension(file), fileStream.Length)));
-            }
+                    WeakReferenceMessenger.Default.Send(new RecordFinishedMessage(new RecordResult(file)));
+                }
+            });
 
             //CopyFromInnerStorageToPath(file, Path.GetFileName(file));
 

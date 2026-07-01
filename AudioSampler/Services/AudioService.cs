@@ -131,6 +131,11 @@ namespace AudioSampler.Services
             return lengthInSeconds; 
         }
 
+        public long GetLengthBytes(int stream)
+        {
+            return Bass.ChannelGetLength(stream);
+        }
+
         /// <summary>
         /// Максимальная амплитуда для нормализации
         /// </summary>
