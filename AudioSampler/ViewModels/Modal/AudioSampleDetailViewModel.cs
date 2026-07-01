@@ -20,6 +20,8 @@ namespace AudioSampler.ViewModels.Modal
         private readonly ModalService _modalService;
         private readonly DataService _dataService;
         private readonly FileService _fileService;
+        private readonly NotificationService _notificationService;
+
         private AudioSample _audioSample;
 
         [ObservableProperty]
@@ -50,12 +52,15 @@ namespace AudioSampler.ViewModels.Modal
             ModalService modalService, 
             DataService dataService, 
             FileService fileService, 
+            NotificationService notificationService,
             AudioSample audioSample)
         {
             _audioService = audioService;
             _modalService = modalService;
             _dataService = dataService;
             _fileService = fileService;
+            _notificationService = notificationService;
+
             _audioSample = audioSample;
 
             Header = "Edit";
@@ -175,7 +180,7 @@ namespace AudioSampler.ViewModels.Modal
                         result.Data.Name = $"{Name} [{DateTime.Now:yyyy-MM-dd HHmmss}]"; 
                     }
 
-                    await _audioService.RenderToFileAsync(
+                    var renderResult = await _audioService.RenderToFileAsync(
                         _audioSample.Path, 
                         result.Data.Folder, 
                         result.Data.Name,
@@ -184,6 +189,14 @@ namespace AudioSampler.ViewModels.Modal
                         result.Data.Normalize,
                         result.Data.Format);
 
+                    if (renderResult.Success) 
+                    {
+                        _notificationService.Show(Material.Icons.MaterialIconKind.ContentSaveMove, result.Data.Name, result.Data.FullFilePath, Avalonia.Controls.Notifications.NotificationType.Success);
+                    }
+                    else
+                    {
+                        _notificationService.Show(Material.Icons.MaterialIconKind.ContentSaveMove, "Error", renderResult.ErrorMessage, Avalonia.Controls.Notifications.NotificationType.Error);
+                    }
                 }
             }
             catch(Exception ex)

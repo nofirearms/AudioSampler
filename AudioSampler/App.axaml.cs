@@ -6,6 +6,7 @@ using AudioSampler.Views;
 using Avalonia;
 using Avalonia.Controls; // Для PageNavigationHost
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Labs.Notifications;
 using Avalonia.Markup.Xaml;
 using Avalonia.Styling;
 using ManagedBass;
@@ -57,6 +58,7 @@ namespace AudioSampler
             services.AddTransient<AudioService>();
             services.AddSingleton<ThemeService>();
             services.AddSingleton<FileService>();
+            services.AddSingleton<NotificationService>();
 
             services.AddSingleton<ViewModelFactory>();
 

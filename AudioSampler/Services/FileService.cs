@@ -19,7 +19,7 @@ namespace AudioSampler.Services
             _dataService = dataService;
         }
 
-        private TopLevel GetTopLevel()
+        public TopLevel GetTopLevel()
         {
             var lifetime = App.Current.ApplicationLifetime;
 

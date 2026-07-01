@@ -241,11 +241,11 @@ namespace AudioSampler.Services
         /// <summary>
         /// Экспорт аудио
         /// </summary>
-        public async Task RenderToFileAsync(string inputPath, IStorageFolder outputFolder, string outputName, double startSeconds, double endSeconds, bool normalize, ExportFormat exportFormat = ExportFormat.wav)
+        public async Task<Result<IStorageFile>> RenderToFileAsync(string inputPath, IStorageFolder outputFolder, string outputName, double startSeconds, double endSeconds, bool normalize, ExportFormat exportFormat = ExportFormat.wav)
         {
             //if (string.IsNullOrEmpty(outputPath)) throw new Exception("Нет открытого файла для обрезки");
 
-            await Task.Run(async () =>
+            return await Task.Run(async () => 
             {
                 int decodeStream = Bass.CreateStream(inputPath, 0, 0, BassFlags.Decode | BassFlags.Float);
                 if (decodeStream == 0) throw new Exception("Ошибка обрезки");
@@ -314,7 +314,7 @@ namespace AudioSampler.Services
 
 
                         var encoder = BassEnc.EncodeStart(decodeStream, tempOutputPath, EncodeFlags.PCM | EncodeFlags.ConvertFloatTo16BitInt, null);
-                        if (encoder == 0) return;
+                        if (encoder == 0) return Result<IStorageFile>.Fail("Encoder handler is 0");
 
                         byte[] buf = new byte[20480];
                         long totalBytesRead1 = 0;
@@ -367,9 +367,14 @@ namespace AudioSampler.Services
                     }
                     else
                     {
-                        throw new Exception("Android не разрешил создать файл в выбранной папке.");
+                        
                     }
 
+                    return Result<IStorageFile>.Ok(userFile);
+                }
+                catch (Exception ex)
+                {
+                    return Result<IStorageFile>.Fail(ex.Message);
                 }
                 finally
                 {

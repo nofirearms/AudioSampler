@@ -3,6 +3,7 @@ using AudioSampler.Services;
 using AudioSampler.ViewModels;
 using AudioSampler.ViewModels.Modal;
 using Avalonia.Controls;
+using Avalonia.Controls.Notifications;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DynamicData;
@@ -17,6 +18,7 @@ using System.Reactive.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace AudioSampler.ViewModels
 {
@@ -115,7 +117,7 @@ namespace AudioSampler.ViewModels
         private void LoadData()
         {
             var samples = _dataService.AudioSamplesRepository.GetAll();
-            _audioSamplesCache.AddOrUpdate(samples); 
+            _audioSamplesCache.AddOrUpdate(samples);
         }
 
         private async Task AddAudioSample(AudioSample audioSample)

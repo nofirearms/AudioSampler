@@ -94,4 +94,11 @@
 
     <!-- TextBox -->
 
+    <!-- Notification Card -->
+    <Style Selector="NotificationCard">
+    <Setter Property="Background" Value="{DynamicResource Background2}"/>
+    
+    <Setter Property="Padding" Value="0"/>
+</Style>
+
 </Styles>
