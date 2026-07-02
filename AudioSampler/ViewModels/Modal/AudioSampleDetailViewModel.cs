@@ -125,7 +125,7 @@ namespace AudioSampler.ViewModels.Modal
 
         private void OnPlaybackTimer(object? sender, EventArgs e)
         {
-            var positionSeconds = _audioService.CheckPlaybackPosition(_stream, _audioSample.Duration.TotalSeconds / EndPercent);
+            var positionSeconds = _audioService.CheckPlaybackPosition(_stream);
             PlaybackPositionPercent = positionSeconds / _audioSample.Duration.TotalSeconds;
             if(PlaybackPositionPercent >= EndPercent)
             {

@@ -24,7 +24,7 @@ namespace AudioSampler.Services
             _audioService = audioService;
 
             _playbackTimer = new DispatcherTimer();
-            _playbackTimer.Interval = TimeSpan.FromMilliseconds(100);
+            _playbackTimer.Interval = TimeSpan.FromMilliseconds(50);
             _playbackTimer.Tick += OnPlaybackTimer;
         }
 
@@ -53,8 +53,11 @@ namespace AudioSampler.Services
 
         private void OnPlaybackTimer(object? sender, EventArgs e)
         {
-            var positionSeconds = _audioService.CheckPlaybackPosition(_streamHandle, _currentAudioSample.Duration.TotalSeconds / _currentAudioSample.AudioSample.SelectionEnd);
+            var positionSeconds = _audioService.CheckPlaybackPosition(_streamHandle);
             var positionPercent = positionSeconds / _currentAudioSample.AudioSample.Duration.TotalSeconds;
+
+            _currentAudioSample?.PlaybackPosition = positionPercent;
+
             if (positionPercent >= _currentAudioSample.AudioSample.SelectionEnd)
             {
                 Stop();

@@ -18,6 +18,9 @@ namespace AudioSampler.ViewModels
         public DateTime DateCreated => _audioSample.DateCreated;
         public TimeSpan Duration => _audioSample.Duration;
 
+        public double SelectionStart => _audioSample.SelectionStart;
+        public double SelectionEnd => _audioSample.SelectionEnd;
+
 
         [ObservableProperty]
         private bool _isPlaying = false;
@@ -39,6 +42,7 @@ namespace AudioSampler.ViewModels
         public void Stop()
         {
             IsPlaying = false;
+            PlaybackPosition = 0;
         }
     }
 }

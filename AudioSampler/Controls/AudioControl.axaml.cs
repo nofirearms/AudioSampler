@@ -91,7 +91,4 @@ public partial class AudioControl : UserControl
         }
     }
 
-
-
-
 }

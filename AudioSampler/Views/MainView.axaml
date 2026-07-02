@@ -2,7 +2,6 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:controls="clr-namespace:Material.Styles.Controls;assembly=Material.Styles"
              xmlns:vm="using:AudioSampler.ViewModels"
              xmlns:modal="using:AudioSampler.ViewModels.Modal"
              xmlns:customcontrols="using:AudioSampler.Controls"
@@ -70,35 +69,44 @@
                         <DataTemplate>
                             <Border CornerRadius="5" Background="{DynamicResource Background1}" Margin="5 3 10 3" BoxShadow="0 1 5 -1 #ee000000">
                                 <Grid ColumnDefinitions="auto, *">
-
-                                    <Button 
-                                        Grid.Column="0"  Margin="5 0 -5 0" 
-                                        Classes.playing="{Binding IsPlaying}" 
-                                        Command="{Binding $parent[ListBox].DataContext.StartStopPlaybackCommand}"
-                                        CommandParameter="{Binding}"
-                                        Theme="{StaticResource TransparentButton}">
-                                        <Button.Styles>
-                                            <Style Selector="Button">
-                                                <Setter Property="Content">
-                                                    <Setter.Value>
-                                                        <Template>
-                                                            <materialIcons:MaterialIcon IconSize="35" Kind="Play" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                        </Template>
-                                                    </Setter.Value>
-                                                </Setter>
-                                            </Style>
+                                     
+                                    <Grid Grid.Column="0"  Margin="5 0 -5 0" >
+                                        <customcontrols:CircularProgressbar 
+                                            Width="45" Height="45" 
+                                            IsVisible="{Binding IsPlaying}"
+                                            MinValue="{Binding SelectionStart}" 
+                                            MaxValue="{Binding SelectionEnd}" 
+                                            Progress="{Binding PlaybackPosition}"></customcontrols:CircularProgressbar>
+                                        <Button 
+                                            Classes.playing="{Binding IsPlaying}" 
+                                            Command="{Binding $parent[ListBox].DataContext.StartStopPlaybackCommand}"
+                                            CommandParameter="{Binding}"
+                                            Theme="{StaticResource TransparentButton}">
+                                            <Button.Styles>
+                                                <Style Selector="Button">
+                                                    <Setter Property="Content">
+                                                        <Setter.Value>
+                                                            <Template>
+                                                                <materialIcons:MaterialIcon IconSize="35" Kind="Play" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                            </Template>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                </Style>
         
-                                            <Style Selector="Button.playing">
-                                                <Setter Property="Content">
-                                                    <Setter.Value>
-                                                        <Template>
-                                                            <materialIcons:MaterialIcon IconSize="35" Kind="Stop" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                                        </Template>
-                                                    </Setter.Value>
-                                                </Setter>
-                                            </Style>
-                                        </Button.Styles>
-                                    </Button>
+                                                <Style Selector="Button.playing">
+                                                    <Setter Property="Content">
+                                                        <Setter.Value>
+                                                            <Template>
+                                                                <materialIcons:MaterialIcon IconSize="35" Kind="Stop" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                            </Template>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                </Style>
+                                            </Button.Styles>
+                                        </Button>
+                                    </Grid>
+
+
 
                                     <Grid Grid.Column="1" Background="Transparent" RowDefinitions="Auto, Auto" ColumnDefinitions="*, Auto" RowSpacing="3" Margin="10 10" >
                                     

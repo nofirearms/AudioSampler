@@ -231,9 +231,8 @@ namespace AudioSampler.Services
         /// Определяем текущее положение воспроизведения в секундах
         /// </summary>
         /// <param name="stream"></param>
-        /// <param name="endSeconds"></param>
         /// <returns></returns>
-        public double CheckPlaybackPosition(int stream, double endSeconds)
+        public double CheckPlaybackPosition(int stream)
         {
             // Получаем текущую секунду, которая играет прямо сейчас
             long currentBytes = Bass.ChannelGetPosition(stream);
