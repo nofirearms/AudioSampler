@@ -45,7 +45,7 @@
         </StackPanel>
         <StackPanel  Orientation="Horizontal" Grid.Row="2" HorizontalAlignment="Right">
             <Button 
-                Theme="{DynamicResource RoundAccentButton}"
+                Theme="{DynamicResource TransparentButton}"
                 Command="{Binding AcceptCommand}"
                 Width="50" 
                 Height="50" 

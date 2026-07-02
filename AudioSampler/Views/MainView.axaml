@@ -163,42 +163,58 @@
                 
                 <StackPanel  Orientation="Vertical"  >
                     <Grid>
-                        <Button 
-                            Theme="{DynamicResource RoundAccentButton}"
-                            Width="50" 
-                            Height="50" 
-                            IsVisible="{Binding SharingState}"
-                            Padding="0"
-                            Command="{Binding StopSharingCommand}"
-                            HorizontalAlignment="Center">
-                            <Grid>
-                                <materialIcons:MaterialIcon IconSize="50" Kind="Fullscreen" />
-                                <materialIcons:MaterialIcon IconSize="20" Kind="Close" />
-                            </Grid>
-                        </Button>
-                        <Button 
-                            Theme="{DynamicResource RoundAccentButton}"
-                            Width="50" 
-                            Height="50" 
-                            Padding="0" 
-                            IsVisible="{Binding SharingState, Converter={StaticResource ReverseBoolConverter}}"
-                            Command="{Binding StartSharingCommand}"
-                            HorizontalAlignment="Center">
-                            <Grid>
-                                <materialIcons:MaterialIcon IconSize="50" Kind="Fullscreen" />
-                                <materialIcons:MaterialIcon IconSize="15" Kind="Record" />
-                            </Grid>
-                        </Button>
+                        <Border BoxShadow="0 3 5 -1 #ee000000" 
+                                CornerRadius="100" 
+                                Margin="0" 
+                                IsVisible="{Binding SharingState}">  
+                            <Button 
+                                Theme="{DynamicResource RoundAccentButton}" 
+                                Width="50" 
+                                Height="50" 
+                                Padding="10"
+                                Command="{Binding StopSharingCommand}"
+                                HorizontalAlignment="Center">
+                                <Grid>
+                                    <materialIcons:MaterialIcon IconSize="50" Kind="Fullscreen" />
+                                    <materialIcons:MaterialIcon IconSize="20" Kind="Close" />
+                                </Grid>
+                            </Button>
+                        </Border>
+
+                        <Border 
+                            BoxShadow="0 3 5 -1 #ee000000" 
+                            CornerRadius="100" 
+                            Margin="0" 
+                            IsVisible="{Binding SharingState, Converter={StaticResource ReverseBoolConverter}}">  
+                            <Button 
+                                Theme="{DynamicResource RoundAccentButton}" 
+                                Width="50" 
+                                Height="50" 
+                                Padding="0" 
+                                Command="{Binding StartSharingCommand}"
+                                HorizontalAlignment="Center">
+                                <Grid>
+                                    <materialIcons:MaterialIcon IconSize="50" Kind="Fullscreen" />
+                                    <materialIcons:MaterialIcon IconSize="15" Kind="Record" />
+                                </Grid>
+                            </Button>
+                        </Border>
+
+
                     </Grid>
 
-                    <Button 
-                        Command="{Binding OpenSettingsCommand}" 
-                        Width="35" 
-                        Height="35" 
-                        Margin="0 5"
-                        Theme="{DynamicResource RoundAccentButton}">
-                        <materialIcons:MaterialIcon Kind="Settings" Width="30" Height="30"/>
-                    </Button>
+                    <Border BoxShadow="0 3 5 -1 #ee000000" CornerRadius="100"  Margin="0 5" HorizontalAlignment="Center">  
+                        <Button 
+                            Command="{Binding OpenSettingsCommand}" 
+                            Width="35" 
+                            Height="35" 
+                            
+                            Theme="{DynamicResource RoundAccentButton}">
+                            <materialIcons:MaterialIcon Kind="Settings" Width="30" Height="30"/>
+                        </Button>
+                    </Border>
+
+
                 </StackPanel>
             </Grid>
 

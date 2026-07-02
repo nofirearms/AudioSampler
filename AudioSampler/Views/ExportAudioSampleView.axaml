@@ -93,7 +93,7 @@
 
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0 20 0 0">
             <Button 
-                Theme="{DynamicResource RoundAccentButton}"
+                Theme="{DynamicResource TransparentButton}"
                 Command="{Binding ExportCommand}"
                 Width="50" 
                 Height="50" 
