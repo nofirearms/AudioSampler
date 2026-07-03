@@ -84,6 +84,7 @@ namespace AudioSampler.ViewModels
 
             captureService.RecordFinished += async(value) =>
             {
+                await Task.Delay(50);
                 await CreateAudioSample(value.FilePath);
             };
 

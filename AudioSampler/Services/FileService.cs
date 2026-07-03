@@ -114,6 +114,8 @@ namespace AudioSampler.Services
 
         public async Task<IStorageFolder?> GetStorageFolderFromFolderBookmarkAsync(FolderBookmark bookmark)
         {
+            if (bookmark is null) return null;
+
             var topLevel = GetTopLevel();
 
             // Если это дефолтная папка по умолчанию
@@ -121,7 +123,7 @@ namespace AudioSampler.Services
             {
                 // Получаем доступ к системной папке Downloads через Avalonia StorageProvider
                 // WellKnownFolder.Downloads поддерживается в Avalonia для Android
-                return await topLevel.StorageProvider.TryGetWellKnownFolderAsync(WellKnownFolder.Downloads);
+                return await topLevel.StorageProvider.TryGetWellKnownFolderAsync(WellKnownFolder.Documents);
             }
             else
             {

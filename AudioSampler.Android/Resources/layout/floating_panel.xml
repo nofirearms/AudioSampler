@@ -1,97 +1,128 @@
-﻿<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/panel_root"
-    android:layout_width="wrap_content"
+﻿<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:background="@drawable/panel_background"
-    android:padding="3dp"
-    android:gravity="center_vertical">
+    android:orientation="vertical"
+    android:gravity="center_horizontal">
 
-	<TextView
-		android:id="@+id/tv_status"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:text="&#xF04DB;"
-		android:textColor="@android:color/holo_blue_bright"
-		android:textSize="18sp"
-		android:layout_marginRight="10dp"
-		android:fontFamily="@font/materialdesignicons"
-		android:visibility="gone"/>
-	
-	
-	<Button
-		android:id="@+id/btn_rewind"
-		android:layout_width="48dp"
-		android:layout_height="48dp"
-		android:text="&#xF11F9;"
-		android:textSize="28sp"
-		android:textColor="#FFFFFF"
-		android:padding="0dp"
-		android:background="@android:color/transparent"
-		android:fontFamily="@font/materialdesignicons" />
-
-	<Button
-		android:id="@+id/btn_record"
-		android:layout_width="48dp"
-		android:layout_height="48dp"
-		android:text="&#xF044A;"
-		android:textSize="36sp"
-		android:textColor="#FF0000"
-		android:padding="0dp"
-		android:background="@android:color/transparent"
-		android:fontFamily="@font/materialdesignicons"
-		android:visibility="visible"/>
-
+	 
+		 
 	<LinearLayout
-		android:id="@+id/recording_controls_group"
+		xmlns:android="http://schemas.android.com/apk/res/android"
+		android:id="@+id/panel_root"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:orientation="horizontal"
-		android:gravity="center_vertical"
-		android:background="@drawable/inner_panel_background"
-		android:visibility="gone">
+		android:background="@drawable/panel_background"
+		android:padding="3dp"
+		android:gravity="center_vertical">
 
-		<FrameLayout
-				android:layout_width="48dp"
-				android:layout_height="48dp">
+		<TextView
+			android:id="@+id/tv_status"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="&#xF04DB;"
+			android:textColor="@android:color/holo_blue_bright"
+			android:textSize="18sp"
+			android:layout_marginRight="10dp"
+			android:fontFamily="@font/materialdesignicons"
+			android:visibility="gone"/>
+	
+	
+		<Button
+			android:id="@+id/btn_rewind"
+			android:layout_width="48dp"
+			android:layout_height="48dp"
+			android:text="&#xF11F9;"
+			android:textSize="28sp"
+			android:textColor="#FFFFFF"
+			android:padding="0dp"
+			android:background="@android:color/transparent"
+			android:fontFamily="@font/materialdesignicons" />
+
+		<Button
+			android:id="@+id/btn_record"
+			android:layout_width="48dp"
+			android:layout_height="48dp"
+			android:text="&#xF044A;"
+			android:textSize="36sp"
+			android:textColor="#FF0000"
+			android:padding="0dp"
+			android:background="@android:color/transparent"
+			android:fontFamily="@font/materialdesignicons"
+			android:visibility="visible"/>
+
+		<LinearLayout
+			android:id="@+id/recording_controls_group"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:orientation="horizontal"
+			android:gravity="center_vertical"
+			android:background="@drawable/inner_panel_background"
+			android:visibility="gone">
+
+			<FrameLayout
+					android:layout_width="48dp"
+					android:layout_height="48dp">
+				<Button
+					android:id="@+id/btn_resume_record"
+					android:layout_width="48dp"
+					android:layout_height="48dp"
+					android:text="&#xF043E;"
+					android:textSize="36sp"
+					android:textColor="#FF0000"
+					android:padding="0dp"
+					android:background="@android:color/transparent"
+					android:fontFamily="@font/materialdesignicons"
+					android:visibility="gone"/>
+				<Button
+					android:id="@+id/btn_pause_record"
+					android:layout_width="48dp"
+					android:layout_height="48dp"
+					android:text="&#xF03E4;"
+					android:textSize="36sp"
+					android:textColor="#FFFFFF"
+					android:padding="0dp"
+					android:background="@android:color/transparent"
+					android:fontFamily="@font/materialdesignicons"
+					android:visibility="visible"/>
+			
+			</FrameLayout>
+
 			<Button
-			    android:id="@+id/btn_resume_record"
+				android:id="@+id/btn_stop_record"
 				android:layout_width="48dp"
 				android:layout_height="48dp"
-				android:text="&#xF043E;"
-				android:textSize="36sp"
-				android:textColor="#FF0000"
-				android:padding="0dp"
-				android:background="@android:color/transparent"
-				android:fontFamily="@font/materialdesignicons"
-				android:visibility="gone"/>
-			<Button
-				android:id="@+id/btn_pause_record"
-				android:layout_width="48dp"
-				android:layout_height="48dp"
-				android:text="&#xF03E4;"
+				android:text="&#xF04DB;"
 				android:textSize="36sp"
 				android:textColor="#FFFFFF"
 				android:padding="0dp"
 				android:background="@android:color/transparent"
-				android:fontFamily="@font/materialdesignicons"
-				android:visibility="visible"/>
-			
-		</FrameLayout>
+				android:fontFamily="@font/materialdesignicons"/>
+			<Button
+				android:id="@+id/btn_cancel_record"
+				android:layout_width="48dp"
+				android:layout_height="48dp"
+				android:text="&#xF0156;"
+				android:textSize="36sp"
+				android:textColor="#FFFFFF"
+				android:padding="0dp"
+				android:background="@android:color/transparent"
+				android:fontFamily="@font/materialdesignicons"/>
+		
+			<TextView
+				android:id="@+id/tv_timer"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="00:00"
+				android:textColor="#FF3B30"
+				android:textSize="14sp"
+				android:layout_marginRight="10dp" />
+		
+		</LinearLayout>
+	
 
 		<Button
-			android:id="@+id/btn_stop_record"
-			android:layout_width="48dp"
-			android:layout_height="48dp"
-			android:text="&#xF04DB;"
-			android:textSize="36sp"
-			android:textColor="#FFFFFF"
-			android:padding="0dp"
-			android:background="@android:color/transparent"
-			android:fontFamily="@font/materialdesignicons"/>
-		<Button
-			android:id="@+id/btn_cancel_record"
+			android:id="@+id/btn_close_panel"
 			android:layout_width="48dp"
 			android:layout_height="48dp"
 			android:text="&#xF0156;"
@@ -99,30 +130,42 @@
 			android:textColor="#FFFFFF"
 			android:padding="0dp"
 			android:background="@android:color/transparent"
-			android:fontFamily="@font/materialdesignicons"/>
+			android:fontFamily="@font/materialdesignicons" 
+			android:visibility="gone"/>
+
+	</LinearLayout>
+
+	
+	<LinearLayout 
+		android:id="@+id/ll_toast"
+		android:layout_marginTop="55dp"
+		android:layout_marginLeft="5dp"
+		android:visibility="gone"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal">
 		
 		<TextView
-            android:id="@+id/tv_timer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="00:00"
-            android:textColor="#FF3B30"
-            android:textSize="14sp"
-            android:layout_marginRight="10dp" />
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginRight="5dp"
+			android:textColor="#00aa00"
+			android:text="&#xF0193;"
+			android:fontFamily="@font/materialdesignicons" 
+			android:visibility="visible" />
+		 
 		
-	</LinearLayout>
+		<TextView
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+
+			android:textColor="#FFFFFF"
+			android:text="Saved"
+			android:visibility="visible" />
 	
+	</LinearLayout>
 
-	<Button
-		android:id="@+id/btn_close_panel"
-		android:layout_width="48dp"
-		android:layout_height="48dp"
-		android:text="&#xF0156;"
-		android:textSize="36sp"
-		android:textColor="#FFFFFF"
-		android:padding="0dp"
-		android:background="@android:color/transparent"
-		android:fontFamily="@font/materialdesignicons" 
-		android:visibility="gone"/>
 
-</LinearLayout>
+</FrameLayout>
+		
+		  

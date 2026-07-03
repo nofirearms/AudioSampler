@@ -1,4 +1,5 @@
-﻿using AudioSampler.Model;
+﻿using AudioSampler.Extensions;
+using AudioSampler.Model;
 using AudioSampler.Services;
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
@@ -7,6 +8,7 @@ using CommunityToolkit.Mvvm.Input;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -28,7 +30,7 @@ namespace AudioSampler.ViewModels.Modal
         private FolderBookmarkListItem _selectedFolder;
         
 
-        public FoldersListViewModel(DataService dataService, FileService fileService, FolderBookmark exportFolderBookmark)
+        public FoldersListViewModel(DataService dataService, FileService fileService, FolderBookmark? exportFolderBookmark)
         {
             _dataService = dataService;
             _fileService = fileService;
@@ -44,8 +46,9 @@ namespace AudioSampler.ViewModels.Modal
             foreach (var bookmark in bookmarks)
             {
                 var storage = await _fileService.GetStorageFolderFromFolderBookmarkAsync(bookmark);
-                //если папки не существует
-                if(storage == null)
+                //если папки не существует, костыль чтобы определить существует ли папка
+                var exists = await storage.ExistsAsync();
+                if (!exists) 
                 {
                     await _dataService.FolderBooksmarksReposity.RemoveAsync(bookmark);
                     continue;

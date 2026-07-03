@@ -5,6 +5,7 @@ using ManagedBass.Enc;
 using ManagedBass.Fx;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -114,7 +115,7 @@ namespace AudioSampler.Services
         /// <returns>ID стрима</returns>
         public int CreatePlaybackStream(string path)
         {
-            return Bass.CreateStream(path, 0, 0, BassFlags.Default);
+            return Bass.CreateStream(path, 0, 0, BassFlags.Default); 
         }
 
         /// <summary>
@@ -199,6 +200,7 @@ namespace AudioSampler.Services
 
             // Читаем ровно bytesToRead данных из стрима в наш массив float
             int bytesRead = Bass.ChannelGetData(decodeStream, sampleBuffer, (int)bytesToRead);
+                            
 
             // 3. Считаем пик только по прочитанному буферу
             float maxPeak = 0f;

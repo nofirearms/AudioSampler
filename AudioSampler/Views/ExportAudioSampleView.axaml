@@ -37,7 +37,8 @@
                 BorderBrush="{DynamicResource AccentBrush1}"
                 CaretBrush="{DynamicResource AccentBrush1}"
                 VerticalContentAlignment="Center"
-                IsReadOnly="True"
+                IsReadOnly="True" 
+                PlaceholderText="Choose a folder"
                 Text="{Binding Folder.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"> 
                 <TextBox.Resources>
                     <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="{DynamicResource BackgroundColor1}" />

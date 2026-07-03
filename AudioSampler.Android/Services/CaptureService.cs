@@ -82,7 +82,7 @@ namespace AudioSampler.Android.Services
                 StopCaptureSession();
             });
 
-            _recordingResultSource = new TaskCompletionSource<bool>();
+            
         }
 
         public override void OnDestroy()
@@ -146,6 +146,8 @@ namespace AudioSampler.Android.Services
         {
             if (_isRecording) return;
 
+            _recordingResultSource = new TaskCompletionSource<bool>();
+
             _isRecording = true;
             
             var config = new AudioPlaybackCaptureConfiguration.Builder(_mediaProjection!)
@@ -174,8 +176,12 @@ namespace AudioSampler.Android.Services
             _recorder.StartRecording();
 
             var folder = System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal);
-            Directory.CreateDirectory(folder);
-            var file = Path.Combine(folder,"AudioSampler", $"Recording{DateTime.Now:yyyyMMdd_HHmmss}.wav");
+            folder = Path.Combine(folder, "AudioSampler");
+            if (!Directory.Exists(folder))
+            {
+                Directory.CreateDirectory(folder);
+            }
+            var file = Path.Combine(folder, $"Recording{DateTime.Now:yyyyMMdd_HHmmss}.wav");
 
             var writeTask = Task.Run(() =>
             {
@@ -239,7 +245,7 @@ namespace AudioSampler.Android.Services
 
         private Task FinalizeWavFileAsync(string file, int sampleRate = 44100, short channels = 2, short bitsPerSample = 16)
         {
-            return Task.Run(() =>
+            return Task.Run(async () =>
             {
                 using (var fileStream = new FileStream(file, FileMode.Open, FileAccess.ReadWrite))
                 using (var writer = new BinaryWriter(fileStream))
@@ -269,7 +275,6 @@ namespace AudioSampler.Android.Services
 
                     writer.Write(System.Text.Encoding.ASCII.GetBytes("data")); // Подчанк самих данных
                     writer.Write(totalDataLength);                                // Размер только аудио данных
-
 
                     WeakReferenceMessenger.Default.Send(new RecordFinishedMessage(new RecordResult(file)));
                 }

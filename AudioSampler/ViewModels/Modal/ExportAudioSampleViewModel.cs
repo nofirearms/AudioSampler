@@ -1,4 +1,5 @@
-﻿using AudioSampler.Model;
+﻿using AudioSampler.Extensions;
+using AudioSampler.Model;
 using AudioSampler.Services;
 using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -91,8 +92,15 @@ namespace AudioSampler.ViewModels.Modal
         [RelayCommand]
         public async void Export()
         {
+            //костыль чтобы определить существует ли папка или нет
+            if(Folder is null)
+            {
+                await _modalService.OpenMessageBoxModal("Error", "Choose export folder", ["OK"]);
+                return;
+            }
 
-            if (!Directory.Exists(Folder.Path.LocalPath))
+            var folderExists = await Folder.ExistsAsync();
+            if (!folderExists)
             {
                 await _modalService.OpenMessageBoxModal("Error", "Selected folder doesn't exist.", ["OK"]);
                 return;

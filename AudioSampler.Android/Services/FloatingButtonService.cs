@@ -46,6 +46,7 @@ namespace AudioSampler.Android.Services
         private TextView? _tvTimer;
         private TextView? _tvStatus;
         private LinearLayout? _recordingControlsGroup;
+        private LinearLayout? _floatingToast;
 
         private RecordingState _recordingState = RecordingState.Initial; 
         public RecordingState RecordingState
@@ -87,6 +88,7 @@ namespace AudioSampler.Android.Services
             _btnClosePanel = _panelView.FindViewById<Button>(Resource.Id.btn_close_panel);
             _tvTimer = _panelView.FindViewById<TextView>(Resource.Id.tv_timer);
             _recordingControlsGroup = _panelView.FindViewById<LinearLayout>(Resource.Id.recording_controls_group);
+            _floatingToast = _panelView.FindViewById<LinearLayout>(Resource.Id.ll_toast);
 
 
             // 3. Вешаем перетаскивание (Drag & Drop) на ВСЮ панель целиком
@@ -263,6 +265,8 @@ namespace AudioSampler.Android.Services
         {
             RecordingState = RecordingState.Stop;
 
+            ShowSimpleToast();
+
             WeakReferenceMessenger.Default.Send(new ToggleRecordMessage(RecordingAction.Stop));
         }
 
@@ -360,7 +364,17 @@ namespace AudioSampler.Android.Services
             StopSelf();
         }
 
+        private void ShowSimpleToast()
+        {
+            if (_floatingToast == null) return;
 
+            _floatingToast.Visibility = ViewStates.Visible;
+
+            new Handler(Looper.MainLooper).PostDelayed(() =>
+            {
+                _floatingToast.Visibility = ViewStates.Gone;
+            }, 2000);
+        }
 
     }
 }

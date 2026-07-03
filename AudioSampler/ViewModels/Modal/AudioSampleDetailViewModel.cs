@@ -158,24 +158,27 @@ namespace AudioSampler.ViewModels.Modal
 
                 //var folderBookmark = _dataService.FolderBooksmarksReposity.GetAll().FirstOrDefault(b => b.Bookmark == value);
 
-                var folderBookmark = setting is null ? new FolderBookmark("DEFAULT") : new FolderBookmark(setting.Value);
+                var folderBookmark = setting is null ? null : new FolderBookmark(setting.Value);
 
                 var folder = await _fileService.GetStorageFolderFromFolderBookmarkAsync(folderBookmark);
                 //если сохранённая папка удалена
-                if(folder == null)
-                {
-                    await _dataService.SettingsRepository.ChangeValue(SettingKey.FolderBookmark, "DEFAULT");
-                    folder = await _fileService.GetStorageFolderFromFolderBookmarkAsync(new FolderBookmark("DEFAULT"));
-                }
+                //if(folder == null)
+                //{
+                //    await _dataService.SettingsRepository.ChangeValue(SettingKey.FolderBookmark, "DEFAULT");
+                //    folder = await _fileService.GetStorageFolderFromFolderBookmarkAsync(new FolderBookmark("DEFAULT"));
+                //}
 
                 //Открываем модальное окно с найстройками экспорта
                 var result = await _modalService.OpenExportModal(new ExportSettings() { Name = Name, Folder = folder, FolderBookmark = folderBookmark });
 
                 if (result.Success)
                 {
-                    if (File.Exists(result.Data.FullFilePath))
+                    //переименовываем файл если такой существует
+                    var file = await result.Data.Folder.GetFileAsync($"{result.Data.Name}.{result.Data.Format}");
+                    if (file != null)
                     {
-                        result.Data.Name = $"{Name} [{DateTime.Now:yyyy-MM-dd HHmmss}]"; 
+                        result.Data.Name = $"{Name} [{DateTime.Now:yyyy-MM-dd HHmmss}]";
+                        file.Dispose();
                     }
 
                     var renderResult = await _audioService.RenderToFileAsync(
