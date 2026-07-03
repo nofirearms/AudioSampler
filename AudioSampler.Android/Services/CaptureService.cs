@@ -28,7 +28,7 @@ namespace AudioSampler.Android.Services
         private MediaProjection? _mediaProjection;
         private AudioRecord? _recorder;
         private bool _isRecording = false;
-        private TaskCompletionSource<bool> _recordingResultSource;
+        private TaskCompletionSource<bool> _recordingResultSource = new();
 
         public CaptureService()
         {
@@ -146,7 +146,7 @@ namespace AudioSampler.Android.Services
         {
             if (_isRecording) return;
 
-            _recordingResultSource = new TaskCompletionSource<bool>();
+            _recordingResultSource = new TaskCompletionSource<bool>(); 
 
             _isRecording = true;
             
@@ -181,7 +181,7 @@ namespace AudioSampler.Android.Services
             {
                 Directory.CreateDirectory(folder);
             }
-            var file = Path.Combine(folder, $"Recording{DateTime.Now:yyyyMMdd_HHmmss}.wav");
+            var file = Path.Combine(folder, $"{DateTime.Now:yyyyMMdd_HHmmss}.wav");
 
             var writeTask = Task.Run(() =>
             {

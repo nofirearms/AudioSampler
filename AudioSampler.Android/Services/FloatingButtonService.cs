@@ -14,8 +14,11 @@ using Android.Views;
 using Android.Widget;
 using AudioSampler.Messages;
 using AudioSampler.Model;
+using AudioSampler.Services;
 using CommunityToolkit.Mvvm.Messaging;
 using Java.Lang;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Timers;
 using MediaController = Android.Media.Session.MediaController;
@@ -35,7 +38,7 @@ namespace AudioSampler.Android.Services
         private float _initialTouchY;
 
         private View? _panelView;
-        private LinearLayout? _panelRoot;
+        private FrameLayout? _panelRoot;
         private Button? _btnRecord;
         private Button? _btnStopRecord;
         private Button? _btnPauseRecord;
@@ -64,6 +67,9 @@ namespace AudioSampler.Android.Services
         private Runnable _timerRunnable;
         private TimeSpan _recordingTime = TimeSpan.Zero;
 
+        private DataService _dataService;
+
+
 
         public override IBinder OnBind(Intent intent) => null;
 
@@ -72,12 +78,13 @@ namespace AudioSampler.Android.Services
             base.OnCreate();
 
             _windowManager = GetSystemService(Context.WindowService).JavaCast<IWindowManager>();
+            _dataService = App.Current.Services.GetRequiredService<DataService>();
 
             // 1. Загружаем наш XML лейаут
             var inflater = LayoutInflater.From(this);
             _panelView = inflater.Inflate(Resource.Layout.floating_panel, null);
 
-            _panelRoot = _panelView.FindViewById<LinearLayout>(Resource.Id.panel_root);
+            _panelRoot = _panelView.FindViewById<FrameLayout>(Resource.Id.panel_root);
             _btnRecord = _panelView.FindViewById<Button>(Resource.Id.btn_record);
             _tvStatus = _panelView.FindViewById<TextView>(Resource.Id.tv_status);
             _btnStopRecord = _panelView.FindViewById<Button>(Resource.Id.btn_stop_record);
@@ -110,7 +117,6 @@ namespace AudioSampler.Android.Services
             _btnResumeRecord.Click += (s, e) => OnResumeButtonClick();
             _btnRewind.Click += (s, e) => OnRewindButtonClick();
             _btnClosePanel.Click += (s, e) => OnClosePanelButtonClick();
-            
 
 
             // Настройки окна WindowManager (теперь WrapContent, панель сама примет нужный размер)
@@ -127,8 +133,9 @@ namespace AudioSampler.Android.Services
             )
             {
                 Gravity = GravityFlags.Top | GravityFlags.Left,
-                X = 100,
-                Y = 100
+
+                X = _dataService.SettingsRepository.Get(SettingKey.FloatingBarX) is Setting x ? int.Parse(x.Value) : 100,
+                Y = _dataService.SettingsRepository.Get(SettingKey.FloatingBarY) is Setting y ? int.Parse(y.Value) : 100,
             };
 
             // Добавляем готовую красивую панель на экран поверх всех приложений
@@ -173,6 +180,13 @@ namespace AudioSampler.Android.Services
                             v.PerformClick();
                         }
                     }
+                    //перетаскивание
+                    else
+                    {
+                        _dataService.SettingsRepository.ChangeValue(SettingKey.FloatingBarX, _params.X.ToString());
+                        _dataService.SettingsRepository.ChangeValue(SettingKey.FloatingBarY, _params.Y.ToString());
+                    }
+                    
                     return true;
             }
             return false;
@@ -190,7 +204,7 @@ namespace AudioSampler.Android.Services
         private void OnRecordingStateChanged(RecordingState oldValue, RecordingState newValue)
         {
 
-            TransitionManager.BeginDelayedTransition(_panelRoot, new AutoTransition().SetDuration(300));
+            TransitionManager.BeginDelayedTransition(_panelRoot, new AutoTransition().SetDuration(200));
 
             if (newValue == RecordingState.Initial)
             {

@@ -62,9 +62,15 @@
                     Classes="MainList"
                     ItemsSource="{Binding AudioSamples}" 
                     Background="{DynamicResource Background2}"
+                    RenderOptions.BitmapInterpolationMode="HighQuality"
                     ScrollViewer.VerticalSnapPointsType="None"
                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"  
                     ScrollViewer.VerticalScrollBarVisibility="Auto">
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <VirtualizingStackPanel Orientation="Vertical" />
+                        </ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <Border CornerRadius="5" Background="{DynamicResource Background1}" Margin="5 3 10 3" BoxShadow="0 1 5 -1 #ee000000">

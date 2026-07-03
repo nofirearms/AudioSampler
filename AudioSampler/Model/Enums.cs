@@ -22,6 +22,8 @@ namespace AudioSampler.Model
         FolderBookmark,
         ExportFormat,
         ExportNormalize,
-        ExportTrim
+        ExportTrim,
+        FloatingBarX,
+        FloatingBarY
     }
 }

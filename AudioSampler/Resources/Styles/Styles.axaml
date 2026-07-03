@@ -65,9 +65,12 @@
         </Style>
 
         <Style Selector="ListBox.MainList ListBoxItem:pressed">
-            <Setter Property="RenderTransform" Value="scale(0.98)" />
+            <Setter Property="RenderTransform" Value="scale(0.99)" />
         </Style>
 
+        <Style Selector="ListBox.MainList ListBoxItem:pressed /template/ ContentPresenter#PART_ContentPresenter" >
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
 
 
        <Style Selector="ListBox.CustomSelectedBackground ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
@@ -97,7 +100,7 @@
     <!-- Notification Card -->
     <Style Selector="NotificationCard">
     <Setter Property="Background" Value="{DynamicResource Background2}"/>
-    
+    <Setter Property="Margin" Value="0 40 0 0"/>
     <Setter Property="Padding" Value="0"/>
 </Style>
 

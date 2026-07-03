@@ -196,7 +196,7 @@ namespace AudioSampler.ViewModels.Modal
                     }
                     else
                     {
-                        _notificationService.Show(Material.Icons.MaterialIconKind.ContentSaveMove, "Error", renderResult.ErrorMessage, Avalonia.Controls.Notifications.NotificationType.Error);
+                        _notificationService.Show(Material.Icons.MaterialIconKind.Error, "Error", renderResult.ErrorMessage, Avalonia.Controls.Notifications.NotificationType.Error);
                     }
                 }
             }
