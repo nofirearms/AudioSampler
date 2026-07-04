@@ -9,6 +9,14 @@
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <None Remove="Resources\Logo\iomoney.png" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <AvaloniaResource Include="Resources\Logo\iomoney.png" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Avalonia" />

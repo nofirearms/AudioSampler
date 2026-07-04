@@ -20,7 +20,7 @@ using System.Diagnostics;
 namespace AudioSampler.Android
 {
     [Activity(
-        Label = "AudioSampler.Android",
+        Label = "Audio Sampler",
         Theme = "@style/MyTheme.NoActionBar",
         Icon = "@mipmap/icon",
         MainLauncher = true,
