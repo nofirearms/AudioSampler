@@ -22,7 +22,7 @@ namespace AudioSampler.Android
     [Activity(
         Label = "AudioSampler.Android",
         Theme = "@style/MyTheme.NoActionBar",
-        Icon = "@drawable/icon",
+        Icon = "@mipmap/icon",
         MainLauncher = true,
         SupportsPictureInPicture = true, // Включает PiP
         CanDisplayOnRemoteDevices = true, // Позволяет ОС управлять окном
