@@ -26,7 +26,7 @@ namespace AudioSampler.Android
         MainLauncher = true,
         SupportsPictureInPicture = true, // Включает PiP
         CanDisplayOnRemoteDevices = true, // Позволяет ОС управлять окном
-        ConfigurationChanges = ConfigChanges.Orientation | ConfigChanges.ScreenSize | ConfigChanges.UiMode)]
+        ConfigurationChanges = ConfigChanges.Orientation | ConfigChanges.ScreenSize | ConfigChanges.UiMode, LaunchMode = LaunchMode.SingleTop)]
     public class MainActivity : AvaloniaMainActivity
     {
         private const int CaptureRequestCode = 1001;

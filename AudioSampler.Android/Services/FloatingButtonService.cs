@@ -50,6 +50,8 @@ namespace AudioSampler.Android.Services
         private TextView? _tvStatus;
         private LinearLayout? _recordingControlsGroup;
         private LinearLayout? _floatingToast;
+        private LinearLayout? _llMainGroup;
+        private Button? _btnMaximize;
 
         private RecordingState _recordingState = RecordingState.Initial; 
         public RecordingState RecordingState
@@ -86,7 +88,6 @@ namespace AudioSampler.Android.Services
 
             _panelRoot = _panelView.FindViewById<FrameLayout>(Resource.Id.panel_root);
             _btnRecord = _panelView.FindViewById<Button>(Resource.Id.btn_record);
-            _tvStatus = _panelView.FindViewById<TextView>(Resource.Id.tv_status);
             _btnStopRecord = _panelView.FindViewById<Button>(Resource.Id.btn_stop_record);
             _btnPauseRecord = _panelView.FindViewById<Button>(Resource.Id.btn_pause_record);
             _btnResumeRecord = _panelView.FindViewById<Button>(Resource.Id.btn_resume_record);
@@ -96,6 +97,8 @@ namespace AudioSampler.Android.Services
             _tvTimer = _panelView.FindViewById<TextView>(Resource.Id.tv_timer);
             _recordingControlsGroup = _panelView.FindViewById<LinearLayout>(Resource.Id.recording_controls_group);
             _floatingToast = _panelView.FindViewById<LinearLayout>(Resource.Id.ll_toast);
+            _llMainGroup = _panelView.FindViewById<LinearLayout>(Resource.Id.ll_main_group);
+            _btnMaximize = _panelView.FindViewById<Button>(Resource.Id.btn_maximize);
 
 
             // 3. Вешаем перетаскивание (Drag & Drop) на ВСЮ панель целиком
@@ -107,6 +110,8 @@ namespace AudioSampler.Android.Services
             _btnCancelRecord.SetOnTouchListener(this);
             _btnClosePanel.SetOnTouchListener(this);
             _btnResumeRecord.SetOnTouchListener(this);
+            _btnMaximize.SetOnTouchListener(this);
+
 
 
             // 4. Настраиваем клики
@@ -117,6 +122,7 @@ namespace AudioSampler.Android.Services
             _btnResumeRecord.Click += (s, e) => OnResumeButtonClick();
             _btnRewind.Click += (s, e) => OnRewindButtonClick();
             _btnClosePanel.Click += (s, e) => OnClosePanelButtonClick();
+            _btnMaximize.Click += (s, e) => OnMaximizeButtonClick();
 
 
             // Настройки окна WindowManager (теперь WrapContent, панель сама примет нужный размер)
@@ -212,7 +218,7 @@ namespace AudioSampler.Android.Services
             }
             else if(newValue == RecordingState.Record)
             {
-                _btnRecord.Visibility = ViewStates.Gone;
+                _llMainGroup.Visibility = ViewStates.Gone;
 
                 _btnResumeRecord.Visibility = ViewStates.Gone;
                 _btnPauseRecord.Visibility = ViewStates.Visible;
@@ -226,7 +232,7 @@ namespace AudioSampler.Android.Services
             }
             else if(newValue == RecordingState.Stop)
             {
-                _btnRecord.Visibility = ViewStates.Visible;
+                _llMainGroup.Visibility = ViewStates.Visible;
 
                 _btnResumeRecord.Visibility = ViewStates.Gone;
                 _btnPauseRecord.Visibility = ViewStates.Visible;
@@ -237,7 +243,7 @@ namespace AudioSampler.Android.Services
             }
             else if(newValue == RecordingState.Pause)
             {
-                _btnRecord.Visibility = ViewStates.Gone;
+                _llMainGroup.Visibility = ViewStates.Gone;
 
                 _btnResumeRecord.Visibility = ViewStates.Visible;
                 _btnPauseRecord.Visibility = ViewStates.Gone;
@@ -289,6 +295,23 @@ namespace AudioSampler.Android.Services
             RecordingState = RecordingState.Stop;
 
             WeakReferenceMessenger.Default.Send(new ToggleRecordMessage(RecordingAction.Cancel));
+        }
+
+        private void OnMaximizeButtonClick()
+        {
+            var context = Application.ApplicationContext;
+
+            // 2. Указываем класс запуска (это та самая точка, где стартует твой общий проект Avalonia)
+            var intent = new Intent(context, typeof(MainActivity));
+
+            // 3. Эти флаги принудительно достают твой общий проект из фона, НЕ перезапуская его
+            intent.AddFlags(ActivityFlags.NewTask | ActivityFlags.ReorderToFront | ActivityFlags.SingleTop);
+
+            // 4. Отрезаем любые анимации, чтобы общее окно появилось мгновенно и без дерганий
+            intent.AddFlags(ActivityFlags.NoAnimation);
+
+            // 5. Даем команду системе вытащить основной проект на экран
+            context.StartActivity(intent);
         }
 
         private void OnResumeButtonClick()
