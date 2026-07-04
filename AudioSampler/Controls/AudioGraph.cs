@@ -42,7 +42,7 @@ namespace AudioSampler.Controls
 
 
         public static readonly StyledProperty<float> BarSpacingProperty =
-            AvaloniaProperty.Register<AudioGraph, float>(nameof(BarSpacing), 2f);
+            AvaloniaProperty.Register<AudioGraph, float>(nameof(BarSpacing), 1f);
 
         public float BarSpacing
         {
