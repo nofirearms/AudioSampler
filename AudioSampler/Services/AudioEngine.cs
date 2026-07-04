@@ -99,5 +99,14 @@ namespace AudioSampler.Services
 
         }
 
+        public void StreamFree()
+        {
+            if (_streamHandle != 0) 
+            {
+                _audioService.StreamFree(_streamHandle);
+            }
+            
+        }
+
     }
 }

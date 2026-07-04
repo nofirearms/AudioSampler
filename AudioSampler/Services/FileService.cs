@@ -4,7 +4,9 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Platform.Storage;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -149,6 +151,23 @@ namespace AudioSampler.Services
                 {
                     // Папка готова к работе, права активны!
                 }
+            }
+        }
+
+        public void DeleteFileByPath(string file)
+        {
+            try
+            {
+                if (File.Exists(file))
+                {
+                    File.Delete(file);
+
+                    // Здесь можно вызвать нотификашку, что всё стерлось успешно
+                }
+            }
+            catch(Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
             }
         }
     }

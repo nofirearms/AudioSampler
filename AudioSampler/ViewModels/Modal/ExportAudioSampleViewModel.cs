@@ -67,8 +67,8 @@ namespace AudioSampler.ViewModels.Modal
             Normalize = normalize == null ? false : bool.Parse(normalize.Value);
         }
 
-        [RelayCommand]
-        public async void SelectExportFolder()
+        [RelayCommand(AllowConcurrentExecutions = false)]
+        public async Task SelectExportFolder()
         {
             var result = await _fileService.RequestFolderBookmarkAsync(false);
             if(result != null)
@@ -78,8 +78,8 @@ namespace AudioSampler.ViewModels.Modal
             }
         }
 
-        [RelayCommand]
-        public async void OpenFoldersList()
+        [RelayCommand(AllowConcurrentExecutions = false)]
+        public async Task OpenFoldersList()
         {
             var result = await _modalService.OpenFoldersListModal(_bookmark);
             if (result.Success)
@@ -89,8 +89,8 @@ namespace AudioSampler.ViewModels.Modal
             }
         }
 
-        [RelayCommand]
-        public async void Export()
+        [RelayCommand(AllowConcurrentExecutions = false)]
+        public async Task Export()
         {
             //костыль чтобы определить существует ли папка или нет
             if(Folder is null)

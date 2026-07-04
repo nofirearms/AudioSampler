@@ -10,6 +10,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 
 namespace AudioSampler.ViewModels.Modal
@@ -79,12 +80,6 @@ namespace AudioSampler.ViewModels.Modal
             if (_audioSample.Normalize) Normalize(true);
         }
 
-        private async void LoadData()
-        {
-
-        }
-
-
 
         [RelayCommand]
         public void Play()
@@ -102,8 +97,8 @@ namespace AudioSampler.ViewModels.Modal
             IsPlaying = false;
         }
 
-        [RelayCommand]
-        public async void Normalize(bool normalize)
+        [RelayCommand(AllowConcurrentExecutions = false)]
+        public async Task Normalize(bool normalize)
         {
             if (normalize)
             {
@@ -134,8 +129,8 @@ namespace AudioSampler.ViewModels.Modal
         }
 
 
-        [RelayCommand]
-        public async void Edit()
+        [RelayCommand(AllowConcurrentExecutions = false)]
+        public async Task Edit()
         {
             _audioSample.Name = Name;
             _audioSample.SelectionStart = StartPercent;
@@ -144,12 +139,12 @@ namespace AudioSampler.ViewModels.Modal
 
             await _dataService.AudioSamplesRepository.CreateOrUpdateAsync(_audioSample);
 
-            Close(true, _audioSample);
+            Close(true, _audioSample, "Edit");
         }
 
 
-        [RelayCommand]
-        public async void Export()
+        [RelayCommand(AllowConcurrentExecutions = false)]
+        public async Task Export()
         {
             //Собираем настройки для модального окна
             try
@@ -161,12 +156,6 @@ namespace AudioSampler.ViewModels.Modal
                 var folderBookmark = setting is null ? null : new FolderBookmark(setting.Value);
 
                 var folder = await _fileService.GetStorageFolderFromFolderBookmarkAsync(folderBookmark);
-                //если сохранённая папка удалена
-                //if(folder == null)
-                //{
-                //    await _dataService.SettingsRepository.ChangeValue(SettingKey.FolderBookmark, "DEFAULT");
-                //    folder = await _fileService.GetStorageFolderFromFolderBookmarkAsync(new FolderBookmark("DEFAULT"));
-                //}
 
                 //Открываем модальное окно с найстройками экспорта
                 var result = await _modalService.OpenExportModal(new ExportSettings() { Name = Name, Folder = folder, FolderBookmark = folderBookmark });
@@ -206,6 +195,17 @@ namespace AudioSampler.ViewModels.Modal
             }
             
             
+        }
+
+        [RelayCommand]
+        public async Task Remove()
+        {
+            var mbResult = await _modalService.OpenMessageBoxModal("Delete File", $"Are you sure you want to delete {_audioSample.Name}?", ["Yes", "No"]);
+            if(mbResult.ButtonTag == "Yes")
+            {
+                Stop();
+                Close(true, _audioSample, "Remove");
+            }
         }
 
         [RelayCommand]

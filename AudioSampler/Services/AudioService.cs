@@ -524,6 +524,12 @@ namespace AudioSampler.Services
 
         //------------------------------------------------------------------------------------------------------------------------------------
 
+        public void StreamFree(int stream)
+        {
+            Stop(stream);
+            Bass.StreamFree(stream);
+        }
+
         public void Dispose(int stream)
         {
             Stop(stream);

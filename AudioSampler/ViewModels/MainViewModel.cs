@@ -28,6 +28,7 @@ namespace AudioSampler.ViewModels
         private readonly DataService _dataService;
         private readonly ModalService _modalService;
         private readonly AudioEngine _audioEngine;
+        private readonly FileService _fileService;
 
         //------------------------ MODAL -------------------------------------
         public IReadOnlyList<IModal> ActiveModals => _modalService.ActiveModals;
@@ -69,12 +70,13 @@ namespace AudioSampler.ViewModels
             }
         }
 
-        public MainViewModel(IScreenCaptureService captureService, DataService dataService, ModalService modalService, AudioEngine audioEngine)
+        public MainViewModel(IScreenCaptureService captureService, DataService dataService, ModalService modalService, AudioEngine audioEngine, FileService fileService)
         {
             _captureService = captureService;
             _dataService = dataService;
             _modalService = modalService;
             _audioEngine = audioEngine;
+            _fileService = fileService;
 
             ((INotifyCollectionChanged)_modalService.ActiveModals).CollectionChanged += (s, e) =>
             {
@@ -164,8 +166,8 @@ namespace AudioSampler.ViewModels
         }
 
 
-        [RelayCommand]
-        private async void OpenSettings()
+        [RelayCommand(AllowConcurrentExecutions = false)]
+        private async Task OpenSettings()
         {
             //_captureService.EnterMiniMode();
             await _modalService.OpenSettingsModal();
@@ -177,10 +179,24 @@ namespace AudioSampler.ViewModels
         {
             if (audioSampleVM is not AudioSampleSummaryViewModel) return;
 
+            if (audioSampleVM.IsPlaying)
+            {
+                _audioEngine.Stop();
+            }
+
             var result = await _modalService.OpenAudioSampleDetailModal(audioSampleVM.AudioSample);
-            if (result.Success)
+            if (!result.Success) return;
+            if (result.ButtonTag == "Edit")
             {
                 _audioSamplesCache.AddOrUpdate(result.Data);
+            }
+            else if(result.ButtonTag == "Remove")
+            {
+                _audioSamplesCache.Remove(result.Data);
+                await _dataService.AudioSamplesRepository.RemoveAsync(result.Data);
+                _audioEngine.StreamFree();
+                _fileService.DeleteFileByPath(result.Data.Path);
+
             }
         }
 
