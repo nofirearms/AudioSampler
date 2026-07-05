@@ -3,6 +3,7 @@ using AudioSampler.ViewModels;
 using Avalonia.Threading;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -35,7 +36,6 @@ namespace AudioSampler.Services
             var sizeBytes = _audioService.GetLengthBytes(stream);
             var waveform = await _audioService.RenderWaveformAsync(path, 100);
             var maxpeak = _audioService.GetMaxPeak(waveform);
-
             var audioSample = new AudioSample
             {
                 Name = Path.GetFileNameWithoutExtension(path),

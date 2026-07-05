@@ -8,6 +8,7 @@ using Material.Icons.Avalonia;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using Tmds.DBus.Protocol;
 using static System.Net.Mime.MediaTypeNames;
 
@@ -16,26 +17,26 @@ namespace AudioSampler.Services
     public class NotificationService
     {
         private readonly FileService _fileService;
-        private readonly WindowNotificationManager _manager;
+        private TopLevel _topLevel;
+        private WindowNotificationManager _manager;
 
         public NotificationService(FileService fileService)
         {
             _fileService = fileService;
 
-            var topLevel = _fileService.GetTopLevel();
+        }
 
-            _manager = new WindowNotificationManager(topLevel)
+        public async Task Show(MaterialIconKind materialIcon, string messageNormal, string messageSmall, NotificationType type)
+        {
+
+            _topLevel = _fileService.GetTopLevel();
+            //создаём каждый раз, иначе при разворачивании не срабатывает
+            _manager = new WindowNotificationManager(_topLevel)
             {
                 Position = NotificationPosition.TopRight,
                 MaxItems = 3,
             };
 
-            
-        }
-
-        public void Show(MaterialIconKind materialIcon, string messageNormal, string messageSmall, NotificationType type)
-        {
-            // 1. Создаем Material-иконку из пакета
             var icon = new MaterialIcon
             {
                 Kind = materialIcon,
@@ -45,15 +46,14 @@ namespace AudioSampler.Services
                 Margin = new Avalonia.Thickness(5, 0, 10, 0),
                 Foreground = type switch
                 {
-                    NotificationType.Success => Brushes.Green,   // Ну или LightGreen, смотря какая тема
+                    NotificationType.Success => Brushes.Green,  
                     NotificationType.Error => Brushes.Crimson,
                     NotificationType.Warning => Brushes.Orange,
                     NotificationType.Information => Brushes.DodgerBlue,
-                    _ => Brushes.White        // Дефолтный цвет, если тип левый
+                    _ => Brushes.White        
                 }
             };
 
-            // 2. Создаем текст сообщения
             var textBlock = new TextBlock
             {
                 Text = messageNormal,
@@ -77,7 +77,6 @@ namespace AudioSampler.Services
                 Children = { textBlock, textBlock2 }
             };
 
-            // 3. Пакуем всё в горизонтальную StackPanel
             var panel = new StackPanel
             {
                 Orientation = Orientation.Horizontal,
@@ -85,7 +84,12 @@ namespace AudioSampler.Services
                 Children = { icon, textPanel },
             };
 
-            _manager.Show(panel, NotificationType.Success, expiration: TimeSpan.FromSeconds(2)); 
+
+            Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+            {
+                _manager.Show(panel, NotificationType.Success, expiration: TimeSpan.FromSeconds(2));
+
+            }, Avalonia.Threading.DispatcherPriority.Background); 
         }
 
     }

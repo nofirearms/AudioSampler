@@ -344,16 +344,26 @@ namespace AudioSampler.Android.Services
         {
             base.OnDestroy();
 
-            if (_panelView != null) _windowManager.RemoveView(_panelView);
+            try
+            {
+                if (_panelView != null) _windowManager.RemoveView(_panelView);
 
-            StopSelf();
+                StopSelf();
+            }
+            catch { }
+
+
         }
 
         public override void OnTaskRemoved(Intent? rootIntent)
         {
-            if (_panelView != null) _windowManager.RemoveView(_panelView);
+            try
+            {
+                if (_panelView != null) _windowManager.RemoveView(_panelView);
 
-            StopSelf();
+                StopSelf();
+            }
+            catch { }
 
             base.OnTaskRemoved(rootIntent);
         }
