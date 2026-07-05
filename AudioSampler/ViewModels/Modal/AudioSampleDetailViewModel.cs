@@ -1,4 +1,5 @@
 ﻿using AudioSampler.Database;
+using AudioSampler.Extensions;
 using AudioSampler.Model;
 using AudioSampler.Services;
 using Avalonia.Controls;
@@ -173,6 +174,13 @@ namespace AudioSampler.ViewModels.Modal
                 var folderBookmark = setting is null ? null : new FolderBookmark(setting.Value);
 
                 var folder = await _fileService.GetStorageFolderFromFolderBookmarkAsync(folderBookmark);
+
+                if(folder != null)
+                {
+                    var folderExists = await folder?.ExistsAsync();
+                    if (!folderExists) folder = null;
+                }
+
 
                 //Открываем модальное окно с найстройками экспорта
                 var result = await _modalService.OpenExportModal(new ExportSettings() { Name = Name, Folder = folder, FolderBookmark = folderBookmark });
