@@ -4,6 +4,7 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Markup.Xaml;
 using System;
+using System.Diagnostics;
 
 namespace AudioSampler.Controls;
 
@@ -29,6 +30,7 @@ public partial class AudioControl : UserControl
     }
 
     private Grid? _activeThumb;
+    private double _deltaPosition;
 
     public AudioControl()
     {
@@ -57,7 +59,8 @@ public partial class AudioControl : UserControl
 
     private void Thumb_PointerPressed(object? sender, PointerPressedEventArgs e)
     {
-        _activeThumb = sender as Grid; 
+        _activeThumb = sender as Grid;
+        _deltaPosition = e.GetPosition(_activeThumb).X;
         e.Pointer.Capture(MainGrid); // Захватываем мышь, чтобы не терять флажок при быстром движении
     }
 
@@ -67,7 +70,7 @@ public partial class AudioControl : UserControl
 
         // Получаем текущую координату мыши относительно всего контрола
         var currentPos = e.GetPosition(MainGrid);
-        double percentage = currentPos.X / MainGrid.Bounds.Width;
+        double percentage = (currentPos.X - _deltaPosition) / MainGrid.Bounds.Width;
         percentage = Math.Clamp(percentage, 0.0, 1.0);
 
         if (_activeThumb.Name == "StartTarget")

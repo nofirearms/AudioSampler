@@ -99,6 +99,8 @@ namespace AudioSampler.Services
 
         }
 
+        public TimeSpan TotalTime => TimeSpan.FromSeconds(_audioService.GetLengthSeconds(_streamHandle));
+
         public void StreamFree()
         {
             if (_streamHandle != 0) 

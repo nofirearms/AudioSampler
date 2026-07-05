@@ -74,7 +74,7 @@
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <Border CornerRadius="5" Background="{DynamicResource Background1}" Margin="5 3 10 3" BoxShadow="0 1 5 -1 #ee000000">
-                                <Grid ColumnDefinitions="auto, *">
+                                <Grid ColumnDefinitions="auto, *" Margin="0 5">
                                      
                                     <Grid Grid.Column="0"  Margin="5 0 -5 0" >
                                         <customcontrols:CircularProgressbar 
@@ -153,7 +153,7 @@
 
                         <ListBox.ItemsPanel>
                             <ItemsPanelTemplate>
-                                <VirtualizingStackPanel Orientation="Vertical" />
+                                <VirtualizingStackPanel Orientation="Vertical"  />
                             </ItemsPanelTemplate>
                     </ListBox.ItemsPanel>
                 </ListBox>
@@ -175,13 +175,13 @@
                                 IsVisible="{Binding SharingState}">  
                             <Button 
                                 Theme="{DynamicResource RoundAccentButton}" 
-                                Width="50" 
-                                Height="50" 
+                                Width="60" 
+                                Height="60" 
                                 Padding="10"
                                 Command="{Binding StopSharingCommand}"
                                 HorizontalAlignment="Center">
                                 <Grid>
-                                    <materialIcons:MaterialIcon IconSize="50" Kind="Fullscreen" />
+                                    <materialIcons:MaterialIcon IconSize="60" Kind="Fullscreen" />
                                     <materialIcons:MaterialIcon IconSize="20" Kind="Close" />
                                 </Grid>
                             </Button>
@@ -194,13 +194,13 @@
                             IsVisible="{Binding SharingState, Converter={StaticResource ReverseBoolConverter}}">  
                             <Button 
                                 Theme="{DynamicResource RoundAccentButton}" 
-                                Width="50" 
-                                Height="50" 
+                                Width="60" 
+                                Height="60" 
                                 Padding="0" 
                                 Command="{Binding StartSharingCommand}"
                                 HorizontalAlignment="Center">
                                 <Grid>
-                                    <materialIcons:MaterialIcon IconSize="50" Kind="Fullscreen" />
+                                    <materialIcons:MaterialIcon IconSize="60" Kind="Fullscreen" />
                                     <materialIcons:MaterialIcon IconSize="15" Kind="Record" />
                                 </Grid>
                             </Button>

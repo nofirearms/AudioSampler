@@ -20,30 +20,31 @@
                     <Rectangle Grid.Column="0" Fill="{DynamicResource Background1}" Opacity="0.95" VerticalAlignment="Stretch"/>
                     <Rectangle Grid.Column="2" Fill="{DynamicResource Background1}" Opacity="0.95"/>
 
-                   <Border BoxShadow="0 1 5 -1 #ee000000">                    
-                        <Grid Grid.Column="0" 
-                            HorizontalAlignment="Right" 
-                            Width="2"
-                            PointerPressed="Thumb_PointerPressed" 
-                            Name="StartTarget">
+                    <Grid 
+                        Grid.Column="0" 
+                        HorizontalAlignment="Right" 
+                        Width="2"
+                        PointerPressed="Thumb_PointerPressed" 
+                        Name="StartTarget">
+                        <Ellipse  Fill="Transparent" Width="80" Height="80"  Margin="-40 -30" VerticalAlignment="Top"/>   
                         <Border Background="{DynamicResource AccentBrush1}" Width="2" VerticalAlignment="Stretch"/>
                         <Path 
                             Fill="{DynamicResource AccentBrush1}" VerticalAlignment="Top"
                             Data="M 0 0 L 0 30 L 30 0 Z" />
                     </Grid>
-                   </Border>
-
 
                     <Grid 
                         Grid.Column="2" 
-                        Width="2"
+                        
                         HorizontalAlignment="Left" 
                         PointerPressed="Thumb_PointerPressed"
                         Name="EndTarget" >
+                        <Ellipse  Fill="Transparent" Width="80" Height="80"  Margin="-40 -30" VerticalAlignment="Bottom"/>                                               
                         <Border Background="{DynamicResource AccentBrush1}" Width="2" VerticalAlignment="Stretch"/>
                         <Path 
                             Fill="{DynamicResource AccentBrush1}" VerticalAlignment="Bottom"
                             Data="M 0 0 L 0 -30 L -30 0 Z" />
+
                     </Grid>
                 </Grid>
         </Border>

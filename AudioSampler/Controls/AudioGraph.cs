@@ -50,10 +50,14 @@ namespace AudioSampler.Controls
             set => SetValue(BarSpacingProperty, value);
         }
 
+
+
         public AudioGraph()
         {
             PointsProperty.Changed.AddClassHandler<AudioGraph>((x, e) => x.InvalidateVisual());
+            UseLayoutRounding = false;
         }
+
 
         public override void Render(DrawingContext context)
         {
@@ -66,35 +70,44 @@ namespace AudioSampler.Controls
             double height = Bounds.Height;
             int count = points.Count;
 
-            // Вычисляем ширину одного столбика с учетом отступов
+            // 1. Вычисляем идеальную дробную ширину
             double totalSpacing = BarSpacing * (count - 1);
-            double barWidth = (width - totalSpacing) / count;
+            double rawBarWidth = (width - totalSpacing) / count;
+            if (rawBarWidth <= 0) return;
 
-            if (barWidth <= 0) return;
+            // 2. ЖЕСТКО округляем ширину и шаг до пикселей один раз.
+            // Теперь ВСЕ столбики и ВСЕ зазоры будут гарантированно одинаковыми на экране.
+            double finalBarWidth = Math.Max(Math.Round(rawBarWidth), 1);
+            double finalSpacing = Math.Round(BarSpacing);
 
-            // Рисуем каждый столбик центрированным по вертикали (как в SoundCloud)
+            // 3. Считаем, сколько пикселей займет вся наша железная сетка
+            double totalWaveformWidth = (count * finalBarWidth) + ((count - 1) * finalSpacing);
+
+            // 4. Находим смещение, чтобы отцентрировать волну (если из-за округлений остался пустой край)
+            double offsetX = Math.Round((width - totalWaveformWidth) / 2);
+            if (offsetX < 0) offsetX = 0;
+
+            double middle_y = Math.Round(height / 2);
+
             for (int i = 0; i < count; i++)
             {
                 double amplitude = points[i];
 
-                // Вычисляем высоту столбика (минимум 2 пикселя, чтобы не пропадал совсем)
-                double barHeight = Math.Max(height * amplitude, 1) / 2;
+                // 5. Шагаем строго на одинаковое пиксельное расстояние
+                double x = offsetX + i * (finalBarWidth + finalSpacing);
 
-                double x = i * (barWidth + BarSpacing);
-                
-                double middle_y = height / 2;
+                // Расчет высоты (минимум 2 пикселя, чтобы половинки были хотя бы по 1 пикселю)
+                double barHeight = Math.Max(height * amplitude, 2) / 2;
 
-                double top_y = middle_y - barHeight ;
-                double bottom_y = middle_y;
+                double roundedTopY = Math.Round(middle_y - barHeight);
+                double roundedFinalHeight = Math.Max(middle_y - roundedTopY, 1);
 
-                // Округляем для четкости на мобилках (anti-aliasing)
-                var top_rect = new Rect(Math.Round(x), Math.Round(top_y), Math.Round(barWidth), Math.Round(barHeight));
-                var bottom_rect = new Rect(Math.Round(x), Math.Round(bottom_y), Math.Round(barWidth), Math.Round(barHeight));
+                // Формируем ректы. Координаты X и Width теперь идеальные целые числа.
+                var top_rect = new Rect(x, roundedTopY, finalBarWidth, roundedFinalHeight);
+                var bottom_rect = new Rect(x, middle_y, finalBarWidth, roundedFinalHeight);
 
-                // Рисуем скругленный столбик (CornerRadius)
                 context.DrawRectangle(BarTopBrush, null, top_rect);
                 context.DrawRectangle(BarBottomBrush, null, bottom_rect);
-
             }
         }
 

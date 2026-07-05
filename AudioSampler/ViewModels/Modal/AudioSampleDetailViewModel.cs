@@ -48,6 +48,17 @@ namespace AudioSampler.ViewModels.Modal
 
         [ObservableProperty]
         private bool _normalized = false;
+
+        [ObservableProperty]
+        private TimeSpan _totalTime;
+
+        [ObservableProperty]
+        private TimeSpan _selectionTime;
+
+        [ObservableProperty]
+        private TimeSpan _currentTime;
+
+
         public AudioSampleDetailViewModel(
             AudioService audioService, 
             ModalService modalService, 
@@ -77,6 +88,8 @@ namespace AudioSampler.ViewModels.Modal
             _playbackTimer.Interval = TimeSpan.FromMilliseconds(100);
             _playbackTimer.Tick += OnPlaybackTimer;
 
+            TotalTime = TimeSpan.FromSeconds(_audioService.GetLengthSeconds(_stream));
+
             if (_audioSample.Normalize) Normalize(true);
         }
 
@@ -95,6 +108,9 @@ namespace AudioSampler.ViewModels.Modal
             _audioService.Stop(_stream);
             _playbackTimer.Stop();
             IsPlaying = false;
+
+            CurrentTime = TimeSpan.FromSeconds(_startPercent * _audioSample.Duration.TotalSeconds);
+            PlaybackPositionPercent = _startPercent;
         }
 
         [RelayCommand(AllowConcurrentExecutions = false)]
@@ -122,6 +138,7 @@ namespace AudioSampler.ViewModels.Modal
         {
             var positionSeconds = _audioService.CheckPlaybackPosition(_stream);
             PlaybackPositionPercent = positionSeconds / _audioSample.Duration.TotalSeconds;
+            CurrentTime = TimeSpan.FromSeconds(positionSeconds);
             if(PlaybackPositionPercent >= EndPercent)
             {
                 Stop();

@@ -37,46 +37,56 @@
                 <Border Grid.Row="1" Background="{DynamicResource Background1}" BorderThickness="1" Margin="0 5">
                     <Grid>
                         <customcontrols:AudioGraph Height="100" Points="{Binding AudioGraphPoints}" BarTopBrush="{DynamicResource AccentBrush2}" BarBottomBrush="{DynamicResource AccentBrush3}"/>    
+                        <customcontrols:Playhead IsVisible="{Binding IsPlaying}" PlaybackPositionPercent="{Binding PlaybackPositionPercent}"/>
                         <customcontrols:AudioControl Height="100" Start="{Binding StartPercent, Mode=TwoWay}" End="{Binding EndPercent, Mode=TwoWay}"/>
                     </Grid>
                     
 
                 </Border>
                 
-                <StackPanel Margin="5 0" Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center">
-                    <Grid>
+                <Grid Margin="5 0" Grid.Row="2">
+                    <StackPanel  Orientation="Horizontal" HorizontalAlignment="Center">
+                        <Grid>
 
-                        <Button 
-                            Theme="{StaticResource FloatTransparentButton}" 
-                            Command="{Binding StopCommand}" 
-                            IsVisible="{Binding IsPlaying}">
-                            <materialIcons:MaterialIcon Kind="Stop" Width="30" Height="30"/>
-                        </Button>
-                        <Button 
-                            Theme="{StaticResource FloatTransparentButton}" 
-                             Command="{Binding PlayCommand}" 
-                            IsVisible="{Binding IsPlaying, Converter={StaticResource ReverseBoolConverter}}">
-                            <materialIcons:MaterialIcon Kind="Play" Width="30" Height="30"/>
-                        </Button>
+                            <Button 
+                                Theme="{StaticResource FloatTransparentButton}" 
+                                Command="{Binding StopCommand}" 
+                                IsVisible="{Binding IsPlaying}">
+                                <materialIcons:MaterialIcon Kind="Stop" Width="30" Height="30"/>
+                            </Button>
+                            <Button 
+                                Theme="{StaticResource FloatTransparentButton}" 
+                                 Command="{Binding PlayCommand}" 
+                                IsVisible="{Binding IsPlaying, Converter={StaticResource ReverseBoolConverter}}">
+                                <materialIcons:MaterialIcon Kind="Play" Width="30" Height="30"/>
+                            </Button>
+                        </Grid>
+
+    <!--                    <Button Width="40" Height="40" Margin="5 0">
+                            <materialIcons:MaterialIcon Kind="Crop" Width="30" Height="30"/>
+                        </Button>-->
+
+    <!--                    <controls:FloatingButton Classes="Mini" Width="40" Height="40" Margin="5 0">
+                            <materialIcons:MaterialIcon Kind="ContentCut" Width="30" Height="30"/>
+                        </controls:FloatingButton>-->
+
+                        <ToggleButton 
+                            IsChecked="{Binding Normalized, Mode=TwoWay}"
+                            Theme="{StaticResource FloatTransparentToggle}" 
+                            Margin="0 0" Command="{Binding NormalizeCommand}" 
+                            CommandParameter="{Binding $self.IsChecked}">
+                            <materialIcons:MaterialIcon Kind="Waveform" Width="30" Height="30"/>
+                        </ToggleButton>
+
+                    </StackPanel>
+
+                    <Grid ColumnDefinitions="*, auto *" HorizontalAlignment="Right">
+                        <TextBlock Grid.Column="0" Width="45" FontSize="12" Text="{Binding CurrentTime, StringFormat=mm\\:ss\\.f}"/>
+                        <TextBlock Grid.Column="1" FontSize="12" Text=" | "/>
+                        <TextBlock Grid.Column="2" HorizontalAlignment="Right" Width="47" FontSize="12" FontWeight="Bold" Text="{Binding TotalTime, StringFormat=mm\\:ss\\.f}"/>
                     </Grid>
+                </Grid >
 
-<!--                    <Button Width="40" Height="40" Margin="5 0">
-                        <materialIcons:MaterialIcon Kind="Crop" Width="30" Height="30"/>
-                    </Button>-->
-
-<!--                    <controls:FloatingButton Classes="Mini" Width="40" Height="40" Margin="5 0">
-                        <materialIcons:MaterialIcon Kind="ContentCut" Width="30" Height="30"/>
-                    </controls:FloatingButton>-->
-
-                    <ToggleButton 
-                        IsChecked="{Binding Normalized, Mode=TwoWay}"
-                        Theme="{StaticResource FloatTransparentToggle}" 
-                        Margin="0 0" Command="{Binding NormalizeCommand}" 
-                        CommandParameter="{Binding $self.IsChecked}">
-                        <materialIcons:MaterialIcon Kind="Waveform" Width="30" Height="30"/>
-                    </ToggleButton>
-
-                </StackPanel>
                 <StackPanel Orientation="Horizontal" Grid.Row="3" HorizontalAlignment="Right" Margin="0 20 0 0">
                     <Button 
                         Theme="{StaticResource TransparentButton}" 
