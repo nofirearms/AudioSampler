@@ -4,5 +4,5 @@
 	<uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 	<uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" />
 	<uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-	<application android:label="Audio Sampler" android:icon="@mipmap/icon" android:allowBackup="true"></application>
+	<application android:label="Audio Sampler" android:icon="@mipmap/ic_launcher" android:allowBackup="true"></application>
 </manifest>

@@ -14,12 +14,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <EmbedAssembliesIntoApk>False</EmbedAssembliesIntoApk>
   </PropertyGroup>
-
 	
   <ItemGroup>
-    <AndroidResource Include="Icon.png">
-      <Link>Resources\drawable\Icon.png</Link>
-    </AndroidResource>
+    <None Remove="Icon.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -52,5 +49,9 @@
 		<AndroidNativeLibrary Include="Resources\lib\x86_64\libbass_fx.so" />
 		<AndroidNativeLibrary Include="Resources\lib\x86_64\libbassenc.so" />
 		<AndroidNativeLibrary Include="Resources\lib\x86_64\libbassenc_mp3.so" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Resources\drawable-night-v31\" />
 	</ItemGroup>
 </Project>
