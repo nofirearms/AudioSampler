@@ -5,11 +5,12 @@
     <Color x:Key="BackgroundColor2">#222222</Color>
     <Color x:Key="BackgroundColor3">#2f2f2f</Color>
 
-    <Color x:Key="AccentColor1">#86bcff</Color>
-    <Color x:Key="AccentColor2">#668fc2</Color>
-    <Color x:Key="AccentColor3">#52729a</Color>
+    <Color x:Key="AccentColor1">#1ce04a</Color>
+    <Color x:Key="AccentColor2">#17b63c</Color>
+    <Color x:Key="AccentColor3">#12852d</Color>
 
     <Color x:Key="InactiveColor1">#a1a1a1</Color>
     <Color x:Key="SelectedListBoxItemColor1">White</Color>
+
 
 </ResourceDictionary>

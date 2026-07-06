@@ -29,6 +29,9 @@
             <ResourceDictionary.ThemeDictionaries>
                 <ResourceInclude x:Key="{x:Static services:ThemeService.BlueTheme}" Source="avares://AudioSampler/Resources/Themes/BlueTheme.axaml" />
                 <ResourceInclude x:Key="{x:Static services:ThemeService.OrangeTheme}" Source="avares://AudioSampler/Resources/Themes/OrangeTheme.axaml" />
+                <ResourceInclude x:Key="{x:Static services:ThemeService.GreenTheme}" Source="avares://AudioSampler/Resources/Themes/GreenTheme.axaml" />
+                <ResourceInclude x:Key="{x:Static services:ThemeService.RedTheme}" Source="avares://AudioSampler/Resources/Themes/RedTheme.axaml" />
+                <ResourceInclude x:Key="{x:Static services:ThemeService.TurquoiseTheme}" Source="avares://AudioSampler/Resources/Themes/TurquoiseTheme.axaml" />
             </ResourceDictionary.ThemeDictionaries>
         </ResourceDictionary>
 

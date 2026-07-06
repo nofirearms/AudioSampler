@@ -13,12 +13,4 @@
     <Color x:Key="InactiveColor1">#a1a1a1</Color>
     <Color x:Key="SelectedListBoxItemColor1">White</Color>
 
-
-   <SolidColorBrush x:Key="Background1" Color="{StaticResource BackgroundColor1}"/>
-    <SolidColorBrush x:Key="Background2" Color="{StaticResource BackgroundColor2}"/>
-    <SolidColorBrush x:Key="Background3" Color="{StaticResource BackgroundColor3}"/>
-    <SolidColorBrush x:Key="AccentBrush1" Color="{StaticResource AccentColor1}"/>
-    <SolidColorBrush x:Key="AccentBrush2" Color="{StaticResource AccentColor2}"/>
-    <SolidColorBrush x:Key="AccentBrush3" Color="{StaticResource AccentColor3}"/>
-    <SolidColorBrush x:Key="InactiveForeground1" Color="{StaticResource InactiveColor1}"/>
 </ResourceDictionary>

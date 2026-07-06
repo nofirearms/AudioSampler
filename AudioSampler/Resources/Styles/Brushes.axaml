@@ -4,6 +4,15 @@
       <Border Padding="20" Background="{StaticResource StripedBrush}"/>
   </Design.PreviewWith>
 
+    <SolidColorBrush x:Key="Background1" Color="{DynamicResource BackgroundColor1}"/>
+    <SolidColorBrush x:Key="Background2" Color="{DynamicResource BackgroundColor2}"/>
+    <SolidColorBrush x:Key="Background3" Color="{DynamicResource BackgroundColor3}"/>
+    <SolidColorBrush x:Key="AccentBrush1" Color="{DynamicResource AccentColor1}"/>
+    <SolidColorBrush x:Key="AccentBrush2" Color="{DynamicResource AccentColor2}"/>
+    <SolidColorBrush x:Key="AccentBrush3" Color="{DynamicResource AccentColor3}"/>
+    <SolidColorBrush x:Key="InactiveForeground1" Color="{DynamicResource InactiveColor1}"/>
+
+
 
     <VisualBrush x:Key="StripedBrush" 
                  TileMode="Tile" 

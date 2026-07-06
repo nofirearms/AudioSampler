@@ -15,6 +15,9 @@ namespace AudioSampler.Services
 
         public static readonly ThemeVariant OrangeTheme = new ThemeVariant("Orange", ThemeVariant.Dark);
         public static readonly ThemeVariant BlueTheme = new ThemeVariant("Blue", ThemeVariant.Dark);
+        public static readonly ThemeVariant GreenTheme = new ThemeVariant("Green", ThemeVariant.Dark);
+        public static readonly ThemeVariant RedTheme = new ThemeVariant("Red", ThemeVariant.Dark);
+        public static readonly ThemeVariant TurquoiseTheme = new ThemeVariant("Turquoise", ThemeVariant.Dark);
 
         public ThemeService(DataService dataService)
         {
