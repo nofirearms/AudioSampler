@@ -5,7 +5,7 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="AudioSampler.Controls.Playhead">
   <Canvas>
-      <Border Background="{DynamicResource AccentBrush1}"
+      <Border HorizontalAlignment="Right" Background="{DynamicResource AccentBrush1}" 
               Opacity="0.2"
               Height="{Binding $parent[Canvas].Bounds.Height}"
               Name="PlaybackBar"

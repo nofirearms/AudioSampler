@@ -8,5 +8,5 @@
         x:Class="AudioSampler.Views.MainWindow"
         Icon="/Assets/avalonia-logo.ico"
         Title="Audio Sampler">
-        <views:MainView />
+        <views:ShellView />
 </Window>

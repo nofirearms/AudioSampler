@@ -64,6 +64,7 @@ namespace AudioSampler
             services.AddSingleton<ViewModelFactory>();
 
             services.AddSingleton<MainViewModel>();
+            services.AddSingleton<ShellViewModel>();
 
 
             return services.BuildServiceProvider();
@@ -75,16 +76,16 @@ namespace AudioSampler
             var themeService = Services.GetRequiredService<ThemeService>();
             await themeService.LoadFromSettings();
 
-            var a = Services.GetRequiredService<MainViewModel>(); 
+            var a = Services.GetRequiredService<ShellViewModel>(); 
 
-            var mainViewModel = Design.IsDesignMode ? new MainViewModel() : Services.GetRequiredService<MainViewModel>();
+            var shellViewModel = Services.GetRequiredService<ShellViewModel>();
             
 
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
                 desktop.MainWindow = new MainWindow
                 {
-                    DataContext = mainViewModel,
+                    DataContext = shellViewModel,
                     Height = 800,
                     Width = 500
                 };
@@ -96,8 +97,9 @@ namespace AudioSampler
                 {
                     var host = new PageNavigationHost()
                     {
-                        Page = new MainView { DataContext = mainViewModel }
+                        Page = new ShellView { DataContext = shellViewModel }
                     };
+                    //для получения toplevel
                     App.Current.AndroidRootView = host;
 
                     return host;
@@ -109,7 +111,7 @@ namespace AudioSampler
             {
                 singleViewPlatform.MainView = new PageNavigationHost()
                 {
-                    Page = new MainView { DataContext = mainViewModel }
+                    Page = new MainView { DataContext = shellViewModel }
                 };
             }
             base.OnFrameworkInitializationCompleted();

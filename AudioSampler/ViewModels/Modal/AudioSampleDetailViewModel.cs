@@ -225,7 +225,7 @@ namespace AudioSampler.ViewModels.Modal
         [RelayCommand]
         public async Task Remove()
         {
-            var mbResult = await _modalService.OpenMessageBoxModal("Delete File", $"Are you sure you want to delete {_audioSample.Name}?", ["Yes", "No"]);
+            var mbResult = await _modalService.OpenMessageBoxModal("Delete File", $"Are you sure you want to delete {_audioSample.Name}?", ["No", "Yes"]);
             if(mbResult.ButtonTag == "Yes")
             {
                 Stop();
@@ -233,7 +233,11 @@ namespace AudioSampler.ViewModels.Modal
             }
         }
 
-        [RelayCommand]
-        public void Cancel() => base.Cancel();
+        protected override void Cancel()
+        {
+            if (IsPlaying) Stop();
+
+            base.Cancel();
+        }
     }
 }

@@ -30,10 +30,6 @@ namespace AudioSampler.ViewModels
         private readonly AudioEngine _audioEngine;
         private readonly FileService _fileService;
 
-        //------------------------ MODAL -------------------------------------
-        public IReadOnlyList<IModal> ActiveModals => _modalService.ActiveModals;
-        public bool HasActiveModals => _modalService.ActiveModals.Any();
-        //--------------------------------------------------------------------
 
         private readonly SourceCache<AudioSample, Guid> _audioSamplesCache = new(c => c.Id);
         //public IObservable<IChangeSet<AudioSampleSummaryViewModel, Guid>> ConnectCards() => _audioSamplesCache.Connect();
@@ -78,15 +74,11 @@ namespace AudioSampler.ViewModels
             _audioEngine = audioEngine;
             _fileService = fileService;
 
-            ((INotifyCollectionChanged)_modalService.ActiveModals).CollectionChanged += (s, e) =>
-            {
-                OnPropertyChanged(nameof(ActiveModals));
-                OnPropertyChanged(nameof(HasActiveModals));
-            };
 
             captureService.RecordFinished += async(value) =>
             {
-                await Task.Delay(50);
+                //разфриз ui
+                await Task.Delay(30);
                 await CreateAudioSample(value.FilePath);
             };
 
