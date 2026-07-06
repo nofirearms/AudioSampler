@@ -12,7 +12,7 @@
              xmlns:converters="using:AudioSampler.Converters"
              xmlns:local="using:AudioSampler.Views" x:Name="self"
              xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
-             x:DataType="vm:ShellViewModel"
+             x:DataType="vm:ShellViewModel" Background="{DynamicResource Background2}"
              x:Class="AudioSampler.Views.ShellView">
   <Grid>
       
