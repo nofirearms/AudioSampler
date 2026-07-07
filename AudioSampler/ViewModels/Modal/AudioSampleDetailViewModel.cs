@@ -191,7 +191,7 @@ namespace AudioSampler.ViewModels.Modal
                     var file = await result.Data.Folder.GetFileAsync($"{result.Data.Name}.{result.Data.Format}");
                     if (file != null)
                     {
-                        result.Data.Name = $"{Name} [{DateTime.Now:yyyy-MM-dd HHmmss}]";
+                        result.Data.Name = $"{result.Data.Name} [{DateTime.Now:yyyy-MM-dd HHmmss}]";
                         file.Dispose();
                     }
 

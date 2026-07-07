@@ -62,7 +62,8 @@
                     Classes="MainList"
                     ItemsSource="{Binding AudioSamples}" 
                     Background="{DynamicResource Background2}"
-                    RenderOptions.BitmapInterpolationMode="HighQuality"
+
+                    ScrollViewer.IsScrollInertiaEnabled="True"
                     ScrollViewer.VerticalSnapPointsType="None"
                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"  
                     ScrollViewer.VerticalScrollBarVisibility="Auto">
@@ -72,81 +73,82 @@
                         </ItemsPanelTemplate>
                     </ListBox.ItemsPanel>
                     <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <Border CornerRadius="5" Background="{DynamicResource Background1}" Margin="5 3 10 3" BoxShadow="0 1 5 -1 #ee000000">
-                                <Grid ColumnDefinitions="auto, *" Margin="0 5">
-                                     
-                                    <Grid Grid.Column="0"  Margin="5 0 -5 0" >
-                                        <customcontrols:CircularProgressbar 
-                                            Width="45" Height="45" 
-                                            IsVisible="{Binding IsPlaying}"
-                                            MinValue="{Binding SelectionStart}" 
-                                            MaxValue="{Binding SelectionEnd}" 
-                                            Progress="{Binding PlaybackPosition}"></customcontrols:CircularProgressbar>
-                                        <Button 
-                                            Classes.playing="{Binding IsPlaying}" 
-                                            Command="{Binding $parent[ListBox].DataContext.StartStopPlaybackCommand}"
-                                            CommandParameter="{Binding}"
-                                            Theme="{StaticResource TransparentButton}">
-                                            <Button.Styles>
-                                                <Style Selector="Button">
-                                                    <Setter Property="Content">
-                                                        <Setter.Value>
-                                                            <Template>
-                                                                <materialIcons:MaterialIcon IconSize="35" Kind="Play" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                            </Template>
-                                                        </Setter.Value>
-                                                    </Setter>
-                                                </Style>
+                        <DataTemplate DataType="vm:AudioSampleSummaryViewModel">
+                            <Grid Margin="5 3 10 3" Height="80">
+                                <Border  Background="#66000000" Margin="1, 2, -1, -2" CornerRadius="5"/>
+                                 <Border CornerRadius="5"  Background="{DynamicResource Background1}"  >
+                                    <Grid ColumnDefinitions="auto, *" Margin="0 5">
+                                        <Grid Grid.Column="0"  Margin="5 0 -5 0" >
+                                            <customcontrols:CircularProgressbar 
+                                                Width="45" Height="45" 
+                                                IsVisible="{Binding IsPlaying}"
+                                                MinValue="{Binding SelectionStart}" 
+                                                MaxValue="{Binding SelectionEnd}" 
+                                                Progress="{Binding PlaybackPosition}"></customcontrols:CircularProgressbar>
+                                            <Button 
+                                                Classes.playing="{Binding IsPlaying}" 
+                                                Command="{Binding $parent[ListBox].DataContext.StartStopPlaybackCommand}"
+                                                CommandParameter="{Binding}"
+                                                Theme="{StaticResource TransparentButton}">
+                                                <Button.Styles>
+                                                    <Style Selector="Button">
+                                                        <Setter Property="Content">
+                                                            <Setter.Value>
+                                                                <Template>
+                                                                    <materialIcons:MaterialIcon IconSize="35" Kind="Play" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                                </Template>
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </Style>
         
-                                                <Style Selector="Button.playing">
-                                                    <Setter Property="Content">
-                                                        <Setter.Value>
-                                                            <Template>
-                                                                <materialIcons:MaterialIcon IconSize="35" Kind="Stop" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                                            </Template>
-                                                        </Setter.Value>
-                                                    </Setter>
-                                                </Style>
-                                            </Button.Styles>
-                                        </Button>
-                                    </Grid>
+                                                    <Style Selector="Button.playing">
+                                                        <Setter Property="Content">
+                                                            <Setter.Value>
+                                                                <Template>
+                                                                    <materialIcons:MaterialIcon IconSize="35" Kind="Stop" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                                </Template>
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </Style>
+                                                </Button.Styles>
+                                            </Button>
+                                        </Grid>
 
-
-
-                                    <Grid Grid.Column="1" Background="Transparent" RowDefinitions="Auto, Auto" ColumnDefinitions="*, Auto" RowSpacing="3" Margin="10 10" >
+                                        <Grid VerticalAlignment="Center" Grid.Column="1" Background="Transparent" RowDefinitions="Auto, Auto" ColumnDefinitions="*, Auto" RowSpacing="5" Margin="10 0" >
                                     
-                                        <i:Interaction.Behaviors>
-                                            <ia:EventTriggerBehavior EventName="Tapped">
-                                                <InvokeCommandAction Command="{Binding $parent[ListBox].DataContext.OpenAudioSampleDetailCommand}" CommandParameter="{Binding}"/>
-                                            </ia:EventTriggerBehavior>    
-                                        </i:Interaction.Behaviors>    
+                                            <i:Interaction.Behaviors>
+                                                <ia:EventTriggerBehavior EventName="Tapped">
+                                                    <InvokeCommandAction Command="{Binding $parent[ListBox].DataContext.OpenAudioSampleDetailCommand}" CommandParameter="{Binding}"/>
+                                                </ia:EventTriggerBehavior>    
+                                            </i:Interaction.Behaviors>    
 
-                                        <TextBlock 
-                                            Grid.Row="0" Grid.Column="0"
-                                            Text="{Binding Name}"
-                                            FontSize="16"/>
+                                            <TextBlock 
+                                                Grid.Row="0" Grid.Column="0"
+                                                Text="{Binding Name}"
+                                                FontSize="16"  />
                 
-                                        <TextBlock 
-                                            Grid.Row="1" Grid.Column="0"
-                                            FontSize="12"
-                                            Margin="0 5 0 0"
-                                            Text="{Binding DateCreated}"
-                                            FontWeight="Light" 
-                                            Foreground="{DynamicResource InactiveForeground1}"/>
+                                            <TextBlock 
+                                                Grid.Row="1" Grid.Column="0"
+                                                FontSize="12"
+                                                Margin="0 5 0 0"
+                                                Text="{Binding DateCreated}"
+                                                FontWeight="Light" 
+                                                Foreground="{DynamicResource InactiveForeground1}"/>
                 
-                                        <TextBlock 
-                                            Grid.Column="1" Grid.Row="0" Grid.RowSpan="2" 
-                                            VerticalAlignment="Center"
-                                            HorizontalAlignment="Right"
-                                            FontSize="14"
-                                            FontWeight="Light" 
-                                            Foreground="{DynamicResource InactiveForeground1}"
-                                            Text="{Binding Duration, StringFormat=hh\\:mm\\:ss}"/>
+                                            <TextBlock 
+                                                Grid.Column="1" Grid.Row="0" Grid.RowSpan="2" 
+                                                VerticalAlignment="Center"
+                                                HorizontalAlignment="Right"
+                                                FontSize="14"
+                                                FontWeight="Light" 
+                                                Foreground="{DynamicResource InactiveForeground1}"
+                                                Text="{Binding Duration, StringFormat=hh\\:mm\\:ss}"/>
+                                        </Grid>
                                     </Grid>
-                                </Grid>
 
-                            </Border>
+                                </Border>                               
+                            </Grid>
+
 
                         </DataTemplate>
                     </ListBox.ItemTemplate>

@@ -14,6 +14,7 @@ using AudioSampler.Messages;
 using AudioSampler.Services;
 using Avalonia;
 using Avalonia.Android;
+using Avalonia.Rendering;
 using CommunityToolkit.Mvvm.Messaging;
 using System.Diagnostics;
 
@@ -34,7 +35,6 @@ namespace AudioSampler.Android
         protected override void OnCreate(Bundle? savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
-
             //костыль чтобы системные кнопки были белыми
             Window.SetNavigationBarColor(Color.Black);
 

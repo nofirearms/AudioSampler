@@ -15,11 +15,7 @@ namespace AudioSampler.Android
         protected override AppBuilder CustomizeAppBuilder(AppBuilder builder)
         {
             return base.CustomizeAppBuilder(builder)
-            .WithInterFont()
-            .With(new SkiaOptions
-            {
-                MaxGpuResourceSizeBytes = 256 * 1024 * 1024 // 256 MB
-            });
+            .WithInterFont();
         }
     }
 }
