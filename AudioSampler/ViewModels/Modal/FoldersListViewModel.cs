@@ -42,7 +42,7 @@ namespace AudioSampler.ViewModels.Modal
 
         private async Task LoadDataAsync()
         {
-            var bookmarks = _dataService.FolderBooksmarksReposity.GetAll();
+            var bookmarks = _dataService.FolderBookmarksReposity.GetAll();
             foreach (var bookmark in bookmarks)
             {
                 var storage = await _fileService.GetStorageFolderFromFolderBookmarkAsync(bookmark);
@@ -50,7 +50,7 @@ namespace AudioSampler.ViewModels.Modal
                 var exists = await storage.ExistsAsync();
                 if (!exists) 
                 {
-                    await _dataService.FolderBooksmarksReposity.RemoveAsync(bookmark);
+                    await _dataService.FolderBookmarksReposity.RemoveAsync(bookmark);
                     continue;
                 }
 
@@ -75,7 +75,7 @@ namespace AudioSampler.ViewModels.Modal
             if (bookmark != null)
             {
                 var storageFolder = await _fileService.GetStorageFolderFromFolderBookmarkAsync(bookmark);
-                await _dataService.FolderBooksmarksReposity.CreateAsync(bookmark);
+                await _dataService.FolderBookmarksReposity.CreateAsync(bookmark);
                 var item = new FolderBookmarkListItem { Bookmark = bookmark, Storage = storageFolder };
 
                 Folders.Add(item);
@@ -90,7 +90,7 @@ namespace AudioSampler.ViewModels.Modal
 
             if (SelectedFolder.Bookmark.Bookmark == "DEFAULT") return;
 
-            await _dataService.FolderBooksmarksReposity.RemoveAsync(SelectedFolder.Bookmark);
+            await _dataService.FolderBookmarksReposity.RemoveAsync(SelectedFolder.Bookmark);
 
             Folders.Remove(SelectedFolder);
         }

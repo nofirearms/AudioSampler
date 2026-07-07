@@ -9,13 +9,13 @@ namespace AudioSampler.Services
     {
         public AudioSamplesRepository AudioSamplesRepository { get; private set; }
         public SettingsRepository SettingsRepository { get; private set; }
-        public FolderBookmarksRepository FolderBooksmarksReposity { get; private set; }
+        public FolderBookmarksRepository FolderBookmarksReposity { get; private set; }
 
         public DataService(AudioSamplesRepository audioSamplesRepository, SettingsRepository settingsRepository, FolderBookmarksRepository exportFoldersRepository)
         {
             AudioSamplesRepository = audioSamplesRepository;
             SettingsRepository = settingsRepository;
-            FolderBooksmarksReposity = exportFoldersRepository;
+            FolderBookmarksReposity = exportFoldersRepository;
         }
 
         

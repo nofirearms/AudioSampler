@@ -20,7 +20,6 @@ namespace AudioSampler.Model
         public double SelectionStart { get; set; } = 0;
         public double SelectionEnd { get; set; } = 1;
         public bool Normalize { get; set; } = false;
-
         public double MaxPeak { get; set; }
 
         public string WaveformJson { get; private set; }

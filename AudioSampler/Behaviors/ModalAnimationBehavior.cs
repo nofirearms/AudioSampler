@@ -56,44 +56,6 @@ namespace AudioSampler.Behaviors
             compositionVisual.StartAnimation("Opacity", opacityAnimation);
         }
 
-        private async void OnAttachedToVisualTree(object? sender, VisualTreeAttachmentEventArgs e)
-        {
-            if (AssociatedObject is null)
-                return;
-
-            var transform = new TranslateTransform();
-            AssociatedObject.RenderTransform = transform;
-            AssociatedObject.Opacity = 0;
-
-            var animation = new Animation
-            {
-                Duration = TimeSpan.FromMilliseconds(100),
-                FillMode = FillMode.Forward,
-                Children =
-            {
-                new KeyFrame
-                {
-                    Cue = new Cue(0),
-                    Setters =
-                    {
-                        new Setter(Visual.OpacityProperty, 0d),
-                        new Setter(TranslateTransform.YProperty, 100d)
-                    }
-                },
-                new KeyFrame
-                {
-                    Cue = new Cue(1),
-                    Setters =
-                    {
-                        new Setter(Visual.OpacityProperty, 1d),
-                        new Setter(TranslateTransform.YProperty, 0d)
-                    }
-                }
-            }
-            };
-
-            await animation.RunAsync(AssociatedObject);
-        }
 
 
         protected override void OnDetaching()

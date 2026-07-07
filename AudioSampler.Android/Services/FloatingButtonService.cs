@@ -144,7 +144,6 @@ namespace AudioSampler.Android.Services
                 Y = _dataService.SettingsRepository.Get(SettingKey.FloatingBarY) is Setting y ? int.Parse(y.Value) : 100,
             };
 
-            // Добавляем готовую красивую панель на экран поверх всех приложений
             _windowManager.AddView(_panelView, _params);
 
             _timerHandler = new Handler(Looper.MainLooper);
@@ -166,7 +165,6 @@ namespace AudioSampler.Android.Services
                     return true;
 
                 case MotionEventActions.Move:
-                    // Двигаем всю панель, за какой бы элемент её ни зацепили
                     _params.X = (int)(_initialX + (e.RawX - _initialTouchX));
                     _params.Y = (int)(_initialY + (e.RawY - _initialTouchY));
                     _windowManager.UpdateViewLayout(_panelView, _params);
@@ -179,8 +177,6 @@ namespace AudioSampler.Android.Services
 
                     if (deltaX < 10 && deltaY < 10)
                     {
-                        // Пользователь просто кликнул (палец почти не сместился).
-                        // Если событие пришло от конкретной кнопки, принудительно вызываем её нативный клик!
                         if (v is Button)
                         {
                             v.PerformClick();

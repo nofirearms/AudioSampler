@@ -28,10 +28,6 @@ namespace AudioSampler.Database
         {
             base.OnModelCreating(modelBuilder);
 
-            //modelBuilder.Entity<FolderBookmark>().HasData(
-            //[
-            //    new FolderBookmark { Bookmark = "DEFAULT", Id = Guid.NewGuid() }
-            //]);
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

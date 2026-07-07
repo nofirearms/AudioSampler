@@ -20,12 +20,12 @@ namespace AudioSampler.Android.Services
             // Сюда мы попадаем АВТОМАТИЧЕСКИ, как только sharing остановился!
             var context = global::Android.App.Application.Context;
 
-            // 1. Принудительно шлем сообщение в твой класс записи, чтобы сохранить последний WAV, если шла запись
+            // Принудительно шлем сообщение в твой класс записи, чтобы сохранить последний WAV, если шла запись
             WeakReferenceMessenger.Default.Send(new ToggleRecordMessage( Model.RecordingAction.Cancel));
             //Шлём сообщение об остановке шаринга, отлавливаем в AndroidScreenCaptureService
             WeakReferenceMessenger.Default.Send(new SharingStateChangedMessage(false));
 
-            // 2. Гасим сервис плавающей панели (она исчезнет с экрана)
+            // Гасим сервис плавающей панели (она исчезнет с экрана)
             var buttonServiceIntent = new Intent(context, typeof(FloatingButtonService));
             context.StopService(buttonServiceIntent);
         }

@@ -63,24 +63,20 @@ namespace AudioSampler.Controls
                 return;
             }
 
-            // Если ничего не выбрано или выбранный элемент не в списке - берём первый
             if (SelectedItem == null || !Items.Contains(SelectedItem))
             {
                 SelectedItem = Items[0];
                 return;
             }
 
-            // Ищем текущий индекс
             int currentIndex = Items.IndexOf(SelectedItem);
 
-            // Если не нашли (страховка) - берём первый
             if (currentIndex == -1)
             {
                 SelectedItem = Items[0];
                 return;
             }
 
-            // Переходим к следующему (циклически)
             int nextIndex = (currentIndex + 1) % Items.Count;
             SelectedItem = Items[nextIndex];
         }

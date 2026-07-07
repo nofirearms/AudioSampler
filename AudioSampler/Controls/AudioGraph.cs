@@ -72,12 +72,10 @@ namespace AudioSampler.Controls
 
             if (barWidth <= 0) return;
 
-            // Рисуем каждый столбик центрированным по вертикали (как в SoundCloud)
             for (int i = 0; i < count; i++)
             {
                 double amplitude = points[i];
 
-                // Вычисляем высоту столбика (минимум 2 пикселя, чтобы не пропадал совсем)
                 double barHeight = Math.Max(height * amplitude, 1) / 2;
 
                 double x = i * (barWidth + BarSpacing);
@@ -87,11 +85,9 @@ namespace AudioSampler.Controls
                 double top_y = middle_y - barHeight;
                 double bottom_y = middle_y;
 
-                // Округляем для четкости на мобилках (anti-aliasing)
                 var top_rect = new Rect(Math.Round(x), Math.Round(top_y), Math.Round(barWidth), Math.Round(barHeight));
                 var bottom_rect = new Rect(Math.Round(x), Math.Round(bottom_y), Math.Round(barWidth), Math.Round(barHeight));
 
-                // Рисуем скругленный столбик (CornerRadius)
                 context.DrawRectangle(BarTopBrush, null, top_rect);
                 context.DrawRectangle(BarBottomBrush, null, bottom_rect);
 

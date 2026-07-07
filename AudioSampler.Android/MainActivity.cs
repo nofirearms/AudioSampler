@@ -25,7 +25,7 @@ namespace AudioSampler.Android
         Theme = "@style/MyTheme.NoActionBar",
         Icon = "@mipmap/ic_launcher",
         MainLauncher = true,
-        SupportsPictureInPicture = true, // Включает PiP
+        SupportsPictureInPicture = true, // Включает PiP, не спользуется
         CanDisplayOnRemoteDevices = true, // Позволяет ОС управлять окном
         ConfigurationChanges = ConfigChanges.Orientation | ConfigChanges.ScreenSize | ConfigChanges.UiMode, LaunchMode = LaunchMode.SingleTop)]
     public class MainActivity : AvaloniaMainActivity
@@ -89,8 +89,7 @@ namespace AudioSampler.Android
                 intent.AddFlags(ActivityFlags.NewTask);
                 StartActivity(intent);
 
-                // Тут можно вывести Toast-сообщение: "Пожалуйста, включите доступ для AudioSampler"
-                Toast.MakeText(this, "Включите доступ к уведомлениям для перемотки", ToastLength.Long)?.Show();
+                Toast.MakeText(this, "Enable notification access for the rewind button", ToastLength.Long)?.Show();
             }
         }
 

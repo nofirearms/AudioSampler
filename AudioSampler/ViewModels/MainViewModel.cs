@@ -32,7 +32,6 @@ namespace AudioSampler.ViewModels
 
 
         private readonly SourceCache<AudioSample, Guid> _audioSamplesCache = new(c => c.Id);
-        //public IObservable<IChangeSet<AudioSampleSummaryViewModel, Guid>> ConnectCards() => _audioSamplesCache.Connect();
 
         [ObservableProperty]
         private ReadOnlyObservableCollection<AudioSampleSummaryViewModel> _audioSamples;
@@ -77,7 +76,7 @@ namespace AudioSampler.ViewModels
 
             captureService.RecordFinished += async(value) =>
             {
-                //разфриз ui
+                //анфриз ui
                 await Task.Delay(30);
                 await CreateAudioSample(value.FilePath);
             };
@@ -161,7 +160,6 @@ namespace AudioSampler.ViewModels
         [RelayCommand(AllowConcurrentExecutions = false)]
         private async Task OpenSettings()
         {
-            //_captureService.EnterMiniMode();
             await _modalService.OpenSettingsModal();
         }
 

@@ -42,17 +42,15 @@ namespace AudioSampler.Services
             var storageProvider = GetTopLevel().StorageProvider;
             IStorageFolder? targetFolder = null;
 
-            // 1. Пробуем открыть кастомную папку по URI, если её передали
             if (!string.IsNullOrEmpty(customFolderUri))
             {
                 try
                 {
                     targetFolder = await storageProvider.TryGetFolderFromPathAsync(new Uri(customFolderUri));
                 }
-                catch { /* игнорируем, если папка удалена */ }
+                catch {  }
             }
 
-            // 2. Если кастомной нет, берем системную "Музыку"
             if (targetFolder == null)
             {
                 targetFolder = await storageProvider.TryGetWellKnownFolderAsync(WellKnownFolder.Downloads);
@@ -103,7 +101,7 @@ namespace AudioSampler.Services
                 }
                 if (saveFolder)
                 {
-                    await _dataService.FolderBooksmarksReposity.CreateAsync(folderBookmark);
+                    await _dataService.FolderBookmarksReposity.CreateAsync(folderBookmark);
                 }
 
                 return folderBookmark;
@@ -120,16 +118,13 @@ namespace AudioSampler.Services
 
             var topLevel = GetTopLevel();
 
-            // Если это дефолтная папка по умолчанию
+            //не используется
             if (bookmark.Bookmark == "DEFAULT")
             {
-                // Получаем доступ к системной папке Downloads через Avalonia StorageProvider
-                // WellKnownFolder.Downloads поддерживается в Avalonia для Android
                 return await topLevel.StorageProvider.TryGetWellKnownFolderAsync(WellKnownFolder.Documents);
             }
             else
             {
-                // Если это кастомный букмарк из базы
                 return await topLevel.StorageProvider.OpenFolderBookmarkAsync(bookmark.Bookmark);
             }
             
@@ -144,12 +139,11 @@ namespace AudioSampler.Services
             {
                 var topLevel = GetTopLevel();
 
-                // Возвращаем объект папки по её закладке. ОС вспомнит, что права у нас есть.
                 IStorageFolder? restoredFolder = await topLevel.StorageProvider.OpenFolderBookmarkAsync(savedBookmark);
 
                 if (restoredFolder != null)
                 {
-                    // Папка готова к работе, права активны!
+
                 }
             }
         }
@@ -161,8 +155,6 @@ namespace AudioSampler.Services
                 if (File.Exists(file))
                 {
                     File.Delete(file);
-
-                    // Здесь можно вызвать нотификашку, что всё стерлось успешно
                 }
             }
             catch(Exception ex)
