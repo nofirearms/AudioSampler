@@ -13,7 +13,7 @@ using System.Text;
 
 namespace AudioSampler.Android.Services
 {
-    public class AndroidScreenCaptureService : IScreenCaptureService
+    public class AndroidScreenCaptureService : IScreenCaptureService, IDisposable
     {
         private readonly MainActivity _activity;
         private const int CaptureRequestCode = 1001;
@@ -24,6 +24,7 @@ namespace AudioSampler.Android.Services
         public AndroidScreenCaptureService(MainActivity activity)
         {
             _activity = activity;
+
 
             WeakReferenceMessenger.Default.Register<RecordFinishedMessage>(this, (r, m) =>
             {
@@ -62,6 +63,11 @@ namespace AudioSampler.Android.Services
         public void StopSharing()
         {
             _activity.StopSharing();
+        }
+
+        public void Dispose()
+        {
+            WeakReferenceMessenger.Default.UnregisterAll(this);
         }
 
         //public void EnterMiniMode()

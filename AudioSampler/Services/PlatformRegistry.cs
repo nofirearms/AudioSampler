@@ -22,9 +22,29 @@ namespace AudioSampler.Services
 
         public void RegisterRealService(IScreenCaptureService service)
         {
+            if (_realService != null)
+            {
+                _realService.RecordFinished -= OnRecordFinished;
+                _realService.SharingStateChanged -= OnSharingStateChanged;
+            }
+
             _realService = service;
-            _realService.RecordFinished += (value) => RecordFinished?.Invoke(value);
-            _realService.SharingStateChanged += (value) => SharingStateChanged?.Invoke(value);
+
+            if (_realService != null)
+            {
+                _realService.RecordFinished += OnRecordFinished;
+                _realService.SharingStateChanged += OnSharingStateChanged;
+            }
+        }
+
+        private void OnSharingStateChanged(bool obj)
+        {
+            SharingStateChanged?.Invoke(obj);
+        }
+
+        private void OnRecordFinished(RecordResult result)
+        {
+            RecordFinished?.Invoke(result);
         }
 
         public void StartScreenCapture() => _realService?.StartScreenCapture();

@@ -32,6 +32,8 @@ namespace AudioSampler.Android
     {
         private const int CaptureRequestCode = 1001;
 
+        private AndroidScreenCaptureService _androidScreenCaptureService;
+
         protected override void OnCreate(Bundle? savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
@@ -40,7 +42,8 @@ namespace AudioSampler.Android
 
 
             // Создаем реальный сервис, передавая ему контекст этой Activity
-            LazyScreenCaptureServiceWrapper.Instance.RegisterRealService(new AndroidScreenCaptureService(this));
+            _androidScreenCaptureService = new AndroidScreenCaptureService(this);
+            LazyScreenCaptureServiceWrapper.Instance.RegisterRealService(_androidScreenCaptureService);
 
             CheckOverlayPermission();
             CheckNotificationPermission();
@@ -61,6 +64,23 @@ namespace AudioSampler.Android
             }
         }
 
+
+        protected override void OnDestroy()
+        {
+            base.OnDestroy();
+
+            StopSharing();
+
+            //костыль, AudioProjectionCallback при destroy срабатывает бозже чем отписка в _androidScreenCaptureService?.Dispose();
+            //из-за этого сообщение не доставляется
+            //TODO ПЕРЕДЕЛАТЬ СИСТЕМУ СООБЩЕНИЙ ПОЛСНОСТЬЮ 
+            WeakReferenceMessenger.Default.Send(new SharingStateChangedMessage(false));
+
+            _androidScreenCaptureService?.Dispose();
+            _androidScreenCaptureService = null;
+
+            
+        }
 
         public void StopSharing()
         {
